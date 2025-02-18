@@ -1,6 +1,23 @@
 
-## Welcome to GoDMC phase 2 analysis pipeline.
+## Welcome to DEEP pipeline.
 
+Here we need to modify the GoDMC phase 2 pipeline for DEEP aims.
+
+african population reference panel
+pan-UKB methods, how many populations in west, east and south Africa; TopMed, H3 Africa and 1KG?
+
+how to define/asign ancestry to individuals in a population/cohort?
+
+change 2a for DEEP for multi-ancestry, imputation reference 
+
+how to solve the pipeline environment, e.g. R, python yaml files or docker; decided by Haotian
+Hase from python 2 to python 3? 
+
+
+
+
+
+## README unchanged part
 This repository contains the scripts to run the GoDMC pipeline which includes:
 
 * Genome-wide scans for DNA methylation quantitative trait loci
@@ -54,13 +71,14 @@ The scripts in this repository were developed by the core GoDMC team and individ
 The developer group of these scripts are listed in alphabetical order below:
 
 Carlos Ruiz Arenas  
-Olalekan Awoniran  
 Eilis Hannon  
 Gibran Hemani  
-Josine Min  
-Maria Soler Artigas  
-Natalia Llonga  
-Olivia Castellini  
+Haotian Tang
+Josine Min
+Maria Soler Artigas
+Natalia Llonga
+Olalekan Awoniran
+Olivia Castellini
 Siyi Wang  
 Sonja Rajic  
 Thomas Jonkman  
