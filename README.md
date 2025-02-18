@@ -73,12 +73,12 @@ The developer group of these scripts are listed in alphabetical order below:
 Carlos Ruiz Arenas  
 Eilis Hannon  
 Gibran Hemani  
-Haotian Tang
-Josine Min
-Maria Soler Artigas
-Natalia Llonga
-Olalekan Awoniran
-Olivia Castellini
+Haotian Tang  
+Josine Min  
+Maria Soler Artigas  
+Natalia Llonga  
+Olalekan Awoniran  
+Olivia Castellini  
 Siyi Wang  
 Sonja Rajic  
 Thomas Jonkman  
