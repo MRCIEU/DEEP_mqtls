@@ -13,8 +13,8 @@ change 2a for DEEP for multi-ancestry, imputation reference
 how to solve the pipeline environment, e.g. R, python yaml files or docker; decided by Haotian
 Hase from python 2 to python 3? 
 
-
-
+In pan-UKB ([medRxiv paper](https://doi.org/10.1101/2024.03.13.24303864)), they compared two different methods, including meta-analyzing genetic ancestry group and mega-analyzing all individuals. 
+They concluded that using the meta-analyzing method results in less evidence of cryptic stratification, reducing false positives and improving the robustness of associations.
 
 
 ## README unchanged part
