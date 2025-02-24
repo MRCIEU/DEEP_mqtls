@@ -1,20 +1,26 @@
-
 ## Welcome to DEEP pipeline.
 
 Here we need to modify the GoDMC phase 2 pipeline for DEEP aims.
 
-african population reference panel
-pan-UKB methods, how many populations in west, east and south Africa; TopMed, H3 Africa and 1KG?
-
-how to define/asign ancestry to individuals in a population/cohort?
-
 change 2a for DEEP for multi-ancestry, imputation reference 
 
-how to solve the pipeline environment, e.g. R, python yaml files or docker; decided by Haotian
 Hase from python 2 to python 3? 
+
+## How to define/assign individuals to a genetic ancestry in a population/cohort?
 
 In pan-UKB ([medRxiv paper](https://doi.org/10.1101/2024.03.13.24303864)), they compared two different methods, including meta-analyzing genetic ancestry group and mega-analyzing all individuals. 
 They concluded that using the meta-analyzing method results in less evidence of cryptic stratification, reducing false positives and improving the robustness of associations.
+
+pan-UKB applied principal components analysis (PCA) on a diverse reference panel consisting of the Human Genome Diversity Panel (HGDP) and 1000 Genomes Project genotype data, 
+to assign each inidividual to a genetic ancestry group. 
+The ancestry labels provided by HGDP+1kGP includes: EUR (European), CSA (Central/South Asian), AFR (African), EAS (East Asian), MID (Middle Eastern), and AMR (Admixed American - an imprecise label introduced by the 1kGP to describe individuals with recent admixture from
+multiple continents including Amerindigenous ancestry).
+
+west, east and south Africa; TopMed, H3 Africa and 1KG?
+
+## Pipeline release
+I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline
+
 
 
 ## README unchanged part
@@ -55,7 +61,6 @@ Thank you for helping improve our project! Before you submit an issue, please ta
 **Use Clear and Descriptive Titles:** Provide a concise summary of the issue in the title. This helps others understand and search for similar issues.
 
 **Provide Detailed Information:**
-
 
 **For Bugs**: Specify which script you were running when the error occured, the expected result, and the actual result. Provide any relevant logs or screenshots.
 
