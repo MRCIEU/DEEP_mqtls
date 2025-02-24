@@ -26,12 +26,12 @@ Based on these Information, I would like to choose environment files first and w
 Happy to have your ideas on this as well.
 
 
+  
+  
+  
 
 
-
-
-
-## README unchanged part -------------------
+## README unchanged parts -------------------
 This repository contains the scripts to run the GoDMC pipeline which includes:
 
 * Genome-wide scans for DNA methylation quantitative trait loci
