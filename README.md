@@ -1,12 +1,23 @@
 ## Welcome to DEEP pipeline.
 
 Here we need to modify the GoDMC phase 2 pipeline for DEEP aims.
+In the following context, Haotian listed his action points for the pipeline.
 
 change 2a for DEEP for multi-ancestry, imputation reference 
 
 Hase from python 2 to python 3? 
 
-## How to define/assign individuals to a genetic ancestry in a population/cohort?
+## 1. Variants list
+We need a list of variants for SNP harmonisation purposes in script02a. We need to update the HRC list with H3 Africa, TopMed and HGDP maybe also with other sequencing resources.
+
+## 2. Pipeline release (not now)
+I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
+Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
+Tom raised a good point that some HPC systems do not allow users to run jobs through dockers. 
+Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  
+Happy to have your ideas on this as well.
+
+## 3. How to define/assign individuals to a genetic ancestry in a population/cohort?
 
 In pan-UKB ([medRxiv paper](https://doi.org/10.1101/2024.03.13.24303864)), they compared two different methods, including meta-analyzing genetic ancestry group and mega-analyzing all individuals. 
 They concluded that using the meta-analyzing method results in less evidence of cryptic stratification, reducing false positives and improving the robustness of associations.
@@ -18,17 +29,15 @@ multiple continents including Amerindigenous ancestry).
 
 West, east and south Africa; TopMed, H3 Africa and 1KG?
 
-## Pipeline release
-I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
-Gib had released both an environment file and a Docker file for [lifecourse-gwas] (https://github.com/mrcieu/lifecourse-gwas). 
-Tom raised a good point that some HPC systems do not allow users to run jobs through dockers. 
-Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.
-Happy to have your ideas on this as well.
+## 4. Meta analysis (not now)
+We use HASE for our mQTL analyses as the standard molecular QTL mapping methods implemented in matrixeQTL, tensorQTL, OSCA etc. can’t store all the summary statistics. 
+[HASE](https://pubmed.ncbi.nlm.nih.gov/27782180/) doesn’t calculate summary statistics for each cohort followed by meta-analysis it stores partial derivatives.
 
+There is a meta-analysis script [here](https://github.com/genetics-of-dna-methylation-consortium/mqtl_meta_analysis) 
+but Josine need to discuss with Xiaopu first as Xiaopu was planning to implement this for GoDMC. Olalekan has tried to update HASE to python3 but we didn’t manage to finish it.
 
-  
-  
-  
+## 5. Interaction mQTLs (not now)
+[paper](https://www.sciencedirect.com/science/article/pii/S0002929723004317)
 
 
 ## README unchanged parts -------------------
