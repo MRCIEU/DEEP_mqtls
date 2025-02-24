@@ -16,14 +16,22 @@ to assign each inidividual to a genetic ancestry group.
 The ancestry labels provided by HGDP+1kGP includes: EUR (European), CSA (Central/South Asian), AFR (African), EAS (East Asian), MID (Middle Eastern), and AMR (Admixed American - an imprecise label introduced by the 1kGP to describe individuals with recent admixture from
 multiple continents including Amerindigenous ancestry).
 
-west, east and south Africa; TopMed, H3 Africa and 1KG?
+West, east and south Africa; TopMed, H3 Africa and 1KG?
 
 ## Pipeline release
-I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline
+I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
+Gib had released both an environment file and a Docker file for [lifecourse-gwas] (https://github.com/mrcieu/lifecourse-gwas). 
+Tom raised a good point that some HPC systems do not allow users to run jobs through dockers. 
+Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.
+Happy to have your ideas on this as well.
 
 
 
-## README unchanged part
+
+
+
+
+## README unchanged part -------------------
 This repository contains the scripts to run the GoDMC pipeline which includes:
 
 * Genome-wide scans for DNA methylation quantitative trait loci
@@ -34,7 +42,9 @@ Please note the scripts in this repository are copyright of the Genetics of DNA 
 
 ### What is GoDMC?
 
-[Genetics of DNA Methylation Consortium (GoDMC)](http://www.godmc.org.uk/) is an international consortium of researchers interested in understanding the interplay between genetic and epigenetic variation. Our objective is to bring together researchers with matched genetic and DNA methylation data to consolidate resources and perform highly powered analyses to understand how both genetics and epigenetics influences health and disease. Outputs from the consortium will be made available to the research community.
+The [Diverse Epigenetic Epidemiology Partnership (DEEP)](https://www.deep-epigenetics.org/) is a partnership of 20 research groups from around the world that aims to improve global health by exploring the effects of genomic and environmental diversity on disease risk across the global population.
+
+DEEP study researchers are interested in studying the differences in disease mechanism and disease risk prediction that are associated with DNA methylation. DNA methylation refers to modifications to DNA which help in turning genes on or off (transcription).The DEEP study ultimately aims to identify disease mechanisms and drug targets that work for all.
 
 To give you an idea of the kind of analyses we are interested please review our previous publication: https://pubmed.ncbi.nlm.nih.gov/34493871/.
 
