@@ -8,7 +8,10 @@ change 2a for DEEP for multi-ancestry, imputation reference
 Hase from python 2 to python 3? 
 
 ## 1. Variants list
-We need a list of variants for SNP harmonisation purposes in script02a. We need to update the HRC list with H3 Africa, TopMed and HGDP maybe also with other sequencing resources.
+We need a list of variants for SNP harmonisation purposes in script02a. We need to update the HRC list with H3Africa.
+Other resources: the [African Genome Variation Project (AGVP)](https://www.sanger.ac.uk/collaboration/african-genome-variation-project/) (mentioned in pan-UKB),TopMed, HGDP, and Hapmap3.
+
+AGVP contains 18 African populations, including 2 populations from the 1000 Genomes Project.
 
 ## 2. Pipeline release (not now)
 I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
@@ -25,9 +28,57 @@ They concluded that using the meta-analyzing method results in less evidence of 
 pan-UKB applied principal components analysis (PCA) on a diverse reference panel consisting of the Human Genome Diversity Panel (HGDP) and 1000 Genomes Project genotype data, 
 to assign each inidividual to a genetic ancestry group. 
 The ancestry labels provided by HGDP+1kGP includes: EUR (European), CSA (Central/South Asian), AFR (African), EAS (East Asian), MID (Middle Eastern), and AMR (Admixed American - an imprecise label introduced by the 1kGP to describe individuals with recent admixture from
-multiple continents including Amerindigenous ancestry).
+multiple continents including Amerindigenous ancestry). All of US applied the same reference panel as described in pan-UKB. 
 
-West, east and south Africa; TopMed, H3 Africa and 1KG?
+West, east and south Africa; TopMed and H3 Africa.
+
+| Project  | Super_pop | Description                             | Sample_size | Which part of Africa |
+|----------|-----------|-----------------------------------------|-------------|----------------------|
+| 1KG_p3   | AFR       | African Ancestry in Southwest US        | 66          |                      |
+|          |           | African Caribbean in Barbados           | 96          |                      |
+|          |           | Esan in Nigeria                         | 99          |                      |
+|          |           | Gambian in Western Division, The Gambia | 113         |                      |
+|          |           | Luhya in Webuye, Kenya                  | 116         |                      |
+|          |           | Mende in Sierra Leone                   | 85          |                      |
+|          |           | Yoruba in Ibadan, Nigeria               | 109         |                      |
+| H3Africa | AFR       | Algeria                                 | 28          |                      |
+|          |           | Benin                                   | 50          |                      |
+|          |           | Botswana                                | 54          |                      |
+|          |           | Burkina Faso                            | 33          |                      |
+|          |           | Cameroon                                | 50          |                      |
+|          |           | Central African Republic                | 26          |                      |
+|          |           | DRC                                     | 13          |                      |
+|          |           | Egypt                                   | 10          |                      |
+|          |           | Gambia                                  | 115         |                      |
+|          |           | Ghana                                   | 26          |                      |
+|          |           | Guinea                                  | 20          |                      |
+|          |           | Kenya                                   | 108         |                      |
+|          |           | Mali                                    | 50          |                      |
+|          |           | Namibia                                 | 7           |                      |
+|          |           | Nigeria                                 | 727         |                      |
+|          |           | Senegal                                 | 2           |                      |
+|          |           | Sierra Leone                            | 87          |                      |
+|          |           | South Africa                            | 271         |                      |
+|          |           | Sudan                                   | 2           |                      |
+|          |           | Tanzania                                | 10          |                      |
+|          |           | Western Sahara                          | 2           |                      |
+|          |           | Zambia                                  | 41          |                      |
+| AGVP     | AFR       | Baganda                                 | 97          |                      |
+|          |           | Banyarwanda                             | 95          |                      |
+|          |           | Barundi                                 | 91          |                      |
+|          |           | Ethiopia                                | 107         |                      |
+|          |           | Fula                                    | 74          |                      |
+|          |           | Ga-Adangbe                              | 100         |                      |
+|          |           | Igbo                                    | 99          |                      |
+|          |           | Jola                                    | 79          |                      |
+|          |           | Kalenjin                                | 100         |                      |
+|          |           | Kikuyu                                  | 99          |                      |
+|          |           | Mandinka                                | 87          |                      |
+|          |           | Sotho                                   | 86          |                      |
+|          |           | Wolof                                   | 78          |                      |
+|          |           | Zulu                                    | 100         |                      |
+|          |           |                                         |             |                      |
+
 
 ## 4. Meta analysis (not now)
 We use HASE for our mQTL analyses as the standard molecular QTL mapping methods implemented in matrixeQTL, tensorQTL, OSCA etc. can’t store all the summary statistics. 
