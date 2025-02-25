@@ -30,11 +30,11 @@ to assign each inidividual to a genetic ancestry group.
 The ancestry labels provided by HGDP+1kGP includes: EUR (European), CSA (Central/South Asian), AFR (African), EAS (East Asian), MID (Middle Eastern), and AMR (Admixed American - an imprecise label introduced by the 1kGP to describe individuals with recent admixture from
 multiple continents including Amerindigenous ancestry). All of US applied the same reference panel as described in pan-UKB. 
 
-West, east and south Africa; TopMed and H3 Africa.
+which part of Africa, e.g. West, east and south ; TopMed and H3 Africa.
 
 | Project  | Super_pop | Description                             | Sample_size | Which part of Africa |
 |----------|-----------|-----------------------------------------|-------------|----------------------|
-| 1KG_p3   | AFR       | African Ancestry in Southwest US        | 66          |                      |
+| 1KG_p3   | AFR       | African Ancestry in Southwest US        | 66          | /                    |
 |          |           | African Caribbean in Barbados           | 96          |                      |
 |          |           | Esan in Nigeria                         | 99          |                      |
 |          |           | Gambian in Western Division, The Gambia | 113         |                      |
@@ -77,8 +77,12 @@ West, east and south Africa; TopMed and H3 Africa.
 |          |           | Sotho                                   | 86          |                      |
 |          |           | Wolof                                   | 78          |                      |
 |          |           | Zulu                                    | 100         |                      |
+| HapMap3  | AFR       | African ancestry in Southwest USA       | 90          | /                    |
+|          |           | Luhya in Webuye, Kenya                  | 100         |                      |
+|          |           | Maasai in Kinyawa, Kenya                | 180         |                      |
+|          |           | Yoruba in Ibadan, Nigeria               | 180         |                      |
 |          |           |                                         |             |                      |
-
+|          |           |                                         |             |                      |
 
 ## 4. Meta analysis (not now)
 We use HASE for our mQTL analyses as the standard molecular QTL mapping methods implemented in matrixeQTL, tensorQTL, OSCA etc. can’t store all the summary statistics. 
