@@ -8,17 +8,18 @@ change 2a for DEEP for multi-ancestry, imputation reference
 Hase from python 2 to python 3? 
 
 ## 1. Variants list
-We need a list of variants for SNP harmonisation purposes in script02a. We need to update the HRC list with H3Africa.
+We need a list of variants for SNP harmonisation purposes in script02a. We want to update the HRC list with H3Africa, if available.
 Other resources: the [African Genome Variation Project (AGVP)](https://www.sanger.ac.uk/collaboration/african-genome-variation-project/) (mentioned in pan-UKB),TopMed, HGDP, and Hapmap3.
 
-AGVP contains 18 African populations, including 2 populations from the 1000 Genomes Project.
+TopMed freeze8 snp list was liftovered from GRCh38 to GRCh37. There are SNPs being mismatched with another chromosome, e.g. SNPs on chr22 can be mismatched on chr21, during LiftOver. I tried three methods here ([genehackman](https://github.com/MRCIEU/GeneHackman), [genepi.utils](https://github.com/nicksunderland/genepi.utils) and [my script](https://github.com/Haotian2020/PAR1_MRdrugtarget_Project/blob/main/scripts/fn-perform_liftover.R)), all have this mismatch issue. I manually and randomly picked some mismatched SNPs from chr1, 2 and 22. I found most of the mismatched cases is due to there is no information of GRCh37 (showing as chr:-1 on dbSNP). Very little situation is that dbSNP has both GRCh37 and GRCh38 information, which means chain files failed to match it. So, I finally just decided to simply remove these mismatched SNPs. I used rentrez R package to extract GRCh37 and GRCh38 position information, to compare if matched SNPs have the consistent position with dbSNP database does, by randomly picking 1000 SNPs on each chromosome (dbSNP API is really slow, which didnt allow you to run 23 chromosomes in the same time with one API key).
 
+TopMed list was merged with HRC r1-1 list (original from GoDMC2 piepline). The duplicated chr:pos_A1_A2 was removed.
+ 
 ## 2. Pipeline release (not now)
 I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
 Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
 Tom raised a good point that some HPC systems do not allow users to run jobs through dockers. 
-Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  
-Happy to have your ideas on this as well.
+Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  Yi also agree with the point that using docker need the admin right of HPC, which is less achieviable compared with using conda envoriment.
 
 ## 3. How to define/assign individuals to a genetic ancestry in a population/cohort?
 
@@ -30,7 +31,7 @@ to assign each inidividual to a genetic ancestry group.
 The ancestry labels provided by HGDP+1kGP includes: EUR (European), CSA (Central/South Asian), AFR (African), EAS (East Asian), MID (Middle Eastern), and AMR (Admixed American - an imprecise label introduced by the 1kGP to describe individuals with recent admixture from
 multiple continents including Amerindigenous ancestry). All of US applied the same reference panel as described in pan-UKB. 
 
-which part of Africa, e.g. West, east and south ; TopMed and H3 Africa.
+which part of Africa, e.g. West, east and south ; TopMed and H3 Africa. AGVP contains 18 African populations, including 2 populations from the 1000 Genomes Project.
 
 | Project  | Super_pop | Description                             | Sample_size | Which part of Africa |
 |----------|-----------|-----------------------------------------|-------------|----------------------|
@@ -93,7 +94,6 @@ but Josine need to discuss with Xiaopu first as Xiaopu was planning to implement
 
 ## 5. Interaction mQTLs (not now)
 [paper](https://www.sciencedirect.com/science/article/pii/S0002929723004317)
-
 
 ## README unchanged parts -------------------
 This repository contains the scripts to run the GoDMC pipeline which includes:
