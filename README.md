@@ -94,6 +94,7 @@ but Josine need to discuss with Xiaopu first as Xiaopu was planning to implement
 
 ## 5. Interaction mQTLs (not now)
 [paper](https://www.sciencedirect.com/science/article/pii/S0002929723004317)
+Y = β<sub>0</sub> + β<sub>SNP</sub> × SNP + β<sub>Env</sub> × Environment + β<sub>inter</sub> × (SNP × Environment) + ϵ
 
 ## README unchanged parts -------------------
 This repository contains the scripts to run the GoDMC pipeline which includes:
