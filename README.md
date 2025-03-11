@@ -96,6 +96,10 @@ but Josine need to discuss with Xiaopu first as Xiaopu was planning to implement
 [paper](https://www.sciencedirect.com/science/article/pii/S0002929723004317)
 Y = β<sub>0</sub> + β<sub>SNP</sub> × SNP + β<sub>Env</sub> × Environment + β<sub>inter</sub> × (SNP × Environment) + ϵ
 
+where Y is the molecular phenotype (DNAm level; normalized), G is the genotype of the genetic variant with MAF > 0.01 (? we have a snplist that MAF >= 0.01) in the DEEP cohorts, E is the environmental variable (estimated cell-type proportions, age, sex, smoking phenotype; mean-centered), G × E is the interaction effect between the genotype and environmental variable, and C represents additional covariates that correspond to 10 genotype PCs from previous steps.
+
+imQTLs with a nominally significant genotype main effect (P<sub>SNP<sub> < 0.05) were assigned to the “positive” or “negative” group if the product of the genotype main effect and interaction effect (β<sub>SNP</sub> × β<sub>inter</sub>) was greater or smaller than 0, respectively.
+
 ## README unchanged parts -------------------
 This repository contains the scripts to run the GoDMC pipeline which includes:
 
