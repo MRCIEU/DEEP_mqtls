@@ -6,6 +6,7 @@ In the following context, Haotian listed his action points for the pipeline.
 change 2a for DEEP for multi-ancestry, imputation reference 
 
 Hase from python 2 to python 3? 
+Hase for interaction analysis
 
 ## 1. Variants list
 We need a list of variants for SNP harmonisation purposes in script02a. We want to update the HRC list with H3Africa, if available.
