@@ -38,6 +38,9 @@ sorted_methylation="yes"
 # reference panel (1000G or hrc)
 reference="hrc"
 
+# genome build for your input data: 37 or 38
+build="37"
+
 # Input data files
 betas="${home_directory}/input_data/data.RData"
 bfile_raw="${home_directory}/input_data/data"
