@@ -19,7 +19,7 @@ TopMed list was merged with HRC r1-1 list (original from GoDMC2 piepline). The d
 ## 2. Pipeline release (not now)
 I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
 Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
-Tom raised a good point that some HPC systems do not allow users to run jobs through dockers. 
+Tom raised a good point that using docker requires the root right, some HPC systems do not allow users to run jobs through dockers. 
 Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  Yi also agree with the point that using docker need the admin right of HPC, which is less achieviable compared with using conda envoriment.
 
 ## 3. How to define/assign individuals to a genetic ancestry in a population/cohort?
