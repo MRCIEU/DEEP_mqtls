@@ -21,6 +21,8 @@ I asked Gib and Tom about the question whether I should use environment files (.
 Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
 Tom raised a good point that using docker requires the root right, some HPC systems do not allow users to run jobs through dockers. 
 Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  Yi also agree with the point that using docker need the admin right of HPC, which is less achieviable compared with using conda envoriment.
+Let me try to make a docker anyway.
+99% senerio conda/mamba should be enough and 1% for using docker.
 
 ## 3. How to define/assign individuals to a genetic ancestry in a population/cohort?
 In pan-UKB ([medRxiv paper](https://doi.org/10.1101/2024.03.13.24303864)), they compared two different methods, including meta-analyzing genetic ancestry group and mega-analyzing all individuals. 
