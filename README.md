@@ -2,6 +2,8 @@
 
 <img src="./images/DEEP.png" width="400"/>
 
+![DEEP Logo](./images/DEEP.png)
+
 Here we need to modify the GoDMC phase 2 pipeline for DEEP aims.
 In the following context, Haotian listed his action points for the pipeline.
 
