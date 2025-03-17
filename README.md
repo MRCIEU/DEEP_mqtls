@@ -1,6 +1,8 @@
 ## Welcome to DEEP pipeline.
 
-<img src="./images/DEEP" width="400"/>
+<img src="./images/DEEP.pdf" width="400"/>
+
+![示例图片](images/DEEP.pdf)
 
 Here we need to modify the GoDMC phase 2 pipeline for DEEP aims.
 In the following context, Haotian listed his action points for the pipeline.
