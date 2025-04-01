@@ -72,13 +72,15 @@ then
 	section_message "download"
 
 	sftp -P 2222 -oIdentityFile=$key ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
-get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
-get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
+#get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
+#get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
+get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
+get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
 get ref-hrc.ref.gz
 get ref-hrc.ref_info.h5
 EOF
 
-	mv HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz* ${scripts_directory}/resources/genetics
+	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz* ${scripts_directory}/resources/genetics
 	mv ref-hrc.ref.gz ${hase}/data
     mv ref-hrc.ref_info.h5 ${hase}/data
 fi
@@ -106,7 +108,9 @@ then
 		${snpchrtxt} \
 		${snpchrplot} \
 		${genetic_descriptives} \
-		${quality_scores_plot}
+		${quality_scores_plot} \
+		${build} \
+		${miss_liftover}
 
 	# Check missingness, there should be a small percentage of missingness (--hard-call-threshold 0.499999)
 	${plink2} --bfile ${bfile_raw} --missing --out ${section_01_dir}/data
@@ -145,8 +149,8 @@ then
 		${meth_ids} \
 		${methylation_descriptives} \
 		${methylation_summary} \
-    ${covariates} \
-    ${sex_pred_plot} \
+    	${covariates} \
+    	${sex_pred_plot} \
 		${intersect_ids} \
 		${intersect_ids_plink}
     
