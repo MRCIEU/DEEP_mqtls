@@ -74,7 +74,7 @@ files_to_check <- list(
   # SNP list
   list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz"),
   # chain file for liftover from hg19 to hg38
-  list(dir = "./resources/genetics", pattern = "hg19ToHg38.over.chain"),
+  #list(dir = "./resources/genetics", pattern = "hg19ToHg38.over.chain"),
   
   list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref.gz"),
   list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref_info.h5")

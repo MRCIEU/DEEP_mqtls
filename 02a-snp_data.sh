@@ -10,15 +10,30 @@ print_version
 
 # Copy raw data to modifiable data
 
-
 # rewrite this to use keep ids in common with meth
 echo "Copying genetic data to processing folder"
 # cp ${bfile_raw}.bed ${bfile}.bed
 # cp ${bfile_raw}.bim ${bfile}.bim
 # cp ${bfile_raw}.fam ${bfile}.fam
 
+# Check genome build and liftover to 38 if build is 37
 
-# For datasets using 1000G exclude indels
+${R_directory}Rscript resources/datacheck/liftover.R \
+	${bfile_raw} \
+	${genome_build} \
+	${miss_liftover}
+
+# Check if the file exists before running plink2
+if [ -f ${miss_liftover} ]; then
+    plink2 --bfile "${bfile_raw}" \
+           --exclude-snps ${miss_liftover} \
+           --make-bed \
+           --out {liftover_data}
+fi
+
+
+# For datasets using 1000G include indels
+# 1000G reference panel is based on genome build 38
 if [ $reference == "1000G" ] ;
 then 
 
