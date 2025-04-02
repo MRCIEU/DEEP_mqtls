@@ -16,12 +16,10 @@ Other resources: the [African Genome Variation Project (AGVP)](https://www.sange
 
 TopMed freeze8 snp list was liftovered from GRCh38 to GRCh37. There are SNPs being mismatched with another chromosome, e.g. SNPs on chr22 can be mismatched on chr21, during LiftOver. I tried three methods here ([genehackman](https://github.com/MRCIEU/GeneHackman), [genepi.utils](https://github.com/nicksunderland/genepi.utils) and [my script](https://github.com/Haotian2020/PAR1_MRdrugtarget_Project/blob/main/scripts/fn-perform_liftover.R)), all have this mismatch issue. I manually and randomly picked some mismatched SNPs from chr1, 2 and 22. I found most of the mismatched cases is due to there is no information of GRCh37 (showing as chr:-1 on dbSNP). Very little situation is that dbSNP has both GRCh37 and GRCh38 information, which means chain files failed to match it. So, I finally just decided to simply remove these mismatched SNPs. I used rentrez R package to extract GRCh37 and GRCh38 position information, to compare if matched SNPs have the consistent position with dbSNP database does, by randomly picking 1000 SNPs on each chromosome (dbSNP API is really slow, which didnt allow you to run 23 chromosomes in the same time with one API key).
 
-TopMed list was merged with HRC r1-1 list (original from GoDMC2 piepline). The duplicated chr:pos_A1_A2 was removed.
-
-TopMed Variants list now has been created and uploaded to DEEP RDSF project, named topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.
+TopMed SNP list was for the same purpose of HRC r1-1 list from GoDMC2 piepline. The duplicated chr:pos_A1_A2 was removed. TopMed list now has been created and uploaded to DEEP RDSF project, named topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.
 
 ## 2. Pipeline release (not now)
-I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
+I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline. 
 Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
 Tom raised a good point that using docker requires the root right, some HPC systems do not allow users to run jobs through dockers. 
 Based on these Information, I would like to choose environment files first and when the DEEP pipeline is finished, then I can make an docker file.  Yi also agree with the point that using docker need the admin right of HPC, which is less achieviable compared with using conda envoriment.
