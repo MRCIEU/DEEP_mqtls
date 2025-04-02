@@ -109,8 +109,7 @@ then
 		${snpchrplot} \
 		${genetic_descriptives} \
 		${quality_scores_plot} \
-		${genome_build} \
-		${miss_liftover}
+		${genome_build}
 
 	# 
 
