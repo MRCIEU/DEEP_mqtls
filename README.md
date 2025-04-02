@@ -18,6 +18,8 @@ TopMed freeze8 snp list was liftovered from GRCh38 to GRCh37. There are SNPs bei
 
 TopMed list was merged with HRC r1-1 list (original from GoDMC2 piepline). The duplicated chr:pos_A1_A2 was removed.
 
+TopMed Variants list now has been created and uploaded to DEEP RDSF project, named topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.
+
 ## 2. Pipeline release (not now)
 I asked Gib and Tom about the question whether I should use environment files (.yaml / .yml) or use a docker for any pipeline.  
 Gib had released both an environment file and a Docker file for [lifecourse-gwas](https://github.com/mrcieu/lifecourse-gwas). 
