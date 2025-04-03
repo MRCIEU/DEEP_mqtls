@@ -21,7 +21,20 @@ message("Number of SNPs: ", nrow(bim))
 message("Checking genome build")
 accepted_builds <- c(37, 38)
 # determine the genome build
-build <- GwasDataImport::determine_build_position(pos=bim[, 4], build = c(37, 38, 36))
+if (mean(startsWith(bim[, 2], "rs")) >= 0.8) {
+  build <- GwasDataImport::determine_build(
+    rsid = bim[, 2],
+    chr = bim[, 1],
+    pos = bim[, 4],
+    build = c(37, 38, 36),
+    fallback = "position"
+  )
+} else {
+  build <- GwasDataImport::determine_build_position(
+    pos = bim[, 4],
+    build = c(37, 38, 36)
+  )
+}
 
 if (is.na(build) || !(build %in% accepted_builds)) {
   extra_msg <- if (build == 36) {
@@ -35,14 +48,14 @@ if (is.na(build) || !(build %in% accepted_builds)) {
 }
 
 if (build != ori_build) {
-  msg <- sprintf("Please check your config file and bim file. Imputed genome build is GRCh%d, but the bim file is GRCh%d", ori_build, build)
+  msg <- sprintf("Please check your config file and bim file. Imputed genome build is GRCh%d, but the bim file is GRCh%d", build, ori_build)
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
 }
 
 if (build == 37) {
     message("Genome build liftover")
-    if(mean(grepl("^rs", bim$V3)) > 0.8) {
+    if(mean(grepl("^rs", bim$V3)) >= 0.8) {
         temp_bim = GwasDataImport::liftover_gwas(
         dat = bim,
         build = c(37, 38, 36),
@@ -72,17 +85,22 @@ if (build == 37) {
         errorlist <- c(errorlist, msg)
         warning("ERROR: ", msg)
     }  
+
     message("Missing SNPs after liftover saved")
+
     write.table(bim[!(bim$V2%in%temp_bim$V2),"V2"], file = miss_liftover, sep = "\t", quote = F, row.names = F, col.names = F)
 
     temp_bim$V2 <- with(temp_bim, paste0(V1, ":", V4, "_",
                         ifelse(V5 < V6, paste(V5, V6, sep = "_"), paste(V6, V5, sep = "_"))))
     bim <- temp_bim
-    print(head(temp_bim))
+    
     bim[["V1"]][bim[["V1"]] == "X"] <- "23"
     bim[["V1"]][bim[["V1"]] == "Y"] <- "24"
-
+    
     write.table(bim, file = paste0(bim_file,"_liftover.bim"), sep = "\t", quote = F, row.names = F, col.names = F)
+
     } else if (build == 38) {
+
     message("Genome build is GRCh38, no liftover required")
+
 }
