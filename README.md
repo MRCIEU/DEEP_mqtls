@@ -105,7 +105,7 @@ where Y is the molecular phenotype (DNAm level; normalized), G is the genotype o
 imQTLs with a nominally significant genotype main effect (P<sub>SNP</sub> < 0.05) were assigned to the “positive” or “negative” group if the product of the genotype main effect and interaction effect (β<sub>SNP</sub> × β<sub>inter</sub>) was greater or smaller than 0, respectively.
 
 ## README unchanged parts -------------------
-This repository contains the scripts to run the GoDMC pipeline which includes:
+This repository contains the scripts to run the DEEP pipeline which includes:
 
 * Genome-wide scans for DNA methylation quantitative trait loci
 * GWAS of DNAm derived phenotypes
@@ -113,7 +113,7 @@ This repository contains the scripts to run the GoDMC pipeline which includes:
 
 Please note the scripts in this repository are copyright of the Genetics of DNA Methylation Consortium and released with a [GPL v3 license](LICENSE).
 
-### What is GoDMC?
+### What is DEEP?
 
 The [Diverse Epigenetic Epidemiology Partnership (DEEP)](https://www.deep-epigenetics.org/) is a partnership of 20 research groups from around the world that aims to improve global health by exploring the effects of genomic and environmental diversity on disease risk across the global population.
 
@@ -125,14 +125,17 @@ If you are interested in joining or finding out more please contact either Josin
 
 ## Guidance for how to use this repository
 
-Detailed instructions for running each stage of the pipeline [can be found here](https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2/wiki). This includes details on how what software you need to have installed, and the required input data and their format. 
+Detailed instructions for running each stage of the pipeline [can be found here](https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2/wiki). 
+to change it
+
+This includes details on how what software you need to have installed, and the required input data and their format. 
 
 Whilst we have done a lot of testing of these scripts across a range of different datasets, we do anticipate that there will be bugs and edge cases we are yet to detect. All communication regarding this pipeline is to occur through this GitHub repository. If you email any of the developers they will direct you back to this repository. 
 
 There are two ways to communicate with us. 
 
-1. [Issues](https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2/issues). This is the mechanism to report bugs or errors with the pipeline or documentation. Essentially anything which requires us to make edits to the content in the repository. There are more guidelines on how to submit issues below.
-2. [Discussions](https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2/discussions). This is the place to ask questions about the pipeline and analyses. 
+1. [Issues](https://github.com/MRCIEU/DEEP_mqtls/issues). This is the mechanism to report bugs or errors with the pipeline or documentation. Essentially anything which requires us to make edits to the content in the repository. There are more guidelines on how to submit issues below.
+2. [Discussions](https://github.com/MRCIEU/DEEP_mqtls/discussions). This is the place to ask questions about the pipeline and analyses. 
 
 ## Submitting an issue
 
@@ -151,7 +154,7 @@ Thank you for helping improve our project! Before you submit an issue, please ta
 
 ## Guidance for contributing
 
-The scripts in this repository were developed by the core GoDMC team and individuals who had [approved external projects](http://www.godmc.org.uk/projects.html). A list can be found under the Acknowledgements section below. At present just this group are able to contribute to the pipeline - if you are interested in joining this group please contact either Josine Min (Josine.Min@bristol.ac.uk) or Eilis Hannon (E.J.Hannon@exeter.ac.uk).
+The scripts in this repository were developed by the core DEEP team and individuals who had [approved external projects](http://www.godmc.org.uk/projects.html). A list can be found under the Acknowledgements section below. At present just this group are able to contribute to the pipeline - if you are interested in joining this group please contact either Josine Min (Josine.Min@bristol.ac.uk) or Eilis Hannon (E.J.Hannon@exeter.ac.uk).
 
 
 ## Acknowledgements
