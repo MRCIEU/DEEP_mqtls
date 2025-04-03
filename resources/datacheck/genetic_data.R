@@ -66,7 +66,20 @@ bim2$alleles[w]<-"GT"
 message("Checking genome build")
 accepted_builds <- c(37, 38)
 # impute the genome build
-build <- GwasDataImport::determine_build_position(pos=bim[, 4], build = c(37, 38, 36))
+if (mean(startsWith(bim[, 2], "rs")) >= 0.8) {
+  build <- GwasDataImport::determine_build(
+    rsid = bim[, 2],
+    chr = bim[, 1],
+    pos = bim[, 4],
+    build = c(37, 38, 36),
+    fallback = "position"
+  )
+} else {
+  build <- GwasDataImport::determine_build_position(
+    pos = bim[, 4],
+    build = c(37, 38, 36)
+  )
+}
 
 if (is.na(build) || !(build %in% accepted_builds)) {
   extra_msg <- if (build == 36) {
@@ -80,7 +93,7 @@ if (is.na(build) || !(build %in% accepted_builds)) {
 }
 
 if (build != ori_build) {
-  msg <- sprintf("Please check your config file and bim file. Imputed genome build is GRCh%d, but the bim file is GRCh%d", ori_build, build)
+  msg <- sprintf("Please check your config file and bim file. Imputed genome build is GRCh%d, but the bim file is GRCh%d", build, ori_build)
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
 }
