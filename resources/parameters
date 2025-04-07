@@ -24,7 +24,8 @@ section_16_dir="${home_directory}/results/16"
 section_17_dir="${home_directory}/results/17"
 
 section_01_logfiles="${section_01_dir}/logs/log${timetemp}.txt"
-section_01_logfile="${section_01_dir}/logs/log.txt"
+section_01a_logfile="${section_01_dir}/logs_a/log.txt"
+section_01b_logfile="${section_01_dir}/logs_b/log.txt"
 section_02a_logfile="${section_02_dir}/logs_a/log.txt"
 section_02b_logfile="${section_02_dir}/logs_b/log.txt"
 section_03a_logfile="${section_03_dir}/logs_a/log.txt"
@@ -85,7 +86,7 @@ sex_pred_plot="${home_directory}/results/01/XY_methylation_vs_sex.pdf"
 
 # Check data
 control_snps="${scripts_directory}/resources/genetics/snpsforbuildandposcheck"
-miss_liftover="${home_directory}/processed_data/genetic_data/miss_liftover.txt"
+miss_liftover="${section_02_dir}/miss_liftover.txt"
 liftover_data="${home_directory}/processed_data/genetic_data/data_liftover"
 snpchrtxt="${section_01_dir}/no_snps_by_chr.txt"
 snpchrplot="${section_01_dir}/no_snps_by_chr.pdf"
