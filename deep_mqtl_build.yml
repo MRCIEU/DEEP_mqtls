@@ -240,7 +240,7 @@ dependencies:
   - qt6-main=6.8.1
   - r-askpass=1.2.1
   - r-assertthat=0.2.1
-  - r-base=4.4.1
+  - r-base=4.4.3
   - r-base64enc=0.1_3
   - r-bit=4.6.0
   - r-bit64=4.6.0_1
@@ -460,5 +460,8 @@ dependencies:
     - segment_liftover==0.956
     - snakemake==8.29.3
     - tables==3.10.2
+    - hail==0.2.134
+    - onnx==1.17.0
+#    - pyspark==3.5.0
 
 prefix: "/user/work/er20212/opt/miniforge3/envs/deep_mqtl"
