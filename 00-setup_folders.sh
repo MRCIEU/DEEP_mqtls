@@ -10,6 +10,7 @@ mkdir -p ${home_directory}/processed_data/ids
 mkdir -p ${home_directory}/processed_data/genetic_data
 mkdir -p ${home_directory}/processed_data/covariate_data
 mkdir -p ${home_directory}/processed_data/methylation_data
+mkdir -p ${home_directory}/processed_data/phenotype_data
 mkdir -p ${home_directory}/processed_data/cellcounts
 mkdir -p ${home_directory}/processed_data/inversions
 mkdir -p ${home_directory}/processed_data/genetic_data/tabfile
@@ -26,7 +27,10 @@ do
    mkdir -p ${home_directory}/results/$i
 done
 
-mkdir -p "${section_01_dir}/logs/"
+mkdir -p "${section_01_dir}/logs_a/"
+mkdir -p "${section_01_dir}/logs_b/"
+mkdir -p "${section_01_dir}/logs_c/"
+mkdir -p "${section_01_dir}/logs_d/"
 mkdir -p "${section_02_dir}/logs_a/"
 mkdir -p "${section_02_dir}/logs_b/"
 mkdir -p "${section_03_dir}/logs_a/"
