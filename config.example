@@ -31,6 +31,9 @@ Python_directory=""
 # Methylation array (one of the following: 450k, epic, or epic2 or epic:epic2. Please note that names are case-sensitive)
 methylation_array="epic"
 
+# please specify tissue type: blood, saliva, buccal, cord
+tissue="blood"
+
 # please specify whether methylation has been obtained for sorted cell types or bulk tissue (yes if you have e.g DNA methylation from sorted cell types)
 sorted_methylation="no"
 
@@ -69,11 +72,6 @@ meth_chunks="100"
 # Number of chunks to split genetic data during mQTL and cellcount GWAS
 # See 03d, 06a, 06b and 07e
 genetic_chunks="1000"
-
-# Number of chunks to split genetic data during inversion calling
-# See 08a
-inversion_chunks="50"
-
 
 # SNP filtering
 # HWE threshold, minor allele frequency, SNP missingness, individual missingness.
