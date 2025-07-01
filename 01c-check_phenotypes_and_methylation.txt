@@ -1,0 +1,40 @@
+#!/bin/bash
+
+source resources/setup.sh "$@"
+set -- $concatenated
+
+exec &> >(tee ${section_01c_logfile})
+print_version
+
+# Check phenotype distributions, remove outliers
+echo "check_phenotypes"
+${R_directory}Rscript resources/datacheck/check_phenotypes.R \
+		${betas} \
+		${methylation_no_outliers} \
+		${cohort_descriptives_commonids} \
+		${methylation_summary} \
+		${intersect_ids} \
+		${covariates} \
+		${covariates_intersect} \
+		${bfile}.fam \
+		${bfile}.bim
+
+# Predict age and smoking
+echo "predict age and smoking"
+${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
+		${methylation_no_outliers} \
+		${bfile}.fam \
+		${smoking_pred} \
+		${smoking_pred_plot} \
+		${smoking_pred_SD} \
+		${covariates} 
+
+# EWAS of age and smoking
+echo "EWAS of age and smoking"
+${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
+        ${methylation_no_outliers} \
+        ${cellcounts_cov} \
+        ${cellcounts_plot} \
+        ${cellcounts_summary}
+
+echo "Successfully completed script 1c"
