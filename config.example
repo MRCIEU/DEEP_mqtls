@@ -28,6 +28,7 @@ R_directory=""
 # Full path to the python directory if you can't use the "module load" command to open python.
 Python_directory=""
 
+# cohort information
 # Methylation array (one of the following: 450k, epic, or epic2 or epic:epic2. Please note that names are case-sensitive)
 methylation_array="epic"
 
@@ -36,6 +37,11 @@ tissue="blood"
 
 # please specify whether methylation has been obtained for sorted cell types or bulk tissue (yes if you have e.g DNA methylation from sorted cell types)
 sorted_methylation="no"
+
+# Age of samples (one of the following: <18, >18, all.)
+age=">18"
+# wheter the samples are related (yes or no)
+relatedness="no"
 
 # reference panel (1000G or hrc)
 reference="hrc"
