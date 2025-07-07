@@ -35,6 +35,11 @@ methylation_array="epic"
 # please specify tissue type: blood, saliva, buccal, cord
 tissue="blood"
 
+# please specify the genome build (one of the following: 37 or 38)
+# 37 means GRCh37, AKA hg19 
+# 38 means GRCh38, AKA hg38.
+genome_build="38"
+
 # please specify whether methylation has been obtained for sorted cell types or bulk tissue (yes if you have e.g DNA methylation from sorted cell types)
 sorted_methylation="no"
 
