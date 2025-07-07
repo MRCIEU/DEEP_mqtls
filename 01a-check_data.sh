@@ -76,6 +76,7 @@ then
 #get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
 get -r hgdp_tgp_unrel_pass_sparse.mt
 get hgdp_tgp_unrel_pass_sparse.mt.md5sum
+get references_grch37_to_grch38.over.chain.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
 get ref-hrc.ref.gz
@@ -84,6 +85,7 @@ EOF
 
 	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz* ${scripts_directory}/resources/genetics
 	mv hgdp_tgp_unrel_pass_sparse.mt ${scripts_directory}/resources/genetics
+	mv references_grch37_to_grch38.over.chain.gz ${scripts_directory}/resources/genetics
 	mv ref-hrc.ref.gz ${hase}/data
     mv ref-hrc.ref_info.h5 ${hase}/data
 fi
