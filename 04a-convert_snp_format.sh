@@ -7,7 +7,7 @@ exec &> >(tee ${section_04a_logfile})
 print_version
 
 # change the envirment from setup.sh to hase_py2
-if [ -z "$R_directory" ] && [ -z "$Python_directory" ]; then
+if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
 mamba activate hase_py2
 echo "Current conda environment: $CONDA_DEFAULT_ENV"
 else

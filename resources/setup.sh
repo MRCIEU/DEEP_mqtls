@@ -7,7 +7,7 @@ git pull
 config_file="./config"
 
 # Activate the environment
-if [ -z "$R_directory" ] && [ -z "$Python_directory" ]; then
+if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
     # Users are using system default R & Python, activate conda environment
 mamba activate deep_mqtls
 echo "Current conda environment: $CONDA_DEFAULT_ENV"

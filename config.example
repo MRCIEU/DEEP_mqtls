@@ -26,7 +26,10 @@ scripts_directory=""
 R_directory=""
 
 # Full path to the python directory if you can't use the "module load" command to open python.
+# for python 3
 Python_directory=""
+# for python 2
+Python2_directory=""
 
 # cohort information
 # Methylation array (one of the following: 450k, epic, or epic2 or epic:epic2. Please note that names are case-sensitive)
