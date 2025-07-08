@@ -6,6 +6,16 @@ git pull
 # Initialize variables
 config_file="./config"
 
+# Activate the environment
+if [ -z "$R_directory" ] && [ -z "$Python_directory" ]; then
+    # Users are using system default R & Python, activate conda environment
+mamba activate deep_mqtls
+echo "Current conda environment: $CONDA_DEFAULT_ENV"
+else
+    # Users have specified custom R/Python directories
+    echo "Custom R/Python directories specified"
+fi
+
 # Parse options using getopts
 while getopts "c:" opt; do
     case $opt in

@@ -5,6 +5,15 @@ set -- $concatenated
 
 exec &> >(tee ${section_04a_logfile})
 print_version
+
+# change the envirment from setup.sh to hase_py2
+if [ -z "$R_directory" ] && [ -z "$Python_directory" ]; then
+mamba activate hase_py2
+echo "Current conda environment: $CONDA_DEFAULT_ENV"
+else
+    # Users have specified custom R/Python directories
+    echo "Custom R/Python directories specified"
+fi
 #Please read resources/bin/hase/README_2.md
 #An expample is also provided below
 
