@@ -14,6 +14,8 @@ import sys
 logfile = sys.argv[1]
 vcf_file = sys.argv[2]
 
+logfile = "/user/work/er20212/test/data/ancestry_infer_hail.log"
+
 hl.init(backend = "spark", # use local
     local="local[*]",  # use as many cores as available
     min_block_size=128,  # minimum block size for Hail
@@ -23,6 +25,8 @@ if "${genome_build}" == "37":
     reference_genome = 'GRCh37'
     dat = hl.import_vcf(vcf_file, reference_genome=reference_genome)
     chain_file = f"{scripts_directory}/resources/genetics/references_grch37_to_grch38.over.chain.gz"
+    rg37 = hl.get_reference('GRCh37')
+    rg38 = hl.get_reference('GRCh38')
     rg37.add_liftover(chain_file, rg38)
     dat = dat.annotate_rows(new_locus = hl.liftover(mt.locus, 'GRCh38'))
     dat = dat.filter_rows(hl.is_defined(dat.locus))
