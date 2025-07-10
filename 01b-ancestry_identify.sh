@@ -17,7 +17,7 @@ plink2 --bfile "${bfile}" --freq --out "${section_01_dir}/"
 
 echo "Running global PCA"
 # global pca plot
-python "${scripts_directory}/resources/datacheck/ancestry_infer.py" \
+${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_infer.py" \
     "${section_01_dir}/logs_b/hail.log" \
     "${bfile}" \
 	"${genome_build}" \
