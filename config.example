@@ -26,7 +26,7 @@ scripts_directory=""
 R_directory=""
 
 # Full path to the python directory if you can't use the "module load" command to open python.
-# Here we need Python 3.9 or later for Hail package and python 2.7 for hase
+# Here you need Python 3.9 or later for Hail package and python 2.7 for hase
 # for python 3
 Python_directory=""
 # for python 2
