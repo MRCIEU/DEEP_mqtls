@@ -74,17 +74,23 @@ then
 	sftp -P 2222 -oIdentityFile=$key ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
 #get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
 #get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
-get -r hgdp_tgp_unrel_pass_sparse.mt
+#get -r hgdp_tgp_unrel_pass_sparse.mt
 get references_grch37_to_grch38.over.chain.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
+get hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv
+get hgdp_tgp_unrel_pass_filtGBMI_strictpruned_loadings.tsv
+get release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz
 get ref-hrc.ref.gz
 get ref-hrc.ref_info.h5
 EOF
 
 	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz* ${scripts_directory}/resources/genetics
-	mv hgdp_tgp_unrel_pass_sparse.mt ${scripts_directory}/resources/genetics
+# mv hgdp_tgp_unrel_pass_sparse.mt ${scripts_directory}/resources/genetics
 	mv references_grch37_to_grch38.over.chain.gz ${scripts_directory}/resources/genetics
+	mv release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz ${scripts_directory}/resources/genetics
+	mv hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv ${scripts_directory}/resources/genetics
+	mv hgdp_tgp_unrel_pass_filtGBMI_strictpruned_loadings.tsv ${scripts_directory}/resources/genetics
 	mv ref-hrc.ref.gz ${hase}/data
     mv ref-hrc.ref_info.h5 ${hase}/data
 fi
