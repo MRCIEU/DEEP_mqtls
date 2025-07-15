@@ -28,7 +28,7 @@ if [ -f ${miss_liftover} ]; then
     plink2 --bfile "${bfile_raw}" \
            --exclude-snps ${miss_liftover} \
            --make-bed \
-           --out {liftover_data}
+           --out ${liftover_data}
 fi
 
 
@@ -390,14 +390,14 @@ fi
     
 #${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.bim ${bfile}.frq ${easyQC} ${easyQCfile} ${easyQCscript}
 
-cp ${scripts_directory}/resources/genetics/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz ${home_directory}/processed_data/genetic_data/
+cp ${scripts_directory}/resources/genetics/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz ${home_directory}/processed_data/genetic_data/
 #zcat ${scripts_directory}/resources/genetics/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz |perl -pe 's/^23/X/g'|gzip >${home_directory}/processed_data/genetic_data/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
 
 replacement_text="DEFINE --pathOut "${home_directory}"/processed_data/genetic_data"
 awk 'NR==3 {$0 = "'"$replacement_text"'"} 1' ${easyQCscript} > ${easyQCscript%.ecf}_edit.ecf
 ${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.afreq ${easyQC} ${easyQCfile} ${easyQCscript%.ecf}_edit.ecf
 
-rm ${home_directory}/processed_data/genetic_data/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
+rm ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 
 mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.multi.AFCHECK.png ${home_directory}/results/02/easyQC_hrc.multi.AFCHECK.png
 mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_directory}/results/02/easyQC_hrc.rep

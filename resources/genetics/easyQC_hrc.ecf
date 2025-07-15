@@ -27,7 +27,7 @@ START EASYQC
 ### 		Please use the reference file ancestry that matches the ancestry of the study
 
 MERGE 	--colInMarker SNP
-		--fileRef HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
+		--fileRef topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 		--acolIn cptid;ref;alt;raf 
 		--acolInClasses character;character;character;numeric
 		--strSeparator TAB

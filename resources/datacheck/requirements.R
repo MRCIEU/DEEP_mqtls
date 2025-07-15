@@ -70,14 +70,18 @@ if (related == "yes") {
 
 # Check for required files
 files_to_check <- list(
-  # list(dir = "./resources/genetics", pattern = "HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz"),
-  # SNP list
-  list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz"),
-  # chain file for liftover from hg19 to hg38
-  #list(dir = "./resources/genetics", pattern = "hg19ToHg38.over.chain"),
-  
-  list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref.gz"),
-  list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref_info.h5")
+    # list(dir = "./resources/genetics", pattern = "HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz"),
+    # SNP list
+    list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz"),
+    # chain file for liftover from hg19 to hg38
+    #list(dir = "./resources/genetics", pattern = "hg19ToHg38.over.chain"),
+    list(dir = "./resources/genetics", pattern = "references_grch37_to_grch38.over.chain.gz"),)
+    list(dir = "./resources/genetics", pattern = "release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz"),
+    list(dir = "./resources/genetics", pattern = "hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv"),
+    list(dir = "./resources/genetics", pattern = "hgdp_tgp_unrel_pass_filtGBMI_strictpruned_loadings.tsv"),
+
+    list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref.gz"),
+    list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref_info.h5")
 )
 
 for (file_info in files_to_check) {
