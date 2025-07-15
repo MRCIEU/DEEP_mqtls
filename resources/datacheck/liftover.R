@@ -9,10 +9,6 @@ bim_file <- as.character(args[1]);
 ori_build <- as.numeric(args[2]);
 miss_liftover <- as.character(args[3])
 
-bim_file <- "/user/work/er20212/DEEP_mqtls/input_data/data_filtered"
-ori_build <- 37
-miss_liftover <- "/user/work/er20212/DEEP_mqtls/processed_data/miss_liftover.txt"
-
 message("Loading bim file: ", bim_file)
 bim <- as.data.frame(fread(paste0(bim_file, ".bim")))
 
