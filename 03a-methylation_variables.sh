@@ -32,6 +32,8 @@ ${R_directory}Rscript resources/smoking/smoking_predictor.R \
 #Predict cell counts - force for all datasets to ensure consistency
 echo "Predicting cell counts using epiDISH"
 ${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
+		${tissue} \
+		${methylation_array} \
         ${methylation_no_outliers} \
         ${cellcounts_cov} \
         ${cellcounts_plot} \
