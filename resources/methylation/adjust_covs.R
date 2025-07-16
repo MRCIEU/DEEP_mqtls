@@ -18,7 +18,7 @@ main <- function()
     
 	message("Reading methylation data...")
 	load(methylationfile)
-
+	
 	if(!is.na(jid))
 	{
 		chunksize <- ceiling(nrow(norm.beta) / chunks)
