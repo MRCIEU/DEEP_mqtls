@@ -36,7 +36,7 @@ Python2_directory=""
 # Methylation array (one of the following: 450k, epic, or epic2 or epic:epic2. Please note that names are case-sensitive)
 methylation_array="epic"
 
-# please specify tissue type: blood, saliva, buccal, cord
+# please specify tissue type: blood, PBMC, PBL, cord saliva, or buccal
 tissue="blood"
 
 # please specify the genome build (one of the following: 37 or 38)
