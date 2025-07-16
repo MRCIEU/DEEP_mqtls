@@ -5,18 +5,29 @@ library(data.table)
 
 arguments <- commandArgs(T)
 
-methylation_file<-arguments[1]
-out_file<-arguments[2]
-cellcounts_plot<-arguments[3]
-cellcounts_summary<-arguments[4]
+tissue<- arguments[1]
+methylation_file<-arguments[2]
+out_file<-arguments[3]
+cellcounts_plot<-arguments[4]
+cellcounts_summary<-arguments[5]
 
 # Predict cell counts.
 data(cent12CT.m)
+data(centUniLIFE.m)
 load(methylation_file)
+
 out.l1 <- epidish(beta.m = norm.beta, ref.m = cent12CT.m, method = "RPC")
 cellcounts<-as.data.frame(out.l1$estF)
 cellcounts<-as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
 cellcounts <- cellcounts[,c("IID", "Baso", "Bmem", "Bnv", "CD4Tmem", "CD4Tnv", "CD8Tmem", "CD8Tnv", "Eos", "Neu", "NK", "Mono", "Treg")]
+
+out.l1 <- epidish(beta.m = norm.beta, ref.m = centUniLIFE.m, method = "RPC")
+cellcounts<-as.data.frame(out.l1$estF)
+cellcounts<-as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
+cellcounts <- cellcounts.unilife.f[,c("IID", 
+                             "B", "CD4T", "CD8T", "Mono", "nRBC", "Gran", "NK", # 7 youthful cord-blood subtypes 
+                              "aCD4Tnv", "aBaso", "aCD4Tmem", "aBmem", "aBnv", "aTreg", "aCD8Tmem", 
+                              "aCD8Tnv", "aEos", "aNK", "aNeu", "aMono")]
 
 #Check if the cellcounts could be calculated for every sample.
 cc_na <- table(apply(cellcounts, 1, anyNA))
@@ -57,6 +68,7 @@ cc_summary <- data.frame(
   max = colMaxs(cc_mat, na.rm = T),
   NAs = colSums(is.na(cc_mat))
 )
+
 write.table(cc_summary, file = cellcounts_summary, quote = FALSE, row.names = TRUE)
 
 write.table(cellcounts, file=paste0(out_file), row.names=FALSE, col.names=TRUE, quote=FALSE)
