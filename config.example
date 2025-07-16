@@ -33,7 +33,7 @@ Python_directory=""
 Python2_directory=""
 
 # cohort information
-# Methylation array (one of the following: 450k, epic, or epic2 or epic:epic2. Please note that names are case-sensitive)
+# Methylation array (one of the following: 450k, epic, or epic2. Please note that names are case-sensitive)
 methylation_array="epic"
 
 # please specify tissue type: blood, PBMC, PBL, cord saliva, or buccal
