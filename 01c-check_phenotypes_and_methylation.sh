@@ -37,4 +37,24 @@ ${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
         ${cellcounts_plot} \
         ${cellcounts_summary}
 
+# cell counts and correlations
+echo "cell counts and correlations"
+
+${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
+		${tissue} \
+        ${methylation_no_outliers} \
+        ${cellcounts_cov} \
+        ${cellcounts_plot} \
+        ${cellcounts_summary}
+
+if [ "${measured_cellcounts}" != "NULL" ]
+then
+  echo "Comparing measured with predicted cellcounts"
+    ${R_directory}Rscript resources/cellcounts/correlation.R \
+	          ${cellcounts_cov} \
+ 	          ${measured_cellcounts} \
+	          ${cor_matrix} \
+	          ${cor_plot}
+fi
+
 echo "Successfully completed script 1c"
