@@ -16,7 +16,8 @@ echo "Copying genetic data to processing folder"
 # cp ${bfile_raw}.bim ${bfile}.bim
 # cp ${bfile_raw}.fam ${bfile}.fam
 
-# Check genome build and liftover to 38 if build is 37
+# Check genome build and liftover to 38 if build is 37 using GwasDataImport
+# https://github.com/MRCIEU/GwasDataImport
 
 ${R_directory}Rscript resources/datacheck/liftover.R \
 	${bfile_raw} \
