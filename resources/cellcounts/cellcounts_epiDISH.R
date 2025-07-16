@@ -1,36 +1,80 @@
 # Create cell counts file
 library(remotes)
 library(EpiDISH)
+library(meffil)
 library(data.table)
 
-arguments <- commandArgs(T)
+arguments <- commandArgs(T);
 
-tissue<- arguments[1]
-methylation_file<-arguments[2]
-out_file<-arguments[3]
-cellcounts_plot<-arguments[4]
-cellcounts_summary<-arguments[5]
+tissue<-tolower(arguments[1]);
+age<-arguments[2];
+methylation_array<-tolower(arguments[3]);
+
+methylation_file<-arguments[4];
+cellcounts_cov<-arguments[5];
+cellcounts_plot<-arguments[6];
+cellcounts_summary<-arguments[7];
+scripts_directory<-arguments[8];
 
 # Predict cell counts.
 data(cent12CT.m)
 data(centUniLIFE.m)
+data(centEpiFibIC.m)
+data(cent12CT450k.m)
+data(centBloodSub.m)
+
 load(methylation_file)
+source(paste0(scripts_directory,"/resources/cellcounts/fn-EpiDISH.r"))
 
-out.l1 <- epidish(beta.m = norm.beta, ref.m = cent12CT.m, method = "RPC")
-cellcounts<-as.data.frame(out.l1$estF)
-cellcounts<-as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
-cellcounts <- cellcounts[,c("IID", "Baso", "Bmem", "Bnv", "CD4Tmem", "CD4Tnv", "CD8Tmem", "CD8Tnv", "Eos", "Neu", "NK", "Mono", "Treg")]
+# Validate inputs and select reference matrices
+refs <- validate_and_select_reference(tissue, methylation_array, age)
+print(paste0("Using reference matrices ",paste(names(refs), collapse=", ")," for tissue: ", tissue, ", methylation array: ", methylation_array, ", age: ", age))
 
-out.l1 <- epidish(beta.m = norm.beta, ref.m = centUniLIFE.m, method = "RPC")
-cellcounts<-as.data.frame(out.l1$estF)
-cellcounts<-as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
-cellcounts <- cellcounts.unilife.f[,c("IID", 
-                             "B", "CD4T", "CD8T", "Mono", "nRBC", "Gran", "NK", # 7 youthful cord-blood subtypes 
-                              "aCD4Tnv", "aBaso", "aCD4Tmem", "aBmem", "aBnv", "aTreg", "aCD8Tmem", 
-                              "aCD8Tnv", "aEos", "aNK", "aNeu", "aMono")]
+cellcounts_total <- data.frame()
+
+for(ref in names(refs)) {
+  if (ref %in% c("salas", "unilife")) {
+    print(paste0("Using reference: ", ref))
+    out.l <- epidish(beta.m = norm.beta, ref.m = refs[[ref]], method = "RPC", maxit = 500)
+    cellcounts <- as.data.frame(out.l$estF)
+    colnames(cellcounts) <- ifelse(
+      colnames(cellcounts) != "IID",
+       paste0(ref, ".", colnames(cellcounts)),
+      colnames(cellcounts)
+    )
+  
+    } 
+      else if (ref == "zheng") {
+        print(paste0("Using reference: ", ref))
+        out.l <- hepidish(beta.m = norm.beta, ref1.m = centEpiFibIC.m, ref2.m = centBloodSub.m, h.CT.idx = 3, method = 'RPC')
+        cellcounts <- as.data.frame(out.l$estF)
+        colnames(cellcounts) <- ifelse(
+          colnames(cellcounts) != "IID",
+           paste0(ref, ".", colnames(cellcounts)),
+          colnames(cellcounts)
+          )
+        }
+      else if (ref == "meffil") {
+        print(paste0("Using reference: ", ref))
+        out.l <- meffil.estimate.cell.counts.from.betas(norm.beta, cell.type.reference = "saliva gse147318")
+        cellcounts <- as.data.frame(out.l)
+        colnames(cellcounts) <- ifelse(
+          colnames(cellcounts) != "IID",
+           paste0(ref, ".", colnames(cellcounts)),
+          colnames(cellcounts)
+        )
+  }
+
+  # Combine results
+  if (nrow(cellcounts_total) == 0) {
+    cellcounts_total <- cellcounts
+  } else {
+    cellcounts_total <- merge(cellcounts_total, cellcounts, by = "IID", all = TRUE)
+  }
+}
 
 #Check if the cellcounts could be calculated for every sample.
-cc_na <- table(apply(cellcounts, 1, anyNA))
+cc_na <- table(apply(cellcounts_total, 1, anyNA))
 message(sprintf("Cell counts were successfully predicted for %s individuals.", cc_na[1]))
 if(length(cc_na) > 1){
   message(sprintf("Cell counts contain NAs for for %s individuals. Please check the input data.", cc_na[2]))
@@ -40,24 +84,24 @@ if(length(cc_na) > 1){
 pdf(cellcounts_plot, width=12, height=8)
 par(mfrow = c(2,3)) # 2x3 grid
 
-for (i in 2:ncol(cellcounts)) {
+for (i in 2:ncol(cellcounts_total)) {
   # Get the cell type for the current iteration
-  cell_type <- colnames(cellcounts)[i]
+  cell_type <- colnames(cellcounts_total)[i]
   
   # Generate plots
-  plot(cellcounts[,i], main = cell_type, xlab = "Sample", ylab = "Estimated Proportion") # Cell count per sample.
-  hist(cellcounts[,i], main = cell_type, xlab = "Estimated Proportion", ylab = "Frequency", # Histogram of cell counts. 
+  plot(cellcounts_total[,i], main = cell_type, xlab = "Sample", ylab = "Estimated Proportion") # Cell count per sample.
+  hist(cellcounts_total[,i], main = cell_type, xlab = "Estimated Proportion", ylab = "Frequency", # Histogram of cell counts. 
           col = "lightgrey", border = "black")
-  qqnorm(cellcounts[,i], xlab = "Theoretical Quantiles", # Predicted cell counts vs. expected distribution of the predicted cell counts.
+  qqnorm(cellcounts_total[,i], xlab = "Theoretical Quantiles", # Predicted cell counts vs. expected distribution of the predicted cell counts.
          ylab = "Estimated Cell Counts", main = cell_type)
-  qqline(cellcounts[,i], col = "steelblue", lwd = 1)
+  qqline(cellcounts_total[,i], col = "steelblue", lwd = 1)
 }
 
 suppressMessages(dev.off())
 
 # Save the distribution of cell counts for this cohort.
 library(matrixStats)
-cc_mat <- as.matrix(cellcounts[-1])
+cc_mat <- as.matrix(cellcounts_total[-1])
 cc_summary <- data.frame(
   mean = colMeans(cc_mat, na.rm = T),
   sd = colSds(cc_mat, na.rm = T),
@@ -71,6 +115,6 @@ cc_summary <- data.frame(
 
 write.table(cc_summary, file = cellcounts_summary, quote = FALSE, row.names = TRUE)
 
-write.table(cellcounts, file=paste0(out_file), row.names=FALSE, col.names=TRUE, quote=FALSE)
+write.table(cellcounts_total, file=paste0(out_file), row.names=FALSE, col.names=TRUE, quote=FALSE)
 
 message("Cell count prediction complete.\n")
