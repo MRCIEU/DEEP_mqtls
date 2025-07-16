@@ -30,26 +30,27 @@ ${R_directory}Rscript resources/smoking/smoking_predictor.R \
 		${covariates} 
 
 #Predict cell counts - force for all datasets to ensure consistency
-echo "Predicting cell counts using epiDISH"
-${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
-		${tissue} \
-		${methylation_array} \
-        ${methylation_no_outliers} \
-        ${cellcounts_cov} \
-        ${cellcounts_plot} \
-        ${cellcounts_summary}
+# echo "Predicting cell counts using epiDISH"
+# ${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
+# 		${tissue} \
+# 		${methylation_array} \
+# 		${age} \
+#         ${methylation_no_outliers} \
+#         ${cellcounts_cov} \
+#         ${cellcounts_plot} \
+#         ${cellcounts_summary}
 
 
-if [ "${measured_cellcounts}" != "NULL" ]
-then
-  echo "Comparing measured with predicted cellcounts"
-    ${R_directory}Rscript resources/cellcounts/correlation.R \
-	          ${cellcounts_cov} \
- 	          ${measured_cellcounts} \
-	          ${cor_matrix} \
-	          ${cor_plot}
+# if [ "${measured_cellcounts}" != "NULL" ]
+# then
+#   echo "Comparing measured with predicted cellcounts"
+#     ${R_directory}Rscript resources/cellcounts/correlation.R \
+# 	          ${cellcounts_cov} \
+#  	          ${measured_cellcounts} \
+# 	          ${cor_matrix} \
+# 	          ${cor_plot}
 
-fi
+# fi
 
 
 # Estimate age accelerated residuals
