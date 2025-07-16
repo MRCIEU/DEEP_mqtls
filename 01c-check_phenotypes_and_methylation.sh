@@ -42,10 +42,13 @@ echo "cell counts and correlations"
 
 ${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
 		${tissue} \
+		${age} \
+		${methylation_array} \
         ${methylation_no_outliers} \
         ${cellcounts_cov} \
         ${cellcounts_plot} \
-        ${cellcounts_summary}
+        ${cellcounts_summary} \
+		${scripts_directory} 
 
 if [ "${measured_cellcounts}" != "NULL" ]
 then
