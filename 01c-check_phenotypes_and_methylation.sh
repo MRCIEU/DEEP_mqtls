@@ -57,7 +57,8 @@ then
 	          ${cellcounts_cov} \
  	          ${measured_cellcounts} \
 	          ${cor_matrix} \
-	          ${cor_plot}
+	          ${cor_plot} \
+			  ${scripts_directory}
 fi
 
 echo "Successfully completed script 1c"
