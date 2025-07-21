@@ -11,7 +11,7 @@ echo "Calculating MAF from bfile"
 plink2 --bfile "${bfile}" --freq --out "${section_01_dir}/"
 
 #echo "Converting PLINK files to VCF format"
-#plink2 --bfile "${bfile_raw}" \
+#plink2 --bfile "${bfile_raw}" \ 
 #	   --export vcf \
 #       --out "${vcf_file}"
 
