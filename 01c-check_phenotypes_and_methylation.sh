@@ -29,14 +29,6 @@ ${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
 		${smoking_pred_SD} \
 		${covariates} 
 
-# EWAS of age and smoking
-echo "EWAS of age and smoking"
-${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
-        ${methylation_no_outliers} \
-        ${cellcounts_cov} \
-        ${cellcounts_plot} \
-        ${cellcounts_summary}
-
 # cell counts and correlations
 echo "cell counts and correlations"
 
@@ -60,5 +52,13 @@ then
 	          ${cor_plot} \
 			  ${scripts_directory}
 fi
+
+# EWAS of age and smoking
+echo "EWAS of age and smoking"
+${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
+        ${methylation_no_outliers} \
+        ${cellcounts_cov} \
+        ${cellcounts_plot} \
+        ${cellcounts_summary}
 
 echo "Successfully completed script 1c"
