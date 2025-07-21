@@ -17,14 +17,14 @@ cellcounts_summary<-arguments[7];
 scripts_directory<-arguments[8];
 
 # Predict cell counts.
-data(cent12CT.m)
-data(centUniLIFE.m)
-data(centEpiFibIC.m)
-data(cent12CT450k.m)
-data(centBloodSub.m)
+data(cent12CT.m);
+data(centUniLIFE.m);
+data(centEpiFibIC.m);
+data(cent12CT450k.m);
+data(centBloodSub.m);
 
 load(methylation_file)
-source(paste0(scripts_directory,"/resources/cellcounts/fn-EpiDISH.r"))
+source(paste0(scripts_directory,"/resources/cellcounts/fn-select_ref.R"))
 
 # Validate inputs and select reference matrices
 refs <- validate_and_select_reference(tissue, methylation_array, age)
@@ -42,7 +42,9 @@ for(ref in names(refs)) {
        paste0(ref, ".", colnames(cellcounts)),
       colnames(cellcounts)
     )
-  
+    # colnames will be B, CD4T, CD8T, Mono, nRBC, Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono with prefix "unilife."
+    # or colnames will be CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono with prefix "salas."
+
     } 
       else if (ref == "zheng") {
         print(paste0("Using reference: ", ref))
@@ -52,17 +54,18 @@ for(ref in names(refs)) {
           colnames(cellcounts) != "IID",
            paste0(ref, ".", colnames(cellcounts)),
           colnames(cellcounts)
-          )
-        }
+        )
+        # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
       else if (ref == "meffil") {
         print(paste0("Using reference: ", ref))
         out.l <- meffil.estimate.cell.counts.from.betas(norm.beta, cell.type.reference = "saliva gse147318")
         cellcounts <- as.data.frame(out.l)
         colnames(cellcounts) <- ifelse(
           colnames(cellcounts) != "IID",
-           paste0(ref, ".", colnames(cellcounts)),
+           paste0("middleton.", colnames(cellcounts)),
           colnames(cellcounts)
         )
+      # colnames will be [CD45pos, large] with prefix "middleton."
   }
 
   # Combine results
@@ -87,7 +90,6 @@ par(mfrow = c(2,3)) # 2x3 grid
 for (i in 2:ncol(cellcounts_total)) {
   # Get the cell type for the current iteration
   cell_type <- colnames(cellcounts_total)[i]
-  
   # Generate plots
   plot(cellcounts_total[,i], main = cell_type, xlab = "Sample", ylab = "Estimated Proportion") # Cell count per sample.
   hist(cellcounts_total[,i], main = cell_type, xlab = "Estimated Proportion", ylab = "Frequency", # Histogram of cell counts. 
@@ -115,6 +117,6 @@ cc_summary <- data.frame(
 
 write.table(cc_summary, file = cellcounts_summary, quote = FALSE, row.names = TRUE)
 
-write.table(cellcounts_total, file=paste0(out_file), row.names=FALSE, col.names=TRUE, quote=FALSE)
+write.table(cellcounts_total, file= cellcounts_cov, row.names=FALSE, col.names=TRUE, quote=FALSE)
 
 message("Cell count prediction complete.\n")
