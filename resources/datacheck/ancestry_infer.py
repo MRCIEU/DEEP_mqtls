@@ -1,18 +1,20 @@
-import onnx
+# import onnx
+# import random
+# from gnomad.sample_qc.ancestry import (
+#     apply_onnx_classification_model,
+#     assign_population_pcs,
+#     pc_project,
+# )
+# from gnomad.utils.filtering import filter_to_adj
 import hail as hl
-import random
+import psutil
 import pandas as pd
 import matplotlib.pyplot as plt
-from gnomad.sample_qc.ancestry import (
-    apply_onnx_classification_model,
-    assign_population_pcs,
-    pc_project,
-)
-from gnomad.utils.filtering import filter_to_adj
 import gzip
 import json
 import warnings
 import sys
+import os
 
 logfile = sys.argv[1]
 bfile = sys.argv[2]
@@ -20,11 +22,32 @@ genome_build = sys.argv[3]
 study_name = sys.argv[4]
 scripts_directory = sys.argv[5]
 
-# initialize Hail
-hl.init(backend = "spark", # use local
-    local="local[4]",
-    min_block_size=128,  # minimum block size for Hail
-    log=logfile, # log file for Hail
+print("Bfile:", bfile)
+print("Study name:", study_name)
+print("Scripts directory:", scripts_directory)
+print("Genome build:", genome_build)
+
+mem = psutil.virtual_memory()
+avail_gb = mem.available / (1024**3)
+driver_mem_gb = int(avail_gb * 0.8)
+
+print(f"Available mem: {avail_gb:.2f} GB")
+print(f"Total mem: {mem.total / (1024**3):.2f} GB")
+
+slurm_cores = os.environ.get('SLURM_CPUS_ON_NODE')
+if slurm_cores is not None and slurm_cores.isdigit():
+    cores_to_use = int(slurm_cores)
+else:
+    cores_to_use = os.cpu_count()
+
+print(f"Using {cores_to_use} cores for Hail")
+hl.init(
+    backend="spark",
+    local=f"local[{cores_to_use}]",
+    log=logfile,
+    spark_conf={
+        'spark.driver.memory': f'{driver_mem_gb}g',
+    }
 )
 
 # import genotype data, if genome build is 37, lift over to 38
@@ -107,7 +130,7 @@ if call_rate >= 0.9:
 else:
     print(f"Call rate: {call_rate:.2%} - Please contact with Haotian Tang (haotian.tang@bristol.ac.uk)")
 
-ht_projections = pc_project(dat_filter, ref_pca_loadings)
+ht_projections = hl.experimental.pc_project(dat_filter.GT, ref_pca_loadings.loadings, ref_pca_loadings.pca_af)
 ht_projections = ht_projections.transmute(**{f"PC{i}": ht_projections.scores[i - 1] for i in range(1, 21)})
 
 ht_projections = ht_projections.key_by("s")
