@@ -38,7 +38,7 @@ validate_and_select_reference <- function(tissue, methylation_array, age) {
   }
   
   if (tissue == "saliva") {
-    if (methylation_array %in% c("epic", "epic2")) {
+    if (methylation_array %in% c("epic", "epic2", "450k")) {
       if (age == ">18") {
         return(list(zheng = centEpiFibIC.m))
       } else if (age == "<18") {
@@ -46,17 +46,13 @@ validate_and_select_reference <- function(tissue, methylation_array, age) {
       } else if (age == "all") {
         stop("No reference available for saliva tissue in all age range with EPIC array.")
       }
-    } else if (methylation_array == "450k") {
-      stop("No reference available for saliva tissue with 450k array.")
     }
   }
   
   if (tissue == "buccal") {
-    if (methylation_array %in% c("epic", "epic2")) {
+    if (methylation_array %in% c("epic", "epic2", "450k")) {
       if (age == ">18") {
         return(list(zheng = centEpiFibIC.m))
-      } else {
-        stop("No reference available for buccal tissue in <18 age range or 450k.")
       }
     }
   }
