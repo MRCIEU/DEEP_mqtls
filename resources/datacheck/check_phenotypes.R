@@ -6,12 +6,9 @@
 #       remove outliers via winsorization,
 #       Then redo summary stats and plots
 
-# To do:
-# Are we subsetting to those with genetic phenotype and methylation data?
-# Do we want a raw version of the phenotypes (not winsorized)
-# Do we want to flag a certain level of missingness in variables (say 10%)
-# How do we feel about the summary stats being an rdata object (this may be the only practical option...)
-# There are some variables we won't want to winsorize, so how do we do this
+# Outstanding questions:
+  # Do we want a raw version of the phenotypes (not winsorized)
+  # There are some variables we won't want to winsorize, so how do we do this?
 
 suppressPackageStartupMessages(library(DescTools))
 suppressPackageStartupMessages(library(ggplot2))
@@ -43,13 +40,16 @@ winsorized_covariates_file <- as.character(args[11])
 message("Checking covariates file: ", covariates_file)
 covar <- read.table(covariates_file,header=T,stringsAsFactors = F)
 
-# QUESTION - do we require all DNAm samples to have genetic data?
-# ie, do we want to subset to commonids_mgc in the below section?
+# We don't require all DNAm samples to have genetic data
+# we'll print out what the differential is here
 meth_ids <- scan(meth_ids_file, what="character")
 fam <- read.table(fam_file, header=FALSE, stringsAsFactors=FALSE)
 commonids_mgc <- Reduce(intersect, list(meth_ids, covar$IID, fam[,2]))
 message("Number of samples with covariate, methylation and genetic data: ", length(commonids_mgc))
-  # QUESTION - do we want to subset covs to participants with all 3 types of data?
+participants <- as.character(intersect(meth_ids,covar$IID))
+covar <- covar[covar$IID%in%participants,]
+message("Number of samples with covariate and methylation data: ", length(participants))
+
 
 # set all the numeric columns to numeric variables, and all the factors to factors
 # we've set stringsAsFactors = F so all the cols should currently be characters
@@ -86,12 +86,12 @@ for(i in phenotypes){
   }
   summstats_list[[i]]$stats_out <- stats_out
   summstats_list[[i]]$nas_out <- sum(is.na(covar[,i]))
-  # remove missing cases to avoid missingness on plot
-    # QUESTION - do we want to output a warning if there is more than 10% missingness or something?
-    # eg like this:
+  
+  # Warning if there is more than 10% missingness in a variable
   if(sum(is.na(covar[,i]))>nrow(covar)/10){
     message("Warning: there is over 10% missingness in",i)
   }
+  # remove missing cases to avoid missingness on plot
   pheno.temp <- covar[!is.na(covar[,i]),]
 
   # run plots (density for numeric variables and bar for categorical)
@@ -148,9 +148,10 @@ save(summstats_list,file=paste0(raw_phenotype_summary_file,"_",study_name,".Rdat
 
 # numeric vars only
 
-  # TO DO - we don't want to winsorize age (as long as values are biologically plausible)
+  # QUESTION - we don't want to winsorize age (as long as values are biologically plausible)
   #         so need to add in some code that checks values are reasonable and removes age and 
   #         any other such vars (perhaps smoking pack years? others?) from winsorization
+  #         Is this a thing we need to code manually once we have the data harmonisation questionnaire?
 
 
 numeric_phenos <- grepl("_numeric", colnames(covar))
