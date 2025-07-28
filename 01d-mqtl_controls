@@ -9,7 +9,11 @@ print_version
 # Loop through each positive control locus
 echo "Running positive controls"
 
-tail -n +2 ./resource/genetics/pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+############################################################################################################
+# positive control
+############################################################################################################
+
+tail -n +2 ./resource/genetics/mqtl_pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
 do
     echo "Processing positive control: $positive_control_cpg"
 
@@ -101,7 +105,7 @@ echo "Running negative control"
 
 seed=45516
 
-tail -n +2 ./resource/genetics/pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+tail -n +2 ./resource/genetics/mqtl_pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
 do
     negative_control_cpg="NEG_${positive_control_cpg}"
 
