@@ -52,8 +52,12 @@ age=">18"
 # wheter the samples are related (yes or no)
 relatedness="no"
 
-# reference panel (1000G or hrc)
-reference="hrc"
+# reference panel (1000g, 1000g+h3a, 1000g+hrc, topmed, 1000g+caapa)
+reference="1000g"
+
+# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure))
+# This info is required by EasyQC, to compare the allele frequencies of your samples against reference panel.
+ancestry="EUR"
 
 # Input data files
 betas="${home_directory}/input_data/data.RData"
