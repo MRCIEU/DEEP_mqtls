@@ -3,6 +3,7 @@ warninglist <- list()
 
 library(data.table)
 library(GwasDataImport)
+library(rtracklayer)
 
 args <- (commandArgs(TRUE));
 bim_file <- as.character(args[1]);
@@ -18,6 +19,7 @@ message("Checking genome build")
 accepted_builds <- c(37, 38)
 # determine the genome build
 if (mean(startsWith(bim[, 2], "rs")) >= 0.8) {
+  message("Detected rsID format, using determine_build function")
   build <- GwasDataImport::determine_build(
     rsid = bim[, 2],
     chr = bim[, 1],
@@ -26,6 +28,7 @@ if (mean(startsWith(bim[, 2], "rs")) >= 0.8) {
     fallback = "position"
   )
 } else {
+  message("Detected chr:pos format, using determine_build_position function")
   build <- GwasDataImport::determine_build_position(
     pos = bim[, 4],
     build = c(37, 38, 36)
@@ -51,7 +54,7 @@ if (build != ori_build) {
 
 if (build == 37) {
     message("Genome build liftover")
-    if(mean(grepl("^rs", bim$V3)) >= 0.8) {
+    if(mean(grepl("^rs", bim$V2)) >= 0.8) {
         temp_bim = GwasDataImport::liftover_gwas(
         dat = bim,
         build = c(37, 38, 36),
@@ -80,9 +83,9 @@ if (build == 37) {
         msg <- paste0("Liftover was not successful for more than 1% of the SNPs. Please contact Haotian (haotian.tang@bristol.ac.uk).")
         errorlist <- c(errorlist, msg)
         warning("ERROR: ", msg)
-    }  
+    }
 
-    message("Missing SNPs after liftover saved")
+    message("Saving the missing SNPs during liftover")
 
     write.table(bim[!(bim$V2%in%temp_bim$V2),"V2"], file = miss_liftover, sep = "\t", quote = F, row.names = F, col.names = F)
 
