@@ -16,14 +16,6 @@ echo "Copying genetic data to processing folder"
 # cp ${bfile_raw}.bim ${bfile}.bim
 # cp ${bfile_raw}.fam ${bfile}.fam
 
-# Check genome build and liftover to 38 if build is 37 using GwasDataImport
-# https://github.com/MRCIEU/GwasDataImport
-
-${R_directory}Rscript resources/datacheck/liftover.R \
-	${bfile_raw} \
-	${genome_build} \
-	${miss_liftover}
-
 # Check if the file exists before running plink2
 if [ -f ${miss_liftover} ]; then
     plink2 --bfile "${bfile_raw}" \
@@ -34,7 +26,6 @@ fi
 
 
 # For datasets using 1000G include indels
-# 1000G reference panel is based on genome build 38
 if [ $reference == "1000G" ] ;
 then 
 
@@ -85,19 +76,33 @@ fi
 
 
 # Sex check -note this is not implemented in PLINK2 so we are going to use PLINK1.9
+module load apps/plink2/2.00a68LM
+module load apps/plink1.9/1.90-b77
+bfile_raw="/user/work/er20212/DEEP_mqtls/input_data/data_filtered"
+bfile="/user/work/er20212/DEEP_mqtls/processed_data/genetic_data/data"
 
-n23=`grep ^23 ${bfile}.bim | wc -l`
+n23=`grep ^23 ${bfile_raw}.bim | wc -l`
+
+plink --bfile ${bfile_raw} \
+	--split-x b37 no-fail \
+	--make-bed \
+	--out ${bfile}
+
+plink2 --bfile ${bfile_raw} \
+	--split-par b38 \
+	--make-bed \
+	--out ${bfile}
 
 if [ "$n23" -gt "0" ]
 then
 	
-	${plink} \
+	${plink2} \
 		--bfile ${bfile} \
 		--split-x b37 no-fail \
 		--make-bed \
 		--out ${bfile}
 
-	${plink} \
+	${plink2} \
 		--bfile ${bfile} \
 		--check-sex \
 		--out ${section_02_dir}/data
