@@ -88,7 +88,7 @@ sex_pred_plot="${home_directory}/results/01/XY_methylation_vs_sex.pdf"
 
 # Check data
 control_snps="${scripts_directory}/resources/genetics/snpsforbuildandposcheck"
-miss_liftover="${section_02_dir}/miss_liftover.txt"
+miss_liftover="${section_01_dir}/miss_liftover.txt"
 liftover_data="${home_directory}/processed_data/genetic_data/data_liftover"
 snpchrtxt="${section_01_dir}/no_snps_by_chr.txt"
 snpchrplot="${section_01_dir}/no_snps_by_chr.pdf"
