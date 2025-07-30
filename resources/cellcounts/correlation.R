@@ -181,3 +181,9 @@ pdf(height=54,width=87,cor_plot)
 #png(height=540, width=870,file=cor_plot)
 corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black",tl.cex=5,cl.cex=5)
 dev.off()
+
+# measurement cell counts == yes 
+
+# add correlation plot between predicted cell count and measured cell counts
+
+# add correlation plot between predicted cell counts
