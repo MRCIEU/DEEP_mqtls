@@ -48,6 +48,10 @@ else
 	echo "passed file check"
 fi
 
+
+# adjust the easyQC script to use the correct path and file names
+echo "Ancestry: ${ancestry}"
+
 if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${ancestry} == "EAS" || ${ancestry} == "SAS" ]]; then
     cp ${scripts_directory}/resources/genetics/1000G_${ancestry}_p3v5.TOPMed_Imputed.Allele_Freq.hg38.txt.gz ${home_directory}/processed_data/genetic_data/
 
