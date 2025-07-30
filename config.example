@@ -56,6 +56,10 @@ relatedness="no"
 reference="1000g"
 
 # Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure))
+# This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel.
+ancestry="EUR"
+
+# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure))
 # This info is required by EasyQC, to compare the allele frequencies of your samples against reference panel.
 ancestry="EUR"
 
