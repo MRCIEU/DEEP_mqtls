@@ -20,7 +20,8 @@ logfile = sys.argv[1]
 bfile = sys.argv[2]
 genome_build = sys.argv[3]
 study_name = sys.argv[4]
-scripts_directory = sys.argv[5]
+home_directory = sys.argv[5]
+scripts_directory = sys.argv[6]
 
 print("Bfile:", bfile)
 print("Study name:", study_name)
@@ -202,4 +203,4 @@ plt.ylabel('PC2')
 plt.title('Projection of Samples onto gnomAD PCA space')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 
-plt.savefig(f'{scripts_directory}/results/01/{study_name}_globalPCA.png', dpi=300, bbox_inches='tight')
+plt.savefig(f'{home_directory}/results/01/{study_name}_globalPCA.png', dpi=300, bbox_inches='tight')
