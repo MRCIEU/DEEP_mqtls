@@ -28,8 +28,8 @@ SNPfail<-data.frame()
 isBothMissing <- which(is.na(a1) & is.na(a2))
 if(length(isBothMissing)>0) {SNPfail<-rbind(SNPfail,bim[isBothMissing,2])}
 
-message("Allele harmonization:",length(isBothMissing)," alleles with  NA are going to be removed")
-	
+message("Allele harmonization:",length(isBothMissing)," alleles with NA are going to be removed")
+
 ## Recode missing single allele or '<DEL>' or '-' to 'D' and set the other to 'I'
 
     a1<-bim[,5]
@@ -38,7 +38,7 @@ message("Allele harmonization:",length(isBothMissing)," alleles with  NA are goi
 	#bim[isRecodea1,5] <- "D"
 	#bim[isRecodea1,6] <- "I"
 	if(length(isRecodea1)>0) {SNPfail<-rbind(SNPfail,bim[isRecodea1,2])}
-	message("Allele harmonization:",length(isRecodea1)," SNPs with A1 alleles with  NA or <DEL> or - are removed")
+	message("Allele harmonization:",length(isRecodea1)," SNPs with A1 alleles with NA or <DEL> or - are removed")
 
     a1<-bim[,5]
 	a2<-bim[,6]
@@ -89,44 +89,44 @@ message("Allele harmonization:",length(isBothMissing)," alleles with  NA are goi
     a2<-bim[,6]
 	isRecodea2_Y_Z <- which(a2=="Y" & a1=="Z")
 	if(length(isRecodea2_Y_Z)>0) {SNPfail<-rbind(SNPfail,bim[isRecodea2_Y_Z ,2])}
-	message("Allele harmonization:",length(isRecodea2_Y_Z)," SNPs with A2 alleles with D/R are removed")
+	message("Allele harmonization:",length(isRecodea2_Y_Z)," SNPs with A2 alleles with Y/Z are removed")
 
-## Recode Sequence coding to D/I
-	a1<-bim[,5]
-	a2<-bim[,6]
-	isRecode_seq1 <- which(nchar(a1)>nchar(a2))
-	#bim[isRecode_seq1,5] <- "I"
-	#bim[isRecode_seq1,6] <- "D"
-	if(length(isRecode_seq1)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq1 ,2])}
-	message("Allele harmonization:",length(isRecode_seq1)," alleles with sequence coding are removed")
+## Recode Sequence coding to D/I [noted]
+	# a1<-bim[,5]
+	# a2<-bim[,6]
+	# isRecode_seq1 <- which(nchar(a1)>nchar(a2))
+	# #bim[isRecode_seq1,5] <- "I"
+	# #bim[isRecode_seq1,6] <- "D"
+	# if(length(isRecode_seq1)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq1 ,2])}
+	# message("Allele harmonization:",length(isRecode_seq1)," alleles with sequence coding are removed")
 	
-	a1<-bim[,5]
-	a2<-bim[,6]
-	isRecode_seq2 <- which(nchar(a1)<nchar(a2))
-	#bim[isRecode_seq2,5] <- "D"
-	#bim[isRecode_seq2,6] <- "I"
-	if(length(isRecode_seq2)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq2 ,2])}
-	message("Allele harmonization:",length(isRecode_seq2)," alleles with sequence coding are removed")
+	# a1<-bim[,5]
+	# a2<-bim[,6]
+	# isRecode_seq2 <- which(nchar(a1)<nchar(a2))
+	# #bim[isRecode_seq2,5] <- "D"
+	# #bim[isRecode_seq2,6] <- "I"
+	# if(length(isRecode_seq2)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq2 ,2])}
+	# message("Allele harmonization:",length(isRecode_seq2)," alleles with sequence coding are removed")
 
-	a1<-bim[,5]
-	a2<-bim[,6]
-	isRecode_seq3 <- which(nchar(a1)>1&nchar(a1)==nchar(a2))
-	if(length(isRecode_seq3)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq3 ,2])}
-	message("Allele harmonization:",length(isRecode_seq3)," alleles with sequence coding are removed")
+	# a1<-bim[,5]
+	# a2<-bim[,6]
+	# isRecode_seq3 <- which(nchar(a1)>1&nchar(a1)==nchar(a2))
+	# if(length(isRecode_seq3)>0) {SNPfail<-rbind(SNPfail,bim[isRecode_seq3 ,2])}
+	# message("Allele harmonization:",length(isRecode_seq3)," alleles with sequence coding are removed")
 
-	a1<-bim[,5]
-    a2<-bim[,6]
-    #isInvalid <- !(a1%in%c("A","C","G","T","I","D")&a2%in%c("A","C","G","T","I","D")&a1!=a2)
-	isInvalid <- !(a1%in%c("A","C","G","T")&a2%in%c("A","C","G","T")&a1!=a2)
-	if(length(which(isInvalid))>0) {
-	SNPfail<-rbind(SNPfail,bim[which(isInvalid),2])}
-    message("Allele harmonization:",length(which(isInvalid))," alleles with coding other than A,C,T,G are going to be removed")
+	# a1<-bim[,5]
+    # a2<-bim[,6]
+    # #isInvalid <- !(a1%in%c("A","C","G","T","I","D")&a2%in%c("A","C","G","T","I","D")&a1!=a2)
+	# isInvalid <- !(a1%in%c("A","C","G","T")&a2%in%c("A","C","G","T")&a1!=a2)
+	# if(length(which(isInvalid))>0) {
+	# SNPfail<-rbind(SNPfail,bim[which(isInvalid),2])}
+    # message("Allele harmonization:",length(which(isInvalid))," alleles with coding other than A,C,T,G are going to be removed")
 	
 
 	rm(a1,a2)
 	rm(isRecode_seq1,isRecode_seq2)
-	rm(isRecodea1_mach1,isRecodea1_mach2,isRecodea2_mach1,isRecodea2_mach2)
-	rm(isInvalid)
+	rm(isRecodea1_mach1, isRecodea1_mach2, isRecodea2_mach1, isRecodea2_mach2)
+	# rm(isInvalid)
 	
 	recoded.bim <- list(bim, SNPfail)
 	
@@ -138,6 +138,3 @@ if(length(recoded.bim[[2]])>0){
 SNPfailures<-as.character(t(recoded.bim[[2]]))
 write.table(SNPfailures,SNPfail.out,sep="\t",quote=F,col.names=F,row.names=F)}
 #write.table(recoded.bim[[1]],bim_file,sep="\t",quote=F,col.names=F,row.names=F)
-
-
-
