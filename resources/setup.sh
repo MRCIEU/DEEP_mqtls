@@ -9,14 +9,22 @@ config_file="./config"
 # Activate the environment
 if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
     # Users are using system default R & Python, activate conda environment
-    if ! command -v mamba &> /dev/null; then
-        echo "mamba not found. Please install mamba first."
+    if command -v mamba &> /dev/null; then
+        echo "Using mamba to activate the environment"
+        CONDA_CMD="mamba"
+
+    elif command -v conda &> /dev/null; then
+        echo "Using conda to activate the environment"
+        CONDA_CMD="conda"
+
+    else
+        echo "ERROR: Neither mamba nor conda found."
+        echo "Please install one of them first or specify the R/Python directories in the config file"
         exit 1
     fi
-    # Initialize mamba shell for current session
-    eval "$(mamba shell hook --shell bash)"
-    mamba activate deep_mqtl
-    echo "Current conda environment: $CONDA_DEFAULT_ENV"
+
+    $CONDA_CMD activate hail_env
+    echo "Current environment is: $CONDA_DEFAULT_ENV"
 else
     # Users have specified custom R/Python directories
     echo "Custom R/Python directories specified"
