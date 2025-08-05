@@ -55,3 +55,4 @@ write.table(allcovs[,-1], file=paste0(out_file, ".txt"), row=F, col=T, qu=F)
 mat <- t(as.matrix(allcovs[,-1]))
 write.table(mat, file=paste0(out_file, ".matrixeqtl"), row=TRUE, col=FALSE, qu=FALSE, sep="\t")
 
+# to split covariates into quantitative and categorical
