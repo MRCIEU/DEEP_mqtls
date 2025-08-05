@@ -8,7 +8,20 @@ print_version
 
 # Check phenotype distributions, remove outliers
 echo "check_phenotypes"
+# smoking from cohorts
 ${R_directory}Rscript resources/datacheck/check_phenotypes.R \
+		${betas} \
+		${methylation_no_outliers} \
+		${cohort_descriptives_commonids} \
+		${methylation_summary} \
+		${intersect_ids} \
+		${covariates} \
+		${covariates_intersect} \
+		${bfile}.fam \
+		${bfile}.bim
+
+echo "Removing outliers"
+${R_directory}Rscript resources/methylation/remove_outliers.R \
 		${betas} \
 		${methylation_no_outliers} \
 		${cohort_descriptives_commonids} \
@@ -60,5 +73,18 @@ ${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
         ${cellcounts_cov} \
         ${cellcounts_plot} \
         ${cellcounts_summary}
+
+# Organise covariates
+# smoking from prediction
+echo "Organising covariates"
+${R_directory}Rscript resources/genetics/covariates.R \
+	${covariates_intersect} \
+	${pcs_all} \
+	${cellcounts_cov} \
+	${smoking_pred}.txt \
+	${bfile}.fam \
+	${covariates_combined}
+
+# need add to the phenotypes
 
 echo "Successfully completed script 1c"
