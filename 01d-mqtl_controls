@@ -6,7 +6,38 @@ set -- $concatenated
 exec &> >(tee ${section_01d_logfile})
 print_version
 
-# Loop through each positive control locus
+# Step 1: generate a sparse genetic relationship matrix (GRM) and PCA
+# For family data, use all samples, correcting for the full (sparse) GRM.
+echo "Generating PCs"
+${gcta} \
+    --grm ${grmfile_all} \
+    --pca 20 \
+    --out ${section_01_dir}/ctr_pc
+
+if [ "${related}" = "yes" ]; then
+    echo "Related is set to yes, making bK sparse"
+    ${gcta} \
+	    --grm ${grmfile_all} \
+	    --make-bK-sparse 0.05 \
+	    --autosome \
+	    --make-grm \
+	    --out ${grmfile_fast}_rel_ctr \
+	    --thread-num ${nthreads}
+
+elif [ "${related}" = "no" ]; then
+    echo "Skipping making bK sparse as related is set to no"
+     # grmfile_all has been created with grm-cutoff, so cryptic relateds has been removed
+    ${gcta} \
+	    --grm ${grmfile_all} \
+	    --make-bK-sparse 0.05 \
+	    --autosome \
+	    --make-grm \
+	    --out ${grmfile_fast}_unrel_ctr \
+	    --thread-num ${nthreads}
+   
+fi
+
+# Step2: Loop through each positive control locus
 echo "Running positive controls"
 
 ############################################################################################################
@@ -30,7 +61,7 @@ do
     ${R_directory}Rscript resources/genetics/make_control.R \
         ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control \
         ${intersect_ids_plink} \
-        ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink
+        ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta
 
     nrow=`cat ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control | wc -l`
     if [ "$nrow" -lt "2" ]; then
@@ -41,25 +72,49 @@ do
     ${R_directory}Rscript resources/genetics/make_control.R \
         ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control \
         ${intersect_ids_plink} \
-        ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink
+        ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta
 
-    echo "Perform plink (untransformed)"
-    ${plink2} \
-        --bfile ${bfile} \
-        --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink \
-        --glm allow-no-covars \
-        --allow-extra-chr \
-        --human \
-        --output-chr 26 \
-        --out ${section_03_dir}/positive_control_untransformed_${positive_control_cpg}
+    # echo "Perform plink (untransformed)"
+    # ${plink2} \
+    #     --bfile ${bfile} \
+    #     --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink \
+    #     --glm allow-no-covars \
+    #     --allow-extra-chr \
+    #     --human \
+    #     --output-chr 26 \
+    #     --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}
 
-    tr -s " " < ${section_03_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_03_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear.gz
-    rm ${section_03_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear
+    echo "Perform GCTA (untransformed) in positive control"
+    if [ "${related}" = "yes" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm-sparse ${grmfile_fast}_rel_ctr \
+            --fastGWA-mlm \
+            --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex, batch from cov
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
+
+    elif [ "${related}" = "no" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm ${grmfile} \
+            --fastGWA-mlm \
+            --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
+    fi
+
+    tr -s " " < ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear.gz
+    rm ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear
 
     echo "make manhattan and qq plots (untransformed)"
-    echo ${section_03_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear.gz > ${section_03_dir}/positive.control.untransformed.file.txt
+    echo ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.PHENO1.glm.linear.gz > ${section_01_dir}/positive.control.untransformed.file.txt
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        ${section_03_dir}/positive.control.untransformed.file.txt \
+        ${section_01_dir}/positive.control.untransformed.file.txt \
         12 \
         1 \
         2 \
@@ -70,21 +125,45 @@ do
         ${positive_control_snp_window} \
         ${positive_control_threshold}
 
-    echo "Perform plink (transformed)"
-    ${plink2} \
-        --bfile ${bfile} \
-        --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink \
-        --glm allow-no-covars \
-        --allow-extra-chr \
-        --out ${section_03_dir}/positive_control_transformed_${positive_control_cpg}
+    # echo "Perform plink (transformed)"
+    echo "Perform GCTA (transformed) in positive control"
+    if [ "${related}" = "yes" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm-sparse ${grmfile_fast}_rel_ctr \
+            --fastGWA-mlm \
+            --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
 
-    tr -s " " < ${section_03_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_03_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear.gz
-    rm ${section_03_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear
+    elif [ "${related}" = "no" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm ${grmfile} \
+            --fastGWA-mlm \
+            --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
+    fi
+
+    # ${plink2} \
+    #     --bfile ${bfile} \
+    #     --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.plink \
+    #     --glm allow-no-covars \
+    #     --allow-extra-chr \
+    #     --out ${section_01_dir}/positive_control_transformed_${positive_control_cpg}
+
+    tr -s " " < ${section_01_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_01_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear.gz
+    rm ${section_01_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear
 
     echo "make manhattan and qq plots (transformed)"
-    echo ${section_03_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear.gz > ${section_03_dir}/positive.control.transformed.file.txt
+    echo ${section_01_dir}/positive_control_transformed_${positive_control_cpg}.PHENO1.glm.linear.gz > ${section_01_dir}/positive.control.transformed.file.txt
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        ${section_03_dir}/positive.control.transformed.file.txt \
+        ${section_01_dir}/positive.control.transformed.file.txt \
         12 \
         1 \
         2 \
@@ -97,12 +176,13 @@ do
 
 done
 
+# Step3: Shuffle negative control loci and run the loop again
 ############################################################################################################
 # negative control
 ############################################################################################################
 
 echo "Running negative control"
-
+# 4 for D, 5 for E, 16 for P
 seed=45516
 
 tail -n +2 ./resource/genetics/mqtl_pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
@@ -127,30 +207,53 @@ do
     ${R_directory}Rscript resources/genetics/make_control.R \
         ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control \
         ${intersect_ids_plink} \
-        ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink
+        ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta
 
     ${R_directory}Rscript resources/genetics/make_control.R \
         ${transformed_methylation_adjusted}.${negative_control_cpg}.negative_control \
         ${intersect_ids_plink} \
-        ${transformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink
+        ${transformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta
 
-    # plink (untransformed)
-    ${plink2} \
-        --bfile ${bfile} \
-        --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink \
-        --glm allow-no-covars \
-        --allow-extra-chr \
-        --human \
-        --output-chr 26 \
-        --out ${section_03_dir}/negative_control_untransformed_${negative_control_cpg}
+    # # plink (untransformed)
+    # ${plink2} \
+    #     --bfile ${bfile} \
+    #     --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink \
+    #     --glm allow-no-covars \
+    #     --allow-extra-chr \
+    #     --human \
+    #     --output-chr 26 \
+    #     --out ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}
+    echo "Perform GCTA (untransformed) in negative control"
+    if [ "${related}" = "yes" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm-sparse ${grmfile_fast}_rel_ctr \
+            --fastGWA-mlm \
+            --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar \ # to add sex
+            --out ${section_01_dir}/negative_control_untransformed_${negative_control_cpg} \
+            --thread-num ${nthreads}
 
-    tr -s " " < ${section_03_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_03_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear.gz
-    rm ${section_03_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear
+    elif [ "${related}" = "no" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm ${grmfile} \
+            --fastGWA-mlm \
+            --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar \ # to add sex
+            --out ${section_01_dir}/negative_control_untransformed_${negative_control_cpg} \
+            --thread-num ${nthreads}
+    fi
+
+    tr -s " " < ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear.gz
+    rm ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear
 
     echo "make manhattan and qq plots (untransformed)"
-    echo ${section_03_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear.gz > ${section_03_dir}/negative.control.untransformed.file.txt
+    echo ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.PHENO1.glm.linear.gz > ${section_01_dir}/negative.control.untransformed.file.txt
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        ${section_03_dir}/negative.control.untransformed.file.txt \
+        ${section_01_dir}/negative.control.untransformed.file.txt \
         12 \
         1 \
         2 \
@@ -161,21 +264,44 @@ do
         ${positive_control_snp_window} \
         ${positive_control_threshold}
 
-    # plink (transformed)
-    ${plink2} \
-        --bfile ${bfile} \
-        --pheno ${transformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink \
-        --glm allow-no-covars \
-        --allow-extra-chr \
-        --out ${section_03_dir}/negative_control_transformed_${negative_control_cpg}
+    # # plink (transformed)
+    # ${plink2} \
+    #     --bfile ${bfile} \
+    #     --pheno ${transformed_methylation_adjusted}.${negative_control_cpg}.negative_control.plink \
+    #     --glm allow-no-covars \
+    #     --allow-extra-chr \
+    #     --out ${section_01_dir}/negative_control_transformed_${negative_control_cpg}
+        # echo "Perform plink (transformed)"
+    echo "Perform GCTA (transformed) in negative control"
+    if [ "${related}" = "yes" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm-sparse ${grmfile_fast}_rel_ctr \
+            --fastGWA-mlm \
+            --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
 
-    tr -s " " < ${section_03_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_03_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear.gz
-    rm ${section_03_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear
+    elif [ "${related}" = "no" ]; then
+        ${gcta} \
+            --bfile ${bfile} \
+            --grm ${grmfile} \
+            --fastGWA-mlm \
+            --pheno ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+            --qcovar ${section_01_dir}/ctr_pc.eigenvec \ # to add age
+            --covar # to add sex
+            --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
+            --thread-num ${nthreads}
+    fi
+    tr -s " " < ${section_01_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear | gzip -c > ${section_01_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear.gz
+    rm ${section_01_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear
 
     echo "make manhattan and qq plots (transformed)"
-    echo ${section_03_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear.gz > ${section_03_dir}/negative.control.transformed.file.txt
+    echo ${section_01_dir}/negative_control_transformed_${negative_control_cpg}.PHENO1.glm.linear.gz > ${section_01_dir}/negative.control.transformed.file.txt
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        ${section_03_dir}/negative.control.transformed.file.txt \
+        ${section_01_dir}/negative.control.transformed.file.txt \
         12 \
         1 \
         2 \
