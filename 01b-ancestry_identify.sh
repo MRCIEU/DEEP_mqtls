@@ -205,6 +205,7 @@ ${plink2} \
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
 	${R_directory}Rscript resources/relateds/grm_relateds.R ${grmfile_all} ${grmfile_relateds} ${rel_cutoff}
+
 elif [ "${related}" = "no" ]; then
 	echo "Removing any cryptic relateds"
 	${gcta} \
@@ -223,7 +224,7 @@ elif [ "${related}" = "no" ]; then
 			--make-bed \
 			--out ${bfile}1 \
 			--threads ${nthreads}
-			
+
 		mv ${bfile}1.bed ${bfile}.bed
 		mv ${bfile}1.bim ${bfile}.bim
 		mv ${bfile}1.fam ${bfile}.fam
@@ -234,7 +235,7 @@ fi
 
 #Calculate PCs
 #gunzip -c ${hm3_snps_no_ld} > temp_hm3snpsnold.txt
-
+# might to change the extract snpslist?
 ${plink2} \
 	--bfile ${bfile} \
 	--extract temp_hm3snps.txt \
@@ -364,16 +365,17 @@ mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_dire
 # Remove mismatched SNPs and flip misaligned SNPs
 echo "Remove mismatched SNPs and NO FLIPPING"
 
-${plink2} \
-	--bfile ${bfile} \
-	--exclude ${easyQC}.mismatch_afcheck.failed.SNPs.txt \
-	--make-bed \
-	--out ${bfile}1 \
-	--threads ${nthreads}
+# no remove there [to do]
+# ${plink2} \
+# 	--bfile ${bfile} \
+# 	--exclude ${easyQC}.mismatch_afcheck.failed.SNPs.txt \
+# 	--make-bed \
+# 	--out ${bfile}1 \
+# 	--threads ${nthreads}
 
-mv ${bfile}1.bed ${bfile}.bed
-mv ${bfile}1.bim ${bfile}.bim
-mv ${bfile}1.fam ${bfile}.fam
+# mv ${bfile}1.bed ${bfile}.bed
+# mv ${bfile}1.bim ${bfile}.bim
+# mv ${bfile}1.fam ${bfile}.fam
 
 echo "Running global PCA"
 # global pca plot using raw bfile
