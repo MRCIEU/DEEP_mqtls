@@ -1,4 +1,4 @@
-name: hail_env
+name: deep_env
 channels:
   - conda-forge
   - pkgs/main
