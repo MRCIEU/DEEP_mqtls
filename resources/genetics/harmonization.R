@@ -124,7 +124,7 @@ message("Allele harmonization:",length(isBothMissing)," alleles with NA are goin
 	
 
 	rm(a1,a2)
-	rm(isRecode_seq1,isRecode_seq2)
+	# rm(isRecode_seq1,isRecode_seq2)
 	rm(isRecodea1_mach1, isRecodea1_mach2, isRecodea2_mach1, isRecodea2_mach2)
 	# rm(isInvalid)
 	
