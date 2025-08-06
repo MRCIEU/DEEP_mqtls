@@ -363,7 +363,7 @@ mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.multi.AFCHECK.p
 mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_directory}/results/02/easyQC_hrc.rep
 
 # Remove mismatched SNPs and flip misaligned SNPs
-echo "Remove mismatched SNPs and NO FLIPPING"
+# echo "Remove mismatched SNPs and NO FLIPPING"
 
 # no remove there [to do]
 # ${plink2} \
