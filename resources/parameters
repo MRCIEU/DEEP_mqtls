@@ -163,8 +163,6 @@ grmfile_all="${home_directory}/processed_data/genetic_data/data"
 grmfile_fast="${home_directory}/processed_data/genetic_data/data_fast"
 grmfile_relateds="${home_directory}/processed_data/genetic_data/data_relateds"
 grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelateds"
-grmfile_fast="${home_directory}/processed_data/genetic_data/data_fast"
-
 
 # PCA files
 pca="${home_directory}/processed_data/genetic_data/pca"
@@ -190,6 +188,8 @@ cor_plot="${home_directory}/results/03/cor_plot.pdf"
 # Covariates
 covariates_intersect="${home_directory}/processed_data/covariate_data/covariates_intersectids.txt"
 covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
+ccovar_file="${home_directory}/processed_data/methylation_data/ccovar_file.txt"
+qcovar_file="${home_directory}/processed_data/methylation_data/qcovar_file.txt"
 meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_transformed"
 meth_pcs_untransformed="${home_directory}/processed_data/methylation_data/meth_pcs_untransformed"
 nongenetic_meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_nongenetic_transformed"
