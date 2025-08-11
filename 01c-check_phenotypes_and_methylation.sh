@@ -7,7 +7,7 @@ exec &> >(tee ${section_01c_logfile})
 print_version
 
 # Check phenotype distributions, remove outliers
-echo "check_phenotypes"
+echo "Check phenotypes"
 # smoking from cohorts
 ${R_directory}Rscript resources/datacheck/check_phenotypes.R \
 		${betas} \
@@ -74,9 +74,9 @@ ${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
         ${cellcounts_plot} \
         ${cellcounts_summary}
 
-# Organise covariates
+# Combine covariates
 # smoking from prediction
-echo "Organising covariates"
+echo "Combining covariates for mQTL analysis"
 ${R_directory}Rscript resources/genetics/covariates.R \
 	${covariates_intersect} \
 	${pcs_all} \

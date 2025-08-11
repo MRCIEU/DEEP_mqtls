@@ -10,12 +10,6 @@ print_version
 echo "Inferring genome build and running liftover if necessary"
 echo "Genome build in the config file is: ${genome_build}"
 
-home_directory="/user/work/er20212/DEEP_mqtls"
-bfile="${home_directory}/processed_data/genetic_data/data"
-bfile_raw="${home_directory}/input_data/data_filtered"
-intersect_ids_plink="${home_directory}/processed_data/ids/intersect_ids_plink.txt"
-intersect_ids="${home_directory}/processed_data/ids/intersect_ids.txt"
-
 # Check genome build and liftover to 38 if build is 37 using GwasDataImport
 # https://github.com/MRCIEU/GwasDataImport
 echo "Determining build based on reference dataset and running liftover"
@@ -86,12 +80,14 @@ then
 
 	plink2 \
 		--bfile ${bfile}_format \
+		--new-id-max-allele-len 70 \
 		--split-par b38 no-fail \
 		--make-bed \
 		--out ${bfile}_xpar_temp
 
 	plink2 \
 		--bfile ${bfile}_xpar_temp \
+		--new-id-max-allele-len 70 \
 		--check-sex \
 		--out ${section_01_dir}/data
 	
@@ -115,6 +111,7 @@ then
 
 		plink2 \
 			--bfile ${bfile}_xpar_temp \
+			--new-id-max-allele-len 70 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
 			--make-bed \
 			--out ${bfile}_xpar_temp1
@@ -135,6 +132,7 @@ cp ${bfile}.bim ${bfile}.bim.original
 echo "Formatting SNP IDs to chr:pos_A1_A2"
 plink2 \
 	--bfile ${bfile} \
+	--new-id-max-allele-len 70 \
 	--set-all-var-ids @:#_\$1_\$2 \
 	--make-bed \
 	--out ${bfile}1 \
@@ -157,6 +155,7 @@ ${R_directory}Rscript resources/genetics/harmonization.R \
 ${plink2} \
 	--bfile ${bfile} \
 	--rm-dup exclude-mismatch \
+	--new-id-max-allele-len 70 \
 	--make-bed \
 	--out ${bfile}1 \
 	--threads ${nthreads}
@@ -179,6 +178,7 @@ echo "Removing ${n_failedSNPs} SNPs from data"
 ${plink2} \
 	--bfile ${bfile} \
 	--exclude ${bfile}.failed.SNPs.txt \
+	--new-id-max-allele-len 70 \
 	--make-bed \
 	--out ${bfile}1 \
 	--threads ${nthreads}
@@ -218,6 +218,7 @@ elif [ "${related}" = "no" ]; then
 		mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
 		mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
 		
+		# filtering out the related samples
 		${plink2} \
 			--bfile ${bfile} \
 			--keep ${grmfile_all}.grm.id \
@@ -245,16 +246,15 @@ ${plink2} \
 	--autosome \
 	--threads ${nthreads}
 
-if [ "${related}" = "no" ]
-then
+if [ "${related}" = "no" ];then
 	${plink2} \
 		--bfile ${bfile} \
 		--extract ${pca}.prune.in \
 		--pca 20 \
 		--out ${pca} \
 		--threads ${nthreads}
-else
 
+elif [ "${related}" = "yes" ]; then
 	${plink2} \
 		--bfile ${bfile} \
 		--extract ${pca}.prune.in \
@@ -267,6 +267,9 @@ else
 		${pca} \
 		${n_pcs} \
 		${nthreads}
+else
+	echo "Error: Set related flag in config to yes or no"
+	exit 1
 fi
 
 # Get genetic outliers
@@ -289,6 +292,7 @@ else
 	echo "Removing ${n_outliers} genetic outliers from data"
 	${plink2} \
 		--bfile ${bfile} \
+		--new-id-max-allele-len 70 \
 		--remove ${genetic_outlier_ids} \
 		--make-bed \
 		--out ${bfile}1 \
@@ -311,7 +315,7 @@ mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
 
 fi
 
-# calculate maf from bfile with chr:pos format for both pca loadings and easyQC
+# calculate maf from bfile with chr:pos format
 echo "Calculating MAF from formatted bfile with chr:pos format"
 plink2 --bfile "${bfile}" \
        --freq \
@@ -365,23 +369,11 @@ mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_dire
 # Remove mismatched SNPs and flip misaligned SNPs
 # echo "Remove mismatched SNPs and NO FLIPPING"
 
-# no remove there [to do]
-# ${plink2} \
-# 	--bfile ${bfile} \
-# 	--exclude ${easyQC}.mismatch_afcheck.failed.SNPs.txt \
-# 	--make-bed \
-# 	--out ${bfile}1 \
-# 	--threads ${nthreads}
-
-# mv ${bfile}1.bed ${bfile}.bed
-# mv ${bfile}1.bim ${bfile}.bim
-# mv ${bfile}1.fam ${bfile}.fam
-
 echo "Running global PCA"
 # global pca plot using raw bfile
 ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_infer.py" \
-    "${section_01_dir}/logs_b/hail.log" \
-    "${bfile_raw}" \
+    "${section_01_dir}/logs_b/hail_clean.log" \
+    "${bfile}" \
 	"${genome_build}" \
     "${study_name}" \
     "${home_directory}" \
