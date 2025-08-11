@@ -25,9 +25,8 @@ inferred_build=$(cat "${section_01_dir}/inferred_build.txt")
 
 # if build is 37
 if [ "$inferred_build" -eq 37 ]; then
-	# update bim file with liftover map if it exists
     if [ -f ${miss_liftover} ]; then
-		echo "Liftover map found, updating bim file with it"
+		echo "SNP missing for liftover found. Excluding them from bfile and liftovering"
         plink2 --bfile "${bfile_raw}" \
             --new-id-max-allele-len 70 \
             --exclude ${miss_liftover} \
@@ -35,8 +34,7 @@ if [ "$inferred_build" -eq 37 ]; then
             --make-bed \
             --out ${bfile}
     else
-	# if no liftover map, just update the bim file
-		echo "No liftover map found, all SNPs have been successfully liftovered"
+		echo "No SNP missing for liftover found. Liftovering"
         plink2 --bfile "${bfile_raw}" \
             --new-id-max-allele-len 70 \
             --update-map ${liftover_map} \
@@ -194,6 +192,7 @@ gunzip -c ${hm3_snps} > temp_hm3snps.txt
 
 ${plink2} \
 	--bfile ${bfile} \
+	--new-id-max-allele-len 70 \
 	--extract temp_hm3snps.txt \
 	--maf ${grm_maf_cutoff} \
 	--make-grm-bin \
@@ -221,6 +220,7 @@ elif [ "${related}" = "no" ]; then
 		# filtering out the related samples
 		${plink2} \
 			--bfile ${bfile} \
+			--new-id-max-allele-len 70 \
 			--keep ${grmfile_all}.grm.id \
 			--make-bed \
 			--out ${bfile}1 \
@@ -239,6 +239,7 @@ fi
 # might to change the extract snpslist?
 ${plink2} \
 	--bfile ${bfile} \
+	--new-id-max-allele-len 70 \
 	--extract temp_hm3snps.txt \
 	--indep-pairwise 10000 5 0.1 \
 	--maf 0.2 \
@@ -249,6 +250,7 @@ ${plink2} \
 if [ "${related}" = "no" ];then
 	${plink2} \
 		--bfile ${bfile} \
+		--new-id-max-allele-len 70 \
 		--extract ${pca}.prune.in \
 		--pca 20 \
 		--out ${pca} \
@@ -317,9 +319,11 @@ fi
 
 # calculate maf from bfile with chr:pos format
 echo "Calculating MAF from formatted bfile with chr:pos format"
-plink2 --bfile "${bfile}" \
-       --freq \
-       	--out "${bfile}"
+plink2 \
+	--bfile "${bfile}" \
+	--new-id-max-allele-len 70 \
+	--freq \
+	--out "${bfile}"
 
 # check afreq against reference panel using EasyQC
 if [ -f "processed_data/genetic_data/easyQC_hrc.ecf.out" ]
@@ -389,6 +393,7 @@ then
 	then
 		${plink2} \
 			--bfile ${bfile} \
+			--new-id-max-allele-len 70 \
 			--extract ${pca}.prune.in \
 			--pca 20 \
 			--out ${pca} \
@@ -398,6 +403,7 @@ then
 
 		${plink2} \
 			--bfile ${bfile} \
+			--new-id-max-allele-len 70 \
 			--extract ${pca}.prune.in \
 			--make-bed \
 			--out ${bfile}_ldpruned \
@@ -429,6 +435,7 @@ fi
 
 ${plink2} \
 	--bfile "${bfile}" \
+	--new-id-max-allele-len 70 \
 	--freq \
 	--hardy \
 	--missing \
