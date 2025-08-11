@@ -55,15 +55,25 @@ ${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
         ${cellcounts_summary} \
 		${scripts_directory} 
 
-if [ "${measured_cellcounts}" != "NULL" ]
-then
-  echo "Comparing measured with predicted cellcounts"
+if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
+	echo "Comparing measured with predicted cellcounts"
     ${R_directory}Rscript resources/cellcounts/correlation.R \
 	          ${cellcounts_cov} \
  	          ${measured_cellcounts} \
 	          ${cor_matrix} \
 	          ${cor_plot} \
 			  ${scripts_directory}
+elif [ "${measured_cellcounts}" == "NULL" ]; then
+	echo "No measured cell counts available for comparison; only compare predicted cell counts if multiple reference available"
+	${R_directory}Rscript resources/cellcounts/correlation.R \
+		${cellcounts_cov} \
+		0 \
+		${cor_matrix} \
+		${cor_plot} \
+		${scripts_directory}
+else
+	echo "Error: measured_cellcounts is not 'NULL' but the file does not exist. Please check your config file."
+	exit 1
 fi
 
 # EWAS of age and smoking
