@@ -11,3 +11,4 @@ resources/genetics/hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv
 resources/genetics/release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz
 resources/genetics/references_grch37_to_grch38.over.chain.gz
 EasyQC_9.2.tar.gz
+temp_hm3snps.txt
