@@ -23,6 +23,9 @@ study_name = sys.argv[4]
 home_directory = sys.argv[5]
 scripts_directory = sys.argv[6]
 
+if "clean" in logfile:
+    genome_build = "38"
+
 print("Bfile:", bfile)
 print("Study name:", study_name)
 print("Scripts directory:", scripts_directory)
