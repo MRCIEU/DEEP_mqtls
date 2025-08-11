@@ -8,15 +8,14 @@ cor_matrix <- arguments [3];
 cor_plot <- arguments [4];
 scripts_directory<-arguments[5];
 
-measured<-read.table(measured_cellcounts, header=T)
-
-#Check if IID column exist in measured cell counts file 
-if (!"IID" %in% colnames(measured)) {
-  stop("Set the name 'IID' to the column of individuals identifiers in measured cell count file")
+if (measured_cellcounts != 0) {
+  measured<-read.table(measured_cellcounts, header=T)
+  if (!"IID" %in% colnames(measured)) {
+    stop("Set the name 'IID' to the column of individuals identifiers in measured cell count file")
+  }
+  # Add prefix 'm.' to all columns except IID
+  colnames(measured)[colnames(measured) != "IID"] <- paste0("m.", colnames(measured)[colnames(measured) != "IID"])
 }
-
-# Add prefix 'm.' to all columns except IID
-colnames(measured)[colnames(measured) != "IID"] <- paste0("m.", colnames(measured)[colnames(measured) != "IID"])
 
 predicted<-read.table(cellcounts_cov, header=T)
 prefix <- unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))]))
@@ -172,6 +171,7 @@ measured <- measured[match(ids, measured$IID), ]
 predicted <- predicted[match(ids, predicted$IID), ]
 
 # correlation will include multiple prefixes
+
 correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")],
                           measured[,-which(names(measured) == "IID")],
                          use = "complete.obs", method="spearman")
@@ -182,7 +182,8 @@ pdf(height=54,width=87,cor_plot)
 corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black",tl.cex=5,cl.cex=5)
 dev.off()
 
-# measurement cell counts == yes 
+# measurement cell counts 
+if 
 
 # add correlation plot between predicted cell count and measured cell counts
 
