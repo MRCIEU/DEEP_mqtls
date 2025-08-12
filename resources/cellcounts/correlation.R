@@ -164,27 +164,34 @@ for (pref in prefix) {
 
 predicted <- predicted[, colnames(predicted) %in% available_cols]
 
-data <- merge(measured, predicted, by = "IID", all = F)
-ids <- data$IID
+if (nrow(predicted) == 0) {
+  stop("No valid predicted cell counts found.")
+}
 
-measured <- measured[match(ids, measured$IID), ]
-predicted <- predicted[match(ids, predicted$IID), ]
+if (nrow(measured) == 0) {
+  print("Doing without measured cell counts")
+  data <- predicted
+  # add correlation plot between predicted cell counts
 
-# correlation will include multiple prefixes
+} else {
+  data <- merge(measured, predicted, by = "IID", all = F)
+  ids <- data$IID
 
-correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")],
-                          measured[,-which(names(measured) == "IID")],
-                         use = "complete.obs", method="spearman")
+  measured <- measured[match(ids, measured$IID), ]
+  predicted <- predicted[match(ids, predicted$IID), ]
 
-write.table(correlation_matrix, file=cor_matrix, row=TRUE, col=TRUE, qu=FALSE, sep="\t")
-pdf(height=54,width=87,cor_plot)
-#png(height=540, width=870,file=cor_plot)
-corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black",tl.cex=5,cl.cex=5)
-dev.off()
+  # correlation will include multiple prefixes
+  correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], measured[,-which(names(measured) == "IID")], use = "complete.obs", method="spearman")
+  
+  write.table(correlation_matrix, file=cor_matrix, row=TRUE, col=TRUE, qu=FALSE, sep="\t")
+  pdf(height=54,width=87,cor_plot)
+  #png(height=540, width=870,file=cor_plot)
+  corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black",tl.cex=5,cl.cex=5)
+  dev.off()
 
-# measurement cell counts 
-if 
+  # add correlation plot between predicted cell count and measured cell counts
 
-# add correlation plot between predicted cell count and measured cell counts
+  # add correlation plot between predicted cell counts
+}
 
-# add correlation plot between predicted cell counts
+

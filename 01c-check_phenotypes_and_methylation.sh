@@ -58,11 +58,11 @@ ${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
 if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
 	echo "Comparing measured with predicted cellcounts"
     ${R_directory}Rscript resources/cellcounts/correlation.R \
-	          ${cellcounts_cov} \
- 	          ${measured_cellcounts} \
-	          ${cor_matrix} \
-	          ${cor_plot} \
-			  ${scripts_directory}
+		${cellcounts_cov} \
+		${measured_cellcounts} \
+		${cor_matrix} \
+		${cor_plot} \
+		${scripts_directory}
 elif [ "${measured_cellcounts}" == "NULL" ]; then
 	echo "No measured cell counts available for comparison; only compare predicted cell counts if multiple reference available"
 	${R_directory}Rscript resources/cellcounts/correlation.R \
@@ -94,7 +94,5 @@ ${R_directory}Rscript resources/genetics/covariates.R \
 	${smoking_pred}.txt \
 	${bfile}.fam \
 	${covariates_combined}
-
-# need add to the phenotypes
 
 echo "Successfully completed script 1c"
