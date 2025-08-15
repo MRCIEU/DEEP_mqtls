@@ -57,7 +57,7 @@ reference="1000g"
 
 # Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure, or ancestry is not matching with any of these populations))
 # This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel of 1000G populations.
-ancestry="EUR"
+ancestry="SAS"
 
 # Input data files
 betas="${home_directory}/input_data/data.RData"
