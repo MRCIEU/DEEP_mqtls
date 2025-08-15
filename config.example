@@ -10,7 +10,7 @@ analyst_name=""
 # Analyst's email address
 analyst_email=""
 
-# This should be provided to you from the GoDMC developers (along with a password)
+# This should be provided to you from the DEEP developers (along with a password)
 sftp_username=""
 
 # This should be "~/.ssh/id_rsa" or "~/.ssh/id_dsa" on your HPC system/server. See instructions on the wiki on how to set up your key.
@@ -55,12 +55,8 @@ relatedness="no"
 # reference panel (1000g, 1000g+h3a, 1000g+hrc, topmed, 1000g+caapa)
 reference="1000g"
 
-# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure))
-# This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel.
-ancestry="EUR"
-
-# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure))
-# This info is required by EasyQC, to compare the allele frequencies of your samples against reference panel.
+# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure, or ancestry is not matching with any of these populations))
+# This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel of 1000G populations.
 ancestry="EUR"
 
 # Input data files
