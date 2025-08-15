@@ -13,12 +13,8 @@ miss_liftover <- as.character(args[3])
 liftover_map <- as.character(args[4])
 section_01_dir <- as.character(args[5])
 
-# bim_file <- "/user/work/er20212/DEEP_mqtls/input_data/data_filtered"
-# ori_build <- 37
 message("Loading bim file: ", bim_file)
 bim <- as.data.frame(fread(paste0(bim_file, ".bim")))
-# miss_liftover <- "./results/01/miss_liftover.txt"
-# liftover_map <- "./processed_data/genetic_data/liftover_map.txt"
 
 message("Number of SNPs: ", nrow(bim))
 
