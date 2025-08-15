@@ -16,20 +16,17 @@ mkdir -p ${home_directory}/processed_data/genetic_data/tabfile
 mkdir -p ${home_directory}/job_reports
 mkdir -p ${hase}/data
 
-for i in {1..9}
-do
-   mkdir -p ${home_directory}/results/0$i
-done
-
-for i in {10..14}
-do
-   mkdir -p ${home_directory}/results/$i
+for i in {1..14}; do
+   printf -v idx "%02d" $i
+   mkdir -p "${home_directory}/results/${idx}"
 done
 
 mkdir -p "${section_01_dir}/logs_a/"
 mkdir -p "${section_01_dir}/logs_b/"
 mkdir -p "${section_01_dir}/logs_c/"
 mkdir -p "${section_01_dir}/logs_d/"
+mkdir -p "${section_01_dir}/logs_e/"
+mkdir -p "${section_01_dir}/logs_f/"
 mkdir -p "${section_02_dir}/logs_a/"
 mkdir -p "${section_02_dir}/logs_b/"
 mkdir -p "${section_03_dir}/logs_a/"

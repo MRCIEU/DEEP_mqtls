@@ -22,8 +22,8 @@ prefix <- unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(pred
 print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse = ", ")))
 
 # there are several situations:
-# colnames will be B, CD4T, CD8T, Mono, nRBC, Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono with prefix "unilife."
-# QUESTOIN: do we calculate Gran?
+# colnames will be B, CD4T, CD8T, Mono, nRBC (only in babies), Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono with prefix "unilife."
+# QUESTION: do we calculate Gran? Pending.
 
 # or colnames will be CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono with prefix "salas."
 # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
@@ -179,7 +179,7 @@ if (nrow(measured) == 0) {
 
   measured <- measured[match(ids, measured$IID), ]
   predicted <- predicted[match(ids, predicted$IID), ]
-
+  
   # correlation will include multiple prefixes
   correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], measured[,-which(names(measured) == "IID")], use = "complete.obs", method="spearman")
   
