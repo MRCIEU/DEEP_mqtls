@@ -8,27 +8,35 @@ config_file="./config"
 
 # Activate the environment
 if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
-    # Users are using system default R & Python, activate conda environment
     if command -v mamba &> /dev/null; then
-        echo "Using mamba to activate the environment"
-        CONDA_CMD="mamba"
+        # Check if mamba is available and contains hail_env environment
+        if mamba env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'hail_env'; then
+            echo "found hail_env environment in mamba"
+            echo "Using mamba to run the script"
+            RUN_CMD="mamba run -n hail_env"
+        fi
+    fi
 
-    elif command -v conda &> /dev/null; then
-        echo "Using conda to activate the environment"
-        CONDA_CMD="conda"
+    if [ -z "$RUN_CMD" ] && command -v conda &> /dev/null; then
+        # Check if conda is available and contains hail_env environment
+        if conda env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'hail_env'; then
+            echo "found hail_env environment in conda"
+            echo "Using conda to run the script"
+            RUN_CMD="conda run -n hail_env"
+        fi
+    fi
 
-    else
-        echo "ERROR: Neither mamba nor conda found."
-        echo "Please install one of them first or specify the R/Python directories in the config file"
+    if [ -z "$RUN_CMD" ]; then
+        echo "ERROR: hail_env environment not found in mamba or conda."
         exit 1
     fi
 
-    $CONDA_CMD activate hail_env
-    echo "Current environment is: $CONDA_DEFAULT_ENV"
 else
-    # Users have specified custom R/Python directories
-    echo "Custom R/Python directories specified"
+    echo "Using specified Python3_directory"
+    RUN_CMD=""
 fi
+
+export RUN_CMD
 
 # Parse options using getopts
 while getopts "c:" opt; do
