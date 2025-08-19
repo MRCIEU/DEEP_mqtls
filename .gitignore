@@ -6,5 +6,6 @@ job_reports/
 processed_data/
 resources/bin/hase/data/
 resources/genetics/1000g_*_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
+resources/genetics/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 # Ignore resource files downloaded from server and website
 EasyQC_9.2.tar.gz
