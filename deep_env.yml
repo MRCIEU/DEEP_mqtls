@@ -35,19 +35,24 @@ dependencies:
   - r-magrittr
   - r-r.utils
   - r-biocmanager
+  - r-desctools
   - zlib
   - libzlib
   - openssl
   - libcurl
   - numpy
   - pandas
+  - xz
   - scipy
   - scikit-learn
   - matplotlib
   - seaborn
   - jupyterlab
   - ipykernel
-  - openjdk
+  - liblapack
+  - libopenblas
+  - gxx
+  - openjdk=11.*
   - git
   - pip
   - pip:
