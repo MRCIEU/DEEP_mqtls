@@ -3,7 +3,7 @@
 source resources/setup.sh "$@"
 set -- $concatenated
 
-exec &> >(tee ${section_01a_logfile})
+exec &> >(tee ${section_01_logfiles})
 exec &> >(tee ${section_01a_logfiles})
 print_version
 
@@ -73,7 +73,7 @@ then
 
 	sftp -P 2222 -oIdentityFile=$key ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
 
-get references_grch37_to_grch38.over.chain.gz
+# get references_grch37_to_grch38.over.chain.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
 get 1000g_AFR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
@@ -220,7 +220,7 @@ fi
   
 #   pheno_file_PRS=phenotypes_$PRS
 #   pheno_desc_PRS=phenotype_${PRS}_PRS_descriptives
-  
+
 #   ${R_directory}Rscript resources/datacheck/phenotypes_for_PRS.R \
 #     ${!pheno_file_PRS} \
 #     ${bfile_raw}.fam \
