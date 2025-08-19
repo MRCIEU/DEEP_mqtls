@@ -11,7 +11,7 @@ analyst_name=""
 analyst_email=""
 
 # This should be provided to you from the DEEP developers (along with a password)
-sftp_username=""
+sftp_username="DEEP_study"
 
 # This should be "~/.ssh/id_rsa" or "~/.ssh/id_dsa" on your HPC system/server. See instructions on the wiki on how to set up your key.
 key=""
