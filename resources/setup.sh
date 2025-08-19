@@ -9,25 +9,25 @@ config_file="./config"
 # Activate the environment
 if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
     if command -v mamba &> /dev/null; then
-        # Check if mamba is available and contains hail_env environment
-        if mamba env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'hail_env'; then
-            echo "found hail_env environment in mamba"
+        # Check if mamba is available and contains deep_env environment
+        if mamba env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
+            echo "found deep_env environment in mamba"
             echo "Using mamba to run the script"
-            RUN_CMD="mamba run -n hail_env"
+            RUN_CMD="mamba run -n deep_env"
         fi
     fi
 
     if [ -z "$RUN_CMD" ] && command -v conda &> /dev/null; then
-        # Check if conda is available and contains hail_env environment
-        if conda env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'hail_env'; then
-            echo "found hail_env environment in conda"
+        # Check if conda is available and contains deep_env environment
+        if conda env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
+            echo "found deep_env environment in conda"
             echo "Using conda to run the script"
-            RUN_CMD="conda run -n hail_env"
+            RUN_CMD="conda run -n deep_env"
         fi
     fi
 
     if [ -z "$RUN_CMD" ]; then
-        echo "ERROR: hail_env environment not found in mamba or conda."
+        echo "ERROR: deep_env environment not found in mamba or conda."
         exit 1
     fi
 
