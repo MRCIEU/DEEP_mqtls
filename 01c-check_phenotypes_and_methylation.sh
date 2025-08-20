@@ -20,18 +20,6 @@ ${R_directory}Rscript resources/datacheck/check_phenotypes.R \
 		${bfile}.fam \
 		${bfile}.bim
 
-echo "Removing outliers"
-${R_directory}Rscript resources/methylation/remove_outliers.R \
-		${betas} \
-		${methylation_no_outliers} \
-		${cohort_descriptives_commonids} \
-		${methylation_summary} \
-		${intersect_ids} \
-		${covariates} \
-		${covariates_intersect} \
-		${bfile}.fam \
-		${bfile}.bim
-
 # Predict age and smoking
 echo "predict age and smoking"
 ${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
