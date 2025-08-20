@@ -23,11 +23,10 @@ ${R_directory}Rscript resources/datacheck/liftover.R \
 
 inferred_build=$(cat "${section_01_dir}/inferred_build.txt")
 
-# if build is 37
 if [ "$inferred_build" -eq 37 ]; then
     if [ -f ${miss_liftover} ]; then
 		echo "SNP missing for liftover found. Excluding them from bfile and liftovering"
-        plink2 --bfile "${bfile_raw}" \
+        ${plink2} --bfile "${bfile_raw}" \
             --new-id-max-allele-len 70 \
             --exclude ${miss_liftover} \
             --update-map ${liftover_map} \
@@ -35,7 +34,7 @@ if [ "$inferred_build" -eq 37 ]; then
             --out ${bfile}
     else
 		echo "No SNP missing for liftover found. Liftovering"
-        plink2 --bfile "${bfile_raw}" \
+        ${plink2} --bfile "${bfile_raw}" \
             --new-id-max-allele-len 70 \
             --update-map ${liftover_map} \
             --make-bed \
@@ -43,7 +42,7 @@ if [ "$inferred_build" -eq 37 ]; then
     fi
 elif [ "$inferred_build" -eq 38 ]; then
 	# if build is 38, just copy the raw bfile to the new bfile
-    plink2 --bfile "${bfile_raw}" \
+    ${plink2} --bfile "${bfile_raw}" \
         --new-id-max-allele-len 70 \
         --make-bed \
         --out ${bfile}
@@ -53,7 +52,7 @@ fi
 echo "Formatting input genetic data"
 # ${intersect_ids_plink} is from 01a, it contains the IDs of samples that intersect with the genetic and methylation data
 
-plink2 \
+${plink2} \
     --bfile ${bfile} \
     --keep ${intersect_ids_plink} \
     --maf ${snp_maf} \
@@ -73,17 +72,15 @@ plink2 \
 
 n23=`grep ^23 "${bfile}_format.bim" | wc -l`
 
-if [ "$n23" -gt "0" ]
-then
-
-	plink2 \
+if [ "$n23" -gt "0" ]; then
+	${plink2} \
 		--bfile ${bfile}_format \
 		--new-id-max-allele-len 70 \
 		--split-par b38 no-fail \
 		--make-bed \
 		--out ${bfile}_xpar_temp
 
-	plink2 \
+	${plink2} \
 		--bfile ${bfile}_xpar_temp \
 		--new-id-max-allele-len 70 \
 		--check-sex \
@@ -107,7 +104,7 @@ then
 		grep "PROBLEM" ${section_01_dir}/data.sexcheck | awk '{print $1, $2}' > ${bfile}_xpar_temp.failed_sexcheck
 		echo "Removing individuals that failed the sex check"
 
-		plink2 \
+		${plink2} \
 			--bfile ${bfile}_xpar_temp \
 			--new-id-max-allele-len 70 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
@@ -128,7 +125,7 @@ cp ${bfile}.bim ${bfile}.bim.original
 
 # format SNP ids to chr:position_A1_A2 (ascii sorted order)
 echo "Formatting SNP IDs to chr:pos_A1_A2"
-plink2 \
+${plink2} \
 	--bfile ${bfile} \
 	--new-id-max-allele-len 70 \
 	--set-all-var-ids @:#_\$1_\$2 \
@@ -204,7 +201,7 @@ ${plink2} \
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
 	${R_directory}Rscript resources/relateds/grm_relateds.R ${grmfile_all} ${grmfile_relateds} ${rel_cutoff}
-
+	
 elif [ "${related}" = "no" ]; then
 	echo "Removing any cryptic relateds"
 	${gcta} \
@@ -286,7 +283,7 @@ ${R_directory}Rscript resources/genetics/genetic_outliers.R \
 
 n_outliers=`wc -l ${genetic_outlier_ids} | awk '{ print $1 }'`
 
-if [ "${n_outliers}" = "0" ]
+if [ "${n_outliers}" -eq "0" ]
 then
 	echo "No genetic outliers detected"
 else
@@ -319,7 +316,7 @@ fi
 
 # calculate maf from bfile with chr:pos format
 echo "Calculating MAF from formatted bfile with chr:pos format"
-plink2 \
+${plink2} \
 	--bfile "${bfile}" \
 	--new-id-max-allele-len 70 \
 	--freq \
@@ -339,22 +336,23 @@ fi
 echo "Ancestry: ${ancestry}"
 echo "Copying reference files for EasyQC"
 if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${ancestry} == "EAS" || ${ancestry} == "SAS" ]]; then
+	echo "Ancestry specified, using an imputation of ancestry-specific 1000g ref to TopMed "
     cp ${scripts_directory}/resources/genetics/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz ${home_directory}/processed_data/genetic_data/
 	replacement_text1="1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"
 
-else if [[ ${ancestry} == "None" ]]; then
+elif [[ ${ancestry} == "None" ]]; then
     echo "No ancestry specified, using all population of topmed snplist and allele frequencies"
     cp ${scripts_directory}/resources/genetics/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz ${home_directory}/processed_data/genetic_data/
 	replacement_text1=""
 fi
 
 replacement_text2="DEFINE --pathOut "${home_directory}"/processed_data/genetic_data"
-awk 'NR==3 { $0 = "'"$replacement_text2"'" } 1' "${easyQCscript}" > temp.ecf
+awk 'NR==3 { $0 = "'"$replacement_text2"'" } 1' "${easyQCscript}" > "${easyQCscript%.ecf}_temp.ecf"
 
 if [ -n "$replacement_text1" ]; then
-	awk 'NR==30 { $0 = "\t\t--fileRef '"$replacement_text1"'" } 1' temp.ecf > "${easyQCscript%.ecf}_edit.ecf"
+	awk 'NR==30 { $0 = "\t\t--fileRef '"$replacement_text1"'" } 1' "${easyQCscript%.ecf}_temp.ecf" > "${easyQCscript%.ecf}_edit.ecf"
 else
-	mv temp.ecf "${easyQCscript%.ecf}_edit.ecf"
+	mv "${easyQCscript%.ecf}_temp.ecf" "${easyQCscript%.ecf}_edit.ecf"
 fi
 
 # run easyQC
@@ -367,24 +365,28 @@ else
 	rm ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 fi
 
-mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.multi.AFCHECK.png ${home_directory}/results/02/easyQC_hrc.multi.AFCHECK.png
-mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_directory}/results/02/easyQC_hrc.rep
+echo "Moving allele freq check figure"
+
+mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.multi.AFCHECK.png ${home_directory}/results/01/easyQC_hrc.multi.AFCHECK.png
+mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_directory}/results/01/easyQC_hrc.rep
 
 # Remove mismatched SNPs and flip misaligned SNPs
 # echo "Remove mismatched SNPs and NO FLIPPING"
 
 echo "Running global PCA"
-# global pca plot using raw bfile
+# global pca plot using cleaned bfile
 ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_infer.py" \
-    "${section_01_dir}/logs_b/hail_clean.log" \
+	"${section_01_dir}/logs_b/hail_clean.log" \
     "${bfile}" \
 	"${genome_build}" \
     "${study_name}" \
     "${home_directory}" \
-    "${scripts_directory}"
+    "${scripts_directory}" \
+	"${nthreads}" \
+	"${mem}"
 
 # From here on, we have clean data
-if [ ! "${n_outliers}" = "0" ]
+if [ ! "${n_outliers}" -eq "0" ]
 then
 
 	echo "Recalculating PCs with outliers removed"
@@ -431,7 +433,7 @@ echo "previous frequencies, missingness, hwe, info scores files present from pre
 else
 	echo "passed file check"
 fi
-	
+
 
 ${plink2} \
 	--bfile "${bfile}" \

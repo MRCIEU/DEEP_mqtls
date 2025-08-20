@@ -55,7 +55,8 @@ relatedness="no"
 # reference panel (1000g, 1000g+h3a, 1000g+hrc, topmed, 1000g+caapa)
 reference="1000g"
 
-# Specify the most likely ancestry of your samples (one of the following: EUR, AFR, AMR, EAS, SAS, or None (if you are not sure, or ancestry is not matching with any of these populations))
+# Specify the most likely ancestry of your samples with one of the following: EUR, AFR, AMR, EAS, SAS, or None.
+# If you are not sure, or ancestry is not matching with any of these populations.
 # This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel of 1000G populations.
 ancestry="SAS"
 
@@ -80,6 +81,11 @@ measured_cellcounts="NULL"
 # If these samples are expected to be unrelated set this to "no" (even if there may be cryptic relatedness)
 related="no"
 
+# Computing resources
+# Number of CPUs to use; on HPC systems, set this to the value requested in your job submission
+ncpu="10"
+# Memory in GB; on HPC systems, match this to the value requested in your job submission
+mem="20"
 # Parallelisation parameters
 # Number of threads to use per node
 nthreads="16"
