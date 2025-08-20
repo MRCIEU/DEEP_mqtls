@@ -8,13 +8,13 @@
 # from gnomad.utils.filtering import filter_to_adj
 import hail as hl
 import psutil
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import gzip
 import json
 import warnings
 import sys
-import os
 
 logfile = sys.argv[1]
 bfile = sys.argv[2]
@@ -22,6 +22,8 @@ genome_build = sys.argv[3]
 study_name = sys.argv[4]
 home_directory = sys.argv[5]
 scripts_directory = sys.argv[6]
+nthreads = int(sys.argv[7])
+memory = int(sys.argv[8])
 
 if "clean" in logfile:
     genome_build = "38"
@@ -31,29 +33,19 @@ print("Study name:", study_name)
 print("Scripts directory:", scripts_directory)
 print("Genome build:", genome_build)
 
-mem = psutil.virtual_memory()
-avail_gb = mem.available / (1024**3)
-driver_mem_gb = int(avail_gb * 0.8)
-
-print(f"Available mem: {avail_gb:.2f} GB")
-print(f"Total mem: {mem.total / (1024**3):.2f} GB")
-
-slurm_cores = os.environ.get('SLURM_CPUS_ON_NODE')
-if slurm_cores is not None and slurm_cores.isdigit():
-    cores_to_use = int(slurm_cores)
-else:
-    cores_to_use = os.cpu_count()
-
-print(f"Using {cores_to_use} cores for Hail")
+driver_mem_gb = int(memory * 0.8)
+print(f"Using {nthreads} threads for Hail local")
+print(f"Using {driver_mem_gb:.2f} GB for Hail spark driver")
 hl.init(
     backend="spark",
-    local=f"local[{cores_to_use}]",
+    local=f"local[{nthreads}]",
     log=logfile,
     spark_conf={
         'spark.driver.memory': f'{driver_mem_gb}g',
     }
 )
 
+print("Reading genetic data")
 # import genotype data, if genome build is 37, lift over to 38
 if genome_build == "37":
     dat = hl.import_plink(bed=f'{bfile}.bed',
