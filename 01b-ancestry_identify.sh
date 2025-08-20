@@ -422,14 +422,14 @@ then
 fi
 
 # Get frequencies, missingness, hwe, info scores
-plink_files=${section_02_dir}/data*.gz
+plink_files=${section_01_dir}/data*.gz
 if [[ "${#plink_files[@]}" -gt 0 ]] ; then
 echo "previous frequencies, missingness, hwe, info scores files present from previous run which will be removed"
-	rm -f ${section_02_dir}/data.afreq.gz
-	rm -f ${section_02_dir}/data.hardy.gz
-	rm -f ${section_02_dir}/data.info.gz
-	rm -f ${section_02_dir}/data.vmiss.gz
-	rm -f ${section_02_dir}/data.smiss.gz
+	rm -f ${section_01_dir}/data.afreq.gz
+	rm -f ${section_01_dir}/data.hardy.gz
+	rm -f ${section_01_dir}/data.info.gz
+	rm -f ${section_01_dir}/data.vmiss.gz
+	rm -f ${section_01_dir}/data.smiss.gz
 else
 	echo "passed file check"
 fi
@@ -441,16 +441,16 @@ ${plink2} \
 	--freq \
 	--hardy \
 	--missing \
-	--out ${section_02_dir}/data
+	--out ${section_01_dir}/data
 
-gzip -f -c ${quality_scores} > ${section_02_dir}/data.info.gz
-gzip ${section_02_dir}/data.hardy
-gzip ${section_02_dir}/data.smiss
-gzip ${section_02_dir}/data.vmiss
-gzip ${section_02_dir}/data.afreq
+gzip -f -c ${quality_scores} > ${section_01_dir}/data.info.gz
+gzip ${section_01_dir}/data.hardy
+gzip ${section_01_dir}/data.smiss
+gzip ${section_01_dir}/data.vmiss
+gzip ${section_01_dir}/data.afreq
 
 # Check missingness
-missingness=`zcat ${section_02_dir}/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
+missingness=`zcat ${section_01_dir}/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
 
 echo "Average missingness: ${missingness}"
 
