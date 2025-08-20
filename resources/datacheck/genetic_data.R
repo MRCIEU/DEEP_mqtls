@@ -214,10 +214,10 @@ names(qual) <- c("V1", "V2", "V3")
 index <- qual$V2 > 0.5
 qual$V2[index] <- 1 - qual$V2[index]
 
-prop <- sum(qual[,2] < 0.01) / nrow(qual)
+prop <- sum(qual[,2] < 0.001) / nrow(qual)
 if(prop > 0.01)
 {
-	msg <- paste0("more than 1% of the retained quality scores have a MAF < 0.01. Please filter on MAF < 0.01")
+	msg <- paste0("more than 1% of the retained quality scores have a MAF < 0.001. Please filter on MAF < 0.001")
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
