@@ -51,7 +51,7 @@ dependencies:
   - ipykernel
   - liblapack
   - libopenblas
-  - gxx
+  - cxx-compiler
   - openjdk=11.*
   - git
   - pip
