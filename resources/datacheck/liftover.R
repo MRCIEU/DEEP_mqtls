@@ -1,10 +1,10 @@
 errorlist <- list()
 warninglist <- list()
 
-library(data.table)
-library(dplyr)
-library(GwasDataImport)
-library(rtracklayer)
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(rtracklayer))
+suppressPackageStartupMessages(library(GwasDataImport))
 
 args <- (commandArgs(TRUE));
 bim_file <- as.character(args[1]);
