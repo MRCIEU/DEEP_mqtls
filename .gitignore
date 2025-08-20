@@ -6,9 +6,9 @@ job_reports/
 processed_data/
 
 # Ignore intermediate files
-resources/genetics/easyQC_hrc_edit.ecf
-resources/genetics/easyQC_hrc_temp.ecf
-resources/genetics/easyQC_hrc_edit.ecf.out
+# resources/genetics/easyQC_hrc_edit.ecf
+# resources/genetics/easyQC_hrc_temp.ecf
+# resources/genetics/easyQC_hrc_edit.ecf.out
 temp_hm3snps.txt
 
 # Ignore resource files downloaded from server and website
