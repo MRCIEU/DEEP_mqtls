@@ -22,17 +22,6 @@ sex_pred_plot_path <- as.character(args[10]);
 ids <- as.character(args[11]);
 ids_plink <- as.character(args[12]);
 
-#predicted_cellcounts_type <- "houseman"
-#cellcounts_file_measured <- NULL
-#meth_ids_file <- "/user/home/epzjlm/scratch/repo/EPIC_mQTL/processed_data/ids/meth_ids.txt"
-#cohort_descriptives_file <- "/user/home/epzjlm/scratch/repo/EPIC_mQTL/processed_data/ids/methylation_descriptives.RData"
-#methylation_summary_file <-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/results/01/methylation_summary.RData"
-#betas_file<-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/input_data/betas_ARIES_F17_EPIC.Robj"
-#fam_file<-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/input_data/combined.fam"
-#cellcounts_file<-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/input_data/cellcounts.txt"
-#ids<-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/processed_data/ids/intersect_ids.txt"
-#ids_plink<-"/user/home/epzjlm/scratch/repo/EPIC_mQTL/processed_data/ids/intersect_ids_plink.txt"
-
 message("Checking methylation data: ", betas_file)
 load(betas_file)
 
@@ -162,7 +151,7 @@ if(! "Sex_factor" %in% names(covar))
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
 }else{
-  covar <- read.table(covar_file,header=T,colClasses=c('Sex_factor'='factor'))
+  covar <- read.table(covar_file, header=T, colClasses=c('Sex_factor'='factor'))
 }
 
 if(any(is.na(covar$Sex_factor)))
@@ -194,6 +183,12 @@ shared_samples <- intersect(colnames(norm.beta), covar$IID)
 norm.beta <- norm.beta[,shared_samples]
 covar <- covar[match(shared_samples, covar$IID),]
 
+if(nrow(covar) == 0){
+  msg <- paste0("There are no samples in the covariate file that match the samples in the methylation data. Please check your covariate file.")
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+}
+
 #Sex prediction won't work if the distribution of sex is too skewed. If this is the case (less than 10% for one sex), skip sex prediction.
 if((length(covar$Sex_factor[covar$Sex_factor == "M"]) < 0.05 * length(covar$Sex_factor) |
     length(covar$Sex_factor[covar$Sex_factor == "F"]) < 0.05 * length(covar$Sex_factor))){
@@ -217,7 +212,7 @@ if((length(covar$Sex_factor[covar$Sex_factor == "M"]) < 0.05 * length(covar$Sex_
   
   message(paste0(nrow(beta_x), " X-chromosome probes were selected."))
   message(paste0(nrow(beta_y), " Y-chromosome probes were selected."))
-  
+
   #If the dataset contains no sex-chromosome probes, skip sex-prediction.
   if(nrow(beta_x) == 0 | nrow(beta_y) == 0){
     message("No sex-chromosomal probes detected for the X and/or Y chromosomes. Skipping sex-prediction.")
