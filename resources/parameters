@@ -139,8 +139,7 @@ allele_ref="${section_02_dir}/data.allele_codes.gz"
 SNPfail1="${home_directory}/processed_data/genetic_data/SNPfail1.txt"
 easyQC="${home_directory}/processed_data/genetic_data/data.easyqc"
 easyQCfile="${home_directory}/processed_data/genetic_data/CLEANED.data.easyqc.gz"
-#easyQCfile="${scripts_directory}/resources/genetics/CLEANED.data.easyqc.txt.gz"
-easyQCscript="${scripts_directory}/resources/genetics/easyQC_hrc.ecf"
+easyQCscript="${scripts_directory}/resources/genetics/easyQC_topmed.ecf"
 genetic_processed_dir="${home_directory}/processed_data/genetic_data"
 
 # CNV file

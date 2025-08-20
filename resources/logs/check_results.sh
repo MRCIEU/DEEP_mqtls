@@ -35,7 +35,7 @@ check_results_02 () {
 		exit 1
 	fi
 
-	if [ -f "${section_02_dir}/easyQC_hrc.multi.AFCHECK.png" ]; then
+	if [ -f "${section_02_dir}/easyQC_topmed.multi.AFCHECK.png" ]; then
 		echo "easyQC plot present"
 	else
 		echo "Problem: easyQC plot is absent"

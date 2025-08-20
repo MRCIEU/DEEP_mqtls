@@ -257,6 +257,7 @@ elif [ "${related}" = "yes" ]; then
 	${plink2} \
 		--bfile ${bfile} \
 		--extract ${pca}.prune.in \
+		--new-id-max-allele-len 70 \
 		--make-bed \
 		--out ${bfile}_ldpruned \
 		--threads ${nthreads}
@@ -323,7 +324,7 @@ ${plink2} \
 	--out "${bfile}"
 
 # check afreq against reference panel using EasyQC
-if [ -f "processed_data/genetic_data/easyQC_hrc.ecf.out" ]
+if [ -f "processed_data/genetic_data/easyQC_topmed_edit.ecf.out" ]
 then
 	echo "easyqc files present from previous run which will be removed"
 	rm processed_data/genetic_data/easy*
@@ -355,9 +356,13 @@ else
 	mv "${easyQCscript%.ecf}_temp.ecf" "${easyQCscript%.ecf}_edit.ecf"
 fi
 
+rm ${easyQCscript%.ecf}_temp.ecf
+easyqc_edit_ecf_cp="${genetic_processed_dir}/easyQC_topmed_edit.ecf"
+mv ${easyQCscript%.ecf}_edit.ecf ${easyqc_edit_ecf_cp}
+
 # run easyQC
 echo "Running EasyQC"
-${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.afreq ${easyQC} ${easyQCfile} ${easyQCscript%.ecf}_edit.ecf
+${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.afreq ${easyQC} ${easyQCfile} ${easyqc_edit_ecf_cp}
 
 if [ -n "$replacement_text1" ]; then
 	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
@@ -367,8 +372,8 @@ fi
 
 echo "Moving allele freq check figure"
 
-mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.multi.AFCHECK.png ${home_directory}/results/01/easyQC_hrc.multi.AFCHECK.png
-mv ${home_directory}/processed_data/genetic_data/easyQC_hrc_edit.rep ${home_directory}/results/01/easyQC_hrc.rep
+mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.multi.AFCHECK.png ${home_directory}/results/01/easyQC_topmed.multi.AFCHECK.png
+mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.rep ${home_directory}/results/01/easyQC_topmed.rep
 
 # Remove mismatched SNPs and flip misaligned SNPs
 # echo "Remove mismatched SNPs and NO FLIPPING"
