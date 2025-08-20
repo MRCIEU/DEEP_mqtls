@@ -1,5 +1,5 @@
 arguments <- commandArgs(T)
-related <- as.character(arguments[1])
+related <- tolower(as.character(arguments[1]))
 
 message("Checking R version")
 currentr <- paste0(R.Version()["major"], ".", R.Version()["minor"])
@@ -70,15 +70,10 @@ if (related == "yes") {
 # Check for required files
 files_to_check <- list(
     list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz"),
-    list(dir = "./resources/genetics", pattern = "1000g_SAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"),
-    list(dir = "./resources/genetics", pattern = "1000g_EAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"),
-    list(dir = "./resources/genetics", pattern = "1000g_AMR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"),
-    list(dir = "./resources/genetics", pattern = "1000g_AFR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"),
-    list(dir = "./resources/genetics", pattern = "1000g_EUR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"),
-    list(dir = "./resources/genetics", pattern = "hg19ToHg38.over.chain"),# chain file for liftover from hg19 to hg38
-    list(dir = "./resources/genetics", pattern = "references_grch37_to_grch38.over.chain.gz"),
+    list(dir = "./resources/genetics", pattern = "1000g_(SAS|EAS|AMR|AFR|EUR)_p3v5\\.topmed_imputed\\.maf_0\\.001\\.r2_0\\.3\\.hg38\\.txt\\.gz"),
+    list(dir = "./resources/genetics", pattern = "references_grch37_to_grch38.over.chain.gz"), # chain file for liftover from hg19 to hg38
     list(dir = "./resources/genetics", pattern = "release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz"),
-    list(dir = "./resources/genetics", pattern = "hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv"),
+    list(dir = "./resources/genetics", pattern = "hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv"), 
     list(dir = "./resources/genetics", pattern = "hgdp_tgp_unrel_pass_filtGBMI_strictpruned_loadings.tsv"),
     list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref.gz"),
     list(dir = "./resources/bin/hase/data", pattern = "ref-hrc.ref_info.h5")
