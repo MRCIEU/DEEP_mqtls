@@ -82,9 +82,7 @@ measured_cellcounts="NULL"
 related="no"
 
 # Computing resources
-# Number of CPUs to use; on HPC systems, set this to the value requested in your job submission
-ncpu="10"
-# Memory in GB; on HPC systems, match this to the value requested in your job submission
+# Memory in GB; If on HPC systems, match this to the value requested in your job submission
 mem="20"
 # Parallelisation parameters
 # Number of threads to use per node
