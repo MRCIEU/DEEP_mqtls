@@ -39,16 +39,24 @@ ${R_directory}Rscript resources/genetics/split_covar.R \
     ${covariates_combined} \
     ${bfile}.fam \
     ${ccovar_file} \
-    ${qcovar_file}
+    ${qcovar_file} \
+    # ${genetic_pc_gwas}
 
-# Step3: Loop through each positive control locus
+# Step 3: Checking positive control file
+echo "Checking positive control file"
+${R_directory}Rscript resources/genetics/check_positive_controls.R \
+    ${positive_control_file} \
+    ${filt_positive_control_file} \
+    ${com_id}
+
+# Step 4: Loop through each positive control locus
 echo "Running positive controls"
 
 ############################################################################################################
 # positive control
 ############################################################################################################
 
-tail -n +2 ./resource/genetics/mqtl_pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
 do
     echo "Processing positive control: $positive_control_cpg"
 
@@ -179,7 +187,7 @@ echo "Running negative control"
 # 4 for D, 5 for E, 16 for P
 seed=45516
 
-tail -n +2 ./resource/genetics/mqtl_pos_ctr.tsv | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
 do
     negative_control_cpg="NEG_${positive_control_cpg}"
 
