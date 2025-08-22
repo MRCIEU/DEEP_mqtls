@@ -1,8 +1,8 @@
 # Create cell counts file
-library(remotes)
-library(EpiDISH)
-library(meffil)
-library(data.table)
+suppressMessages(library(remotes))
+suppressMessages(library(EpiDISH))
+suppressMessages(library(meffil))
+suppressMessages(library(data.table))
 
 arguments <- commandArgs(T);
 
