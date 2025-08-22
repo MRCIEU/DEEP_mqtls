@@ -13,7 +13,7 @@ if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directo
         if mamba env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
             echo "found deep_env environment in mamba"
             echo "Using mamba to run the script"
-            RUN_CMD="mamba run -n deep_env"
+            RUN_CMD="mamba run -n deep_env "
         fi
     fi
 
@@ -22,7 +22,7 @@ if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directo
         if conda env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
             echo "found deep_env environment in conda"
             echo "Using conda to run the script"
-            RUN_CMD="conda run -n deep_env"
+            RUN_CMD="conda run -n deep_env "
         fi
     fi
 
@@ -31,12 +31,24 @@ if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directo
         exit 1
     fi
 
+    R_directory="$RUN_CMD"
+    Python_directory="$RUN_CMD"
+    Python2_directory="$RUN_CMD"
+
 else
-    echo "Using specified Python3_directory"
+    echo "Using specified R and Python directories"
     RUN_CMD=""
+
+    if [ -z "$R_directory" ] || [ -z "$Python_directory" ] || [ -z "$Python2_directory" ]; then
+        echo "ERROR: Please define all of R_directory, Python_directory, and Python2_directory in your config or environment."
+        exit 1
+    fi
 fi
 
 export RUN_CMD
+export R_directory
+export Python_directory
+export Python2_directory
 
 # Parse options using getopts
 while getopts "c:" opt; do
