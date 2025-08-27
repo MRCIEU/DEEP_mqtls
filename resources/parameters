@@ -158,12 +158,12 @@ cellcounts_plink="${home_directory}/processed_data/cellcounts/cellcounts.transfo
 cellcounts_plink_raw="${home_directory}/processed_data/cellcounts/cellcounts.raw.plink"
 cellcounts_plink_smokadj="${home_directory}/processed_data/cellcounts/cellcounts.transformed.smokadj.plink"
 cellcounts_SD="5"
-cellcounts_plot="${section_03_dir}/cellcounts_plot.pdf"
-cellcounts_summary="${section_03_dir}/cellcounts_summary.txt"
+cellcounts_plot="${section_01_dir}/cellcounts_plot.pdf"
+cellcounts_summary="${section_01_dir}/cellcounts_summary.txt"
 cellcounts_gwa="${home_directory}/processed_data/cellcounts/cellcounts.houseman.txt"
 cellcounts_cov="${home_directory}/processed_data/cellcounts/cellcounts.covariates.txt"
-cor_matrix="${home_directory}/results/03/cor_matrix.txt"
-cor_plot="${home_directory}/results/03/cor_plot.pdf"
+cor_matrix="${section_01_dir}/cor_matrix.txt"
+cor_plot="${section_01_dir}/cor_plot.pdf"
 
 # Covariates
 covariates_intersect="${home_directory}/processed_data/covariate_data/covariates_intersectids.txt"
@@ -203,15 +203,15 @@ outlier_count="${home_directory}/processed_data/methylation_data/outlier_count.t
 # Smoking prediction
 methylation_processed_dir="${home_directory}/processed_data/methylation_data"
 smoking_pred="${methylation_processed_dir}/smoking_prediction"
-smoking_pred_plot="${section_03_dir}/smoking_prediction.pdf"
+smoking_pred_plot="${section_01_dir}/smoking_prediction.pdf"
 smoking_pred_SD="5"
 
 
 # Age prediction
 age_pred="${home_directory}/processed_data/methylation_data/age_prediction"
-age_pred_sumstats="${section_03_dir}/age_prediction_stats"
-age_pred_plot="${section_03_dir}/age_prediction"
-age_pred_clock="${section_03_dir}/age_clock.txt"
+age_pred_sumstats="${section_01_dir}/age_prediction_stats"
+age_pred_plot="${section_01_dir}/age_prediction"
+age_pred_clock="${section_01_dir}/age_clock.txt"
 age_pred_SD="5"
 
 
