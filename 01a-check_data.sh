@@ -13,16 +13,14 @@ containsElement () {
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo "There is no method for ${1}."
 	echo "Please run:"
-	echo "./01-check_data [arg]"
+	echo "./01a-check_data [arg]"
 	echo "where arg is an optional argument that can be one of:"
 	printf '%s\n' ${@:2}
 	return 1
 }
 
 arg="all"
-declare -a sections=('all' 'config' 'download' 'requirements' 'genetic' 'methylation' 'covariates' 'covariates_for_PRS' 'phenotypes_for_PRS' 'summary')
-
-vect_PRS=$(grep "PRS" ${scripts_directory}/resources/parameters | grep "weights" | awk -F"_" '{print $2}' |tr "\n" " ")
+declare -a sections=('all' 'config' 'download' 'requirements' 'genetic' 'methylation' 'covariates' 'phenotypes' 'summary')
 
 if [ -n "${1}" ]; then
 	arg="${1}"
@@ -40,7 +38,7 @@ section_message () {
 	echo "$1 section"
 	echo ""
 	echo "to run this part on its own type:"
-	echo "$ ./01-check_data.sh $1"
+	echo "$ ./01a-check_data.sh $1"
 	echo ""
 	echo "-----------------------------------------------"
 	echo ""
