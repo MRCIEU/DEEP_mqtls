@@ -111,8 +111,8 @@ covariate_descriptives="${home_directory}/processed_data/ids/covariate_descripti
 phenotype_descriptives="${home_directory}/processed_data/ids/phenotype_descriptives.RData"
 
 cohort_descriptives="${section_01_dir}/cohort_descriptives.RData"
-methylation_summary="${section_03_dir}/methylation_summary.RData"
-cohort_descriptives_commonids="${section_03_dir}/cohort_descriptives_commonids.RData"
+methylation_summary="${section_01_dir}/methylation_summary.RData"
+cohort_descriptives_commonids="${section_01_dir}/cohort_descriptives_commonids.RData"
 
 # Clean genetic data
 bfile="${home_directory}/processed_data/genetic_data/data"
