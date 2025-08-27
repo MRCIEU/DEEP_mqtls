@@ -108,25 +108,11 @@ genetic_descriptives="${home_directory}/processed_data/ids/genetic_descriptives.
 methylation_descriptives="${home_directory}/processed_data/ids/methylation_descriptives.RData"
 cnv_descriptives="${home_directory}/processed_data/ids/cnv_descriptives.RData"
 covariate_descriptives="${home_directory}/processed_data/ids/covariate_descriptives.RData"
-covariate_ADHD_PRS_descriptives="${home_directory}/processed_data/ids/covariate_ADHD_PRS_descriptives.RData"
-covariate_AD_PRS_descriptives="${home_directory}/processed_data/ids/covariate_AD_PRS_descriptives.RData"
-covariate_Psoriasis_PRS_descriptives="${home_directory}/processed_data/ids/covariate_Psoriasis_PRS_descriptives.RData"
-covariate_PsoriasisNOHLA_PRS_descriptives="${home_directory}/processed_data/ids/covariate_PsoriasisNOHLA_PRS_descriptives.RData"
 phenotype_descriptives="${home_directory}/processed_data/ids/phenotype_descriptives.RData"
-phenotype_ADHD_PRS_descriptives="${home_directory}/processed_data/ids/phenotype_ADHD_PRS_descriptives.RData"
-phenotype_AD_PRS_descriptives="${home_directory}/processed_data/ids/phenotype_AD_PRS_descriptives.RData"
-phenotype_Psoriasis_PRS_descriptives="${home_directory}/processed_data/ids/phenotype_Psoriasis_PRS_descriptives.RData"
-phenotype_PsoriasisNOHLA_PRS_descriptives="${home_directory}/processed_data/ids/phenotype_PsoriasisNOHLA_PRS_descriptives.RData"
 
 cohort_descriptives="${section_01_dir}/cohort_descriptives.RData"
 methylation_summary="${section_03_dir}/methylation_summary.RData"
 cohort_descriptives_commonids="${section_03_dir}/cohort_descriptives_commonids.RData"
-
-# PRS
-# PRS_ADHD_weights="${scripts_directory}/resources/genetics/ADHD_weights_2023_moreMCMCit_1kg.txt"
-# PRS_AD_weights="${scripts_directory}/resources/genetics/AD_weights_2024_moreMCMCit_HRC.txt"
-# PRS_Psoriasis_weights="${scripts_directory}/resources/genetics/Psoriasis_weights_2024_tophits.txt"
-# PRS_PsoriasisNOHLA_weights="${scripts_directory}/resources/genetics/PsoriasisNOHLA_weights_2024_tophits.txt"
 
 # Clean genetic data
 bfile="${home_directory}/processed_data/genetic_data/data"
