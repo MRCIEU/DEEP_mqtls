@@ -1,5 +1,4 @@
 # Split covariates file
-
 # Original covariates
 # Genetic PCs
 # Cell counts
@@ -12,6 +11,7 @@ ccovar_file <- arguments[3]
 qcovar_file <- arguments[4]
 scripts_directory <- arguments[5]
 genetic_pc_gwas <- arguments[6]
+qcovar_noPC_file <- arguments[7]
 
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 
@@ -47,5 +47,14 @@ if (ncol(category_cov) < 3) {
   stop("After removing constant columns, category_cov only contains FID and IID. Please check your input data.")
 }
 
+pc_cols <- paste0("PC", 1:10)
+pc_cov <- quant_cov[, c("FID", "IID", intersect(pc_cols, colnames(quant_cov)))]
+
+all_pc_cols <- paste0("PC", 1:20)
+quant_cov_noPC <- quant_cov[, !(colnames(quant_cov) %in% all_pc_cols), drop = FALSE]
+
 write.table(quant_cov, file=qcovar_file, sep = "\t", row.names = FALSE, quote = FALSE)
 write.table(category_cov, file=ccovar_file, sep = "\t", row.names = FALSE, quote = FALSE)
+
+write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE, quote = FALSE)
