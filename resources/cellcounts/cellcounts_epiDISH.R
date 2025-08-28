@@ -23,20 +23,23 @@ data(centEpiFibIC.m);
 data(cent12CT450k.m);
 data(centBloodSub.m);
 
+print("Loading methylation file")
 load(methylation_file)
+print("Sourcing reference selection function")
 source(paste0(scripts_directory,"/resources/cellcounts/fn-select_ref.R"))
 
 # Validate inputs and select reference matrices
 refs <- validate_and_select_reference(tissue, methylation_array, age)
-print(paste0("Using reference matrices ",paste(names(refs), collapse=", ")," for tissue: ", tissue, ", methylation array: ", methylation_array, ", age: ", age))
+print(paste0("Using reference matrices ",paste(names(refs), collapse=", ")," for tissue: ", tissue, ", methylation array: ", methylation_array, ", age range: ", age))
 
 cellcounts_total <- data.frame()
 
 for(ref in names(refs)) {
   if (ref %in% c("salas", "unilife")) {
     print(paste0("Using reference: ", ref))
-    out.l <- epidish(beta.m = norm.beta, ref.m = refs[[ref]], method = "RPC", maxit = 500)
-    cellcounts <- as.data.frame(out.l$estF)
+    out.e <- epidish(beta.m = norm.beta, ref.m = refs[[ref]], method = "RPC", maxit = 500)
+    cellcounts <- as.data.frame(out.e$estF)
+    cellcounts <- as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
     colnames(cellcounts) <- ifelse(
       colnames(cellcounts) != "IID",
        paste0(ref, ".", colnames(cellcounts)),
@@ -44,28 +47,30 @@ for(ref in names(refs)) {
     )
     # colnames will be B, CD4T, CD8T, Mono, nRBC, Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono with prefix "unilife."
     # or colnames will be CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono with prefix "salas."
-
-    } 
-      else if (ref == "zheng") {
-        print(paste0("Using reference: ", ref))
-        out.l <- hepidish(beta.m = norm.beta, ref1.m = centEpiFibIC.m, ref2.m = centBloodSub.m, h.CT.idx = 3, method = 'RPC')
-        cellcounts <- as.data.frame(out.l$estF)
-        colnames(cellcounts) <- ifelse(
-          colnames(cellcounts) != "IID",
-           paste0(ref, ".", colnames(cellcounts)),
-          colnames(cellcounts)
-        )
-        # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
-      else if (ref == "meffil") {
-        print(paste0("Using reference: ", ref))
-        out.l <- meffil.estimate.cell.counts.from.betas(norm.beta, cell.type.reference = "saliva gse147318")
-        cellcounts <- as.data.frame(out.l)
-        colnames(cellcounts) <- ifelse(
-          colnames(cellcounts) != "IID",
-           paste0("middleton.", colnames(cellcounts)),
-          colnames(cellcounts)
-        )
-      # colnames will be [CD45pos, large] with prefix "middleton."
+  } else if (ref == "zheng") {
+    print(paste0("Using reference: ", ref))
+    out.e <- hepidish(beta.m = norm.beta, ref1.m = centEpiFibIC.m, ref2.m = centBloodSub.m, h.CT.idx = 3, method = 'RPC')
+    cellcounts <- as.data.frame(out.e$estF)
+    # rownames of IID become the first column
+    cellcounts <- as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
+    colnames(cellcounts) <- ifelse(
+      colnames(cellcounts) != "IID",
+       paste0(ref, ".", colnames(cellcounts)),
+      colnames(cellcounts)
+    )
+    # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
+  } else if (ref == "meffil") {
+    print(paste0("Using reference: ", ref))
+    out.e <- meffil.estimate.cell.counts.from.betas(norm.beta, cell.type.reference = "saliva gse147318")
+    cellcounts <- as.data.frame(out.e)
+    # rownames of IID become the first column
+    cellcounts <- as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
+    colnames(cellcounts) <- ifelse(
+      colnames(cellcounts) != "IID",
+       paste0("middleton.", colnames(cellcounts)),
+      colnames(cellcounts)
+    )
+    # colnames will be [CD45pos, large] with prefix "middleton."
   }
 
   # Combine results
