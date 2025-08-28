@@ -13,7 +13,7 @@ containsElement () {
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo "There is no method for ${1}."
 	echo "Please run:"
-	echo "./01a-check_data [arg]"
+	echo "./01a-check_data.sh [arg]"
 	echo "where arg is an optional argument that can be one of:"
 	printf '%s\n' ${@:2}
 	return 1
