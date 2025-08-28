@@ -193,6 +193,8 @@ methylation_ids="${home_directory}/processed_data/genetic_data/methylation_ids.t
 
 # Methylation files
 methylation_no_outliers="${home_directory}/processed_data/methylation_data/methylation_no_outliers.Robj"
+normalized_between_datasets="${home_directory}/processed_data/methylation_data/normalized_between_datasets.Robj"
+
 transformed_methylation_adjusted="${home_directory}/processed_data/methylation_data/transformed_methylation_adjusted"
 untransformed_methylation_adjusted="${home_directory}/processed_data/methylation_data/untransformed_methylation_adjusted"
 transformed_methylation_adjusted_pcs="${home_directory}/processed_data/methylation_data/transformed_methylation_adjusted_pcs"
