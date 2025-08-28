@@ -170,6 +170,9 @@ covariates_intersect="${home_directory}/processed_data/covariate_data/covariates
 covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
 ccovar_file="${home_directory}/processed_data/methylation_data/ccovar_file.txt"
 qcovar_file="${home_directory}/processed_data/methylation_data/qcovar_file.txt"
+genetic_pc_gwas="${home_directory}/processed_data/genetic_data/genetic_pc_gwas.txt"
+qcovar_noPC_file="${home_directory}/processed_data/methylation_data/qcovar_noPC_file.txt"
+
 meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_transformed"
 meth_pcs_untransformed="${home_directory}/processed_data/methylation_data/meth_pcs_untransformed"
 nongenetic_meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_nongenetic_transformed"
