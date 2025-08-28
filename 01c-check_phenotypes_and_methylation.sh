@@ -18,7 +18,7 @@ containsElement () {
 }
 
 arg="all"
-declare -a sections=('all' 'check_phenotype' 'methy_outlier' 'predict_age_smoking' 'cell_counts' 'ewas' 'combine_covariates')
+declare -a sections=('all' 'methy_outlier' 'check_phenotype' 'predict_age_smoking' 'cell_counts' 'ewas' 'combine_covariates')
 
 if [ -n "${1}" ]; then
 	arg="${1}"
@@ -40,6 +40,24 @@ section_message () {
 
 }
 
+if [ "$arg" = "methy_outlier" ] || [ "$arg" = "all" ]
+then
+	section_message "methy_outlier"
+
+	echo "Removing methylation outliers"
+	${R_directory}Rscript resources/methylation/remove_outliers.R \
+		${betas} \
+		${methylation_no_outliers} \
+		${cohort_descriptives_commonids} \
+		${methylation_summary} \
+		${intersect_ids} \
+		${covariates} \
+		${covariates_intersect} \
+		${bfile}.fam \
+		${bfile}.bim
+
+fi
+
 if [ "$arg" = "check_phenotype" ] || [ "$arg" = "all" ]
 then
 	section_message "check_phenotype"
@@ -56,24 +74,6 @@ then
 		${covariates_intersect} \
 		${bfile}.fam \
 		${bfile}.bim 
-
-fi
-
-if [ "$arg" = "methy_outlier" ] || [ "$arg" = "all" ]
-then
-	section_message "methy_outlier"
-
-	echo "Removing methylation outliers"
-	${R_directory}Rscript resources/methylation/remove_outliers.R \
-		${betas} \
-		${methylation_no_outliers} \
-		${cohort_descriptives_commonids} \
-		${methylation_summary} \
-		${intersect_ids} \
-		${covariates} \
-		${covariates_intersect} \
-		${bfile}.fam \
-		${bfile}.bim
 
 fi
 
@@ -116,6 +116,7 @@ then
 			${cor_matrix} \
 			${cor_plot} \
 			${scripts_directory}
+			
 	elif [ "${measured_cellcounts}" == "NULL" ]; then
 		echo "No measured cell counts available for comparison; only compare predicted cell counts if multiple reference available"
 		${R_directory}Rscript resources/cellcounts/correlation.R \
