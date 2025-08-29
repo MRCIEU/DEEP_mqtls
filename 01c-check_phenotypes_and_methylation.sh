@@ -47,14 +47,19 @@ then
 	echo "Removing methylation outliers"
 	${R_directory}Rscript resources/methylation/remove_outliers.R \
 		${betas} \
-		${methylation_no_outliers} \
-		${cohort_descriptives_commonids} \
-		${methylation_summary} \
 		${intersect_ids} \
+		${meth_ids} \
 		${covariates} \
-		${covariates_intersect} \
 		${bfile}.fam \
-		${bfile}.bim
+		${bfile}.bim \
+		${methylation_no_outliers_gwas} \
+		${methylation_no_outliers_ewas} \
+		${cohort_descriptives_was} \
+		${methylation_summary_gwas} \
+		${methylation_summary_ewas} \
+		${covariates_intersect_gwas} \
+		${covariates_intersect_ewas} \
+
 
 fi
 
@@ -83,7 +88,7 @@ then
 
 	echo "Predict age and smoking"
 	${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
-		${methylation_no_outliers} \
+		${methylation_no_outliers_ewas} \
 		${bfile}.fam \
 		${smoking_pred} \
 		${smoking_pred_plot} \
@@ -115,7 +120,8 @@ then
 			${measured_cellcounts} \
 			${cor_matrix} \
 			${cor_plot} \
-			${scripts_directory}
+			${scripts_directory} \
+			${study_name}
 			
 	elif [ "${measured_cellcounts}" == "NULL" ]; then
 		echo "No measured cell counts available for comparison; only compare predicted cell counts if multiple reference available"
@@ -124,7 +130,8 @@ then
 			0 \
 			${cor_matrix} \
 			${cor_plot} \
-			${scripts_directory}
+			${scripts_directory} \
+			${study_name}
 	else
 		echo "Error: measured_cellcounts is not 'NULL' but the file does not exist. Please check your config file."
 		exit 1
