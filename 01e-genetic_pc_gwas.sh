@@ -51,10 +51,10 @@ for pc in {1..10}; do
             3 \
             2 \
             TRUE \
-            ${positive_control_snp_chr} \
-            ${positive_control_snp_pos} \
-            ${positive_control_snp_window} \
-            ${positive_control_threshold}
+            0 \
+            0 \
+            0 \
+            0
 
 done
 
