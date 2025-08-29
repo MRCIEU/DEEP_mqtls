@@ -105,4 +105,3 @@ plot.out <- ggarrange(hannum_plot, mcigarette_plot,
                       labels = c("A","B"),
                       ncol = 2, nrow = 1)
 print(plot.out)
-
