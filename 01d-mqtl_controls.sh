@@ -35,12 +35,14 @@ fi
 
 # Step2: make covar files for gcta input
 echo "Making covariate files for GCTA"
-${R_directory}Rscript resources/genetics/split_covar.R \
+${R_directory}Rscript resources/methylation/split_covar.R \
     ${covariates_combined} \
     ${bfile}.fam \
     ${ccovar_file} \
     ${qcovar_file} \
-    # ${genetic_pc_gwas}
+    ${scripts_directory} \
+    ${genetic_pc_gwas} \
+    ${qcovar_noPC_file}
 
 # Step 3: Checking positive control file
 echo "Checking positive control file"
@@ -55,6 +57,7 @@ echo "Running positive controls"
 ############################################################################################################
 # positive control
 ############################################################################################################
+base_methylation_no_outliers="${methylation_no_outliers%.Robj}"
 
 tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
 do
@@ -68,18 +71,22 @@ do
     # positive_control_threshold="0.001"
 
     # Get the control CPG
-    awk -F',' -v cpg=${positive_control_cpg} '{ if(NR == 1 || $1 == cpg) { print $0 }}' ${untransformed_methylation_adjusted_pcs}.csv > ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control
-    awk -F',' -v cpg=${positive_control_cpg} '{ if(NR == 1 || $1 == cpg) { print $0 }}' ${transformed_methylation_adjusted_pcs}.csv > ${transformed_methylation_adjusted}.${positive_control_cpg}.positive_control
+    echo "Extracting methylation values for positive control CPG ${positive_control_cpg}"
+
+    ${R_directory}Rscript -e "load('${methylation_no_outliers}')
+                if (!exists('norm.beta')) norm.beta <- get(ls()[1])
+                row <- norm.beta[rownames(norm.beta) == '${positive_control_cpg}', , drop=FALSE]
+                write.table(row, file='${base_methylation_no_outliers}.${positive_control_cpg}.positive_control', sep='\t', quote=FALSE, col.names=NA)"
 
     echo "making gcta input for positive control CPG ${positive_control_cpg} (untransformed)"
-    nrow=`cat ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control | wc -l`
+    nrow=`cat ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control | wc -l`
     if [ "$nrow" -lt "2" ]; then
         echo "The positive control CPG ${positive_control_cpg} appears to be missing for mQTL analysis on untransformed methylation data. Please check."
     else 
         ${R_directory}Rscript resources/genetics/make_control.R \
-            ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control \
+            ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control \
             ${intersect_ids_plink} \
-            ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta
+            ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta
 
         echo "Perform fastGWA (untransformed) in positive control"
         if [ "${related}" = "yes" ]; then
@@ -88,7 +95,7 @@ do
                 --bfile ${bfile} \
                 --grm-sparse ${grmfile_fast}_rel \
                 --fastGWA-mlm \
-                --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+                --pheno ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta \
                 --qcovar ${qcovar_file} \
                 --covar ${ccovar_file} \
                 --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
@@ -99,7 +106,7 @@ do
                 --bfile ${bfile} \
                 --grm-sparse ${grmfile_fast}_unrel \
                 --fastGWA-mlm \
-                --pheno ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control.gcta \
+                --pheno ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta \
                 --qcovar ${qcovar_file} \
                 --covar ${ccovar_file} \ 
                 --out ${section_01_dir}/positive_control_untransformed_${positive_control_cpg} \
@@ -111,7 +118,7 @@ do
 
         echo "make manhattan and qq plots (untransformed)"
         echo ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz > ${section_01_dir}/positive.control.untransformed.file.txt
-        ${R_directory}Rscript resources/genetics/gcta_plot_gwas.R \
+        ${R_directory}Rscript resources/genetics/plot_gwas.R \
             ${section_01_dir}/positive.control.untransformed.file.txt \
             10 \
             1 \
@@ -163,7 +170,7 @@ do
 
     #     echo "make manhattan and qq plots (transformed)"
     #     echo ${section_01_dir}/positive_control_transformed_${positive_control_cpg}.fastGWAmlm.gz > ${section_01_dir}/positive.control.transformed.file.txt
-    #     ${R_directory}Rscript resources/genetics/gcta_plot_gwas.R \
+    #     ${R_directory}Rscript resources/genetics/plot_gwas.R \
     #         ${section_01_dir}/positive.control.transformed.file.txt \
     #         10 \
     #         1 \
@@ -194,21 +201,21 @@ do
     echo "Processing negative control: $negative_control_cpg"
 
     echo "Confirming the corresponding positive control exists"
-    nrow=`cat ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control | wc -l`
+    nrow=`cat ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control | wc -l`
     if [ "$nrow" -lt "2" ]; then
         echo "The positive control CPG ${positive_control_cpg} appears to be missing for mQTL analysis on untransformed methylation data. Please check."
     else
         echo "Shuffle untransformed"
         ${R_directory}Rscript resources/genetics/shuffle_control.R \
-            ${untransformed_methylation_adjusted}.${positive_control_cpg}.positive_control \
-            ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control \
+            ${base_methylation_no_outliers}.${positive_control_cpg}.positive_control \
+            ${base_methylation_no_outliers}.${negative_control_cpg}.negative_control \
             $seed
 
         echo "Making gcta input for negative control CPG ${negative_control_cpg} (untransformed)"
         ${R_directory}Rscript resources/genetics/make_control.R \
-            ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control \
+            ${base_methylation_no_outliers}.${negative_control_cpg}.negative_control \
             ${intersect_ids_plink} \
-            ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta
+            ${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta
 
             echo "Perform GCTA (untransformed) in negative control"
         if [ "${related}" = "yes" ]; then
@@ -216,7 +223,7 @@ do
                 --bfile ${bfile} \
                 --grm-sparse ${grmfile_fast}_rel \
                 --fastGWA-mlm \
-                --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta \
+                --pheno ${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta \
                 --qcovar ${qcovar_file} \
                 --covar ${ccovar_file} \ 
                 --out ${section_01_dir}/negative_control_untransformed_${negative_control_cpg} \
@@ -227,7 +234,7 @@ do
                 --bfile ${bfile} \
                 --grm-sparse ${grmfile_fast}_unrel \
                 --fastGWA-mlm \
-                --pheno ${untransformed_methylation_adjusted}.${negative_control_cpg}.negative_control.gcta \
+                --pheno ${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta \
                 --qcovar ${qcovar_file} \
                 --covar ${ccovar_file} \
                 --out ${section_01_dir}/negative_control_untransformed_${negative_control_cpg} \
@@ -239,7 +246,7 @@ do
 
         echo "make manhattan and qq plots (untransformed)"
         echo ${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.fastGWAmlm.gz > ${section_01_dir}/negative.control.untransformed.file.txt
-        ${R_directory}Rscript resources/genetics/gcta_plot_gwas.R \
+        ${R_directory}Rscript resources/genetics/plot_gwas.R \
         ${section_01_dir}/negative.control.untransformed.file.txt \
             10 \
             1 \
@@ -297,7 +304,7 @@ do
 
     #     echo "make manhattan and qq plots (transformed)"
     #     echo ${section_01_dir}/negative_control_transformed_${negative_control_cpg}.fastGWAmlm.gz > ${section_01_dir}/negative.control.transformed.file.txt
-    #     ${R_directory}Rscript resources/genetics/gcta_plot_gwas.R \
+    #     ${R_directory}Rscript resources/genetics/plot_gwas.R \
     #         ${section_01_dir}/negative.control.transformed.file.txt \
     #         10 \
     #         1 \
