@@ -8,22 +8,77 @@ cor_matrix <- arguments [3];
 cor_plot <- arguments [4];
 scripts_directory<-arguments[5];
 
+# Define mapping for common cell types and their possible aliases
+celltype_aliases <- list(
+  Neu = c("neutrophil", "neutrophils", "neutro", "neu", "neut"),
+  Lym = c("lymphocyte", "lymphocytes", "lymph", "lym"),
+  Mono = c("monocyte", "monocytes", "mono", "mon"),
+  Eos = c("eosinophil", "eosinophils", "eos", "eosin"),
+  Baso = c("basophil", "basophils", "baso", "bas"),
+  Gran = c("granulocyte", "granulocytes", "gran", "grans", "granulo")
+)
+
+# Function to standardize measured column names
+standardize_measured_colnames <- function(df, mapping, prefix = "m.") {
+  cn <- colnames(df)
+  for (std in names(mapping)) {
+    pats <- mapping[[std]]
+    idx <- which(sapply(cn, function(x) any(tolower(x) %in% pats)))
+    if (length(idx) == 1) {
+      colnames(df)[idx] <- std
+      cn <- colnames(df)
+    } else if (length(idx) > 1) {
+      stop(paste("Multiple columns matched for", std, ":", paste(cn[idx], collapse = ", ")))
+    }
+  }
+  # Add prefix except for IID
+  colnames(df)[colnames(df) != "IID"] <- paste0(prefix, colnames(df)[colnames(df) != "IID"])
+  return(df)
+}
+
+# Function to check if all values (except IID) are <= 1 (assume percent if TRUE)
+is_percentage_matrix <- function(df) {
+  num_df <- df[, colnames(df) != "IID", drop = FALSE]
+  all(num_df <= 1, na.rm = TRUE)
+}
+
+# Function to convert to percentage (each row sum to 1)
+convert_to_percentage <- function(df) {
+  num_df <- df[, colnames(df) != "IID", drop = FALSE]
+  row_sums <- rowSums(num_df, na.rm = TRUE)
+  # Avoid division by zero
+  row_sums[row_sums == 0] <- NA
+  num_df <- num_df / row_sums
+  df[, colnames(df) != "IID"] <- num_df
+  return(df)
+}
+
 if (measured_cellcounts != 0) {
-  measured<-read.table(measured_cellcounts, header=T)
+  measured <- read.table(measured_cellcounts, header=T)
   if (!"IID" %in% colnames(measured)) {
     stop("Set the name 'IID' to the column of individuals identifiers in measured cell count file")
   }
-  # Add prefix 'm.' to all columns except IID
-  colnames(measured)[colnames(measured) != "IID"] <- paste0("m.", colnames(measured)[colnames(measured) != "IID"])
+  print("Detecting columns in measured cell counts file")
+  measured <- standardize_measured_colnames(measured, celltype_aliases, prefix = "m.")
+
+  if (nrow(measured) > 0 && !is_percentage_matrix(measured)) {
+    message("Measured cell counts are not in percentage, converting to percentage (row sum = 1).")
+    measured <- convert_to_percentage(measured)
+  }
+  
+} else {
+  measured <- data.frame()
+  print("No measured cell counts available for comparison.")
 }
 
+
+message("Reading in predicted cell counts")
 predicted<-read.table(cellcounts_cov, header=T)
 prefix <- unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))]))
 print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse = ", ")))
 
 # there are several situations:
 # colnames will be B, CD4T, CD8T, Mono, nRBC (only in babies), Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono with prefix "unilife."
-# QUESTION: do we calculate Gran? Pending.
 
 # or colnames will be CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono with prefix "salas."
 # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
@@ -63,7 +118,7 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
           combined_data[paste0(pref, ".Bcells")] <- rowSums(data[, available_b_cols, drop = FALSE], na.rm = TRUE)
         }
       } else if (pref == "zheng") {
-        # Zheng: already has B
+        # Zheng: B
         b_col <- paste0(pref, ".B")
         if (b_col %in% colnames(data)) {
           combined_data[paste0(pref, ".Bcells")] <- data[, b_col]
@@ -108,8 +163,8 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
           "sumMono" = c("Mono", "aMono"),
           "sumEos" = c("Eos", "aEos"),
           "sumBaso" = c("Baso", "aBaso"),
-          "sumNK" = c("NK", "aNK")
-          # add gran if needed
+          "sumNK" = c("NK", "aNK"),
+          "sumGran" = c("Gran", "aNeu", "aEos", "aBaso") # Granulocytes as sum of Neu, Eos, Baso
         )
         
         for (cell_type in names(cell_type_mapping)) {
@@ -146,8 +201,6 @@ print("Final predicted columns:")
 print(colnames(predicted))
 
 # Continue with the rest of the correlation analysis
-data <- merge(measured, predicted, by = "IID", all = F)
-ids <- data$IID
 
 available_cols <- c("IID")
 for (pref in prefix) {
@@ -169,9 +222,10 @@ if (nrow(predicted) == 0) {
 }
 
 if (nrow(measured) == 0) {
-  print("Doing without measured cell counts")
+  print("Correlation analysis without measured cell counts")
   data <- predicted
   # add correlation plot between predicted cell counts
+  correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], use = "complete.obs", method="spearman")
 
 } else {
   data <- merge(measured, predicted, by = "IID", all = F)
@@ -182,16 +236,14 @@ if (nrow(measured) == 0) {
   
   # correlation will include multiple prefixes
   correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], measured[,-which(names(measured) == "IID")], use = "complete.obs", method="spearman")
-  
-  write.table(correlation_matrix, file=cor_matrix, row=TRUE, col=TRUE, qu=FALSE, sep="\t")
-  pdf(height=54,width=87,cor_plot)
-  #png(height=540, width=870,file=cor_plot)
-  corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black",tl.cex=5,cl.cex=5)
-  dev.off()
 
-  # add correlation plot between predicted cell count and measured cell counts
-
-  # add correlation plot between predicted cell counts
 }
 
+write.table(correlation_matrix, file = cor_matrix, row.names = TRUE, col.names = TRUE, quote = FALSE, sep = "\t")
+pdf(file = cor_plot, height = 54, width = 87)
+corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
+dev.off()
 
+# add correlation plot between predicted cell count and measured cell counts
+
+# add correlation plot between predicted cell counts
