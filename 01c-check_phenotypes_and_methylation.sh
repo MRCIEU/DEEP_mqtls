@@ -71,7 +71,7 @@ then
 	# smoking from cohorts
 	${R_directory}Rscript resources/datacheck/check_phenotypes.R \
 		${betas} \
-		${methylation_no_outliers} \
+		${methylation_no_outliers_ewas} \
 		${cohort_descriptives_commonids} \
 		${methylation_summary} \
 		${intersect_ids} \
