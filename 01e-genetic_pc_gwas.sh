@@ -44,9 +44,10 @@ for pc in {1..10}; do
     echo "make manhattan and qq plots for genetic PC ${pc_col}"
     echo ${section_01_dir}/gwas_${pc_col}.fastGWAmlm.gz > ${section_01_dir}/gwas_${pc_col}.file.txt
     
-    ${R_directory}Rscript resources/genetics/gcta_plot_gwas.R \
+    ${R_directory}Rscript resources/genetics/plot_gwas.R \
         ${section_01_dir}/gwas_${pc_col}.file.txt \
-            10 \
+            0 \
+            8 \
             1 \
             3 \
             2 \
