@@ -111,8 +111,9 @@ covariate_descriptives="${home_directory}/processed_data/ids/covariate_descripti
 phenotype_descriptives="${home_directory}/processed_data/ids/phenotype_descriptives.RData"
 
 cohort_descriptives="${section_01_dir}/cohort_descriptives.RData"
-methylation_summary="${section_01_dir}/methylation_summary.RData"
-cohort_descriptives_commonids="${section_01_dir}/cohort_descriptives_commonids.RData"
+methylation_summary_gwas="${section_01_dir}/methylation_summary_gwas.RData"
+methylation_summary_ewas="${section_01_dir}/methylation_summary_ewas.RData"
+cohort_descriptives_was="${section_01_dir}/cohort_descriptives_was.RData"
 
 # Clean genetic data
 bfile="${home_directory}/processed_data/genetic_data/data"
@@ -166,7 +167,8 @@ cor_matrix="${section_01_dir}/cor_matrix.txt"
 cor_plot="${section_01_dir}/cor_plot.pdf"
 
 # Covariates
-covariates_intersect="${home_directory}/processed_data/covariate_data/covariates_intersectids.txt"
+covariates_intersect_gwas="${home_directory}/processed_data/covariate_data/covariates_gwas_intersectids.txt"
+covariates_intersect_ewas="${home_directory}/processed_data/covariate_data/covariates_ewas_intersectids.txt"
 covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
 ccovar_file="${home_directory}/processed_data/methylation_data/ccovar_file.txt"
 qcovar_file="${home_directory}/processed_data/methylation_data/qcovar_file.txt"
@@ -195,7 +197,8 @@ genetic_outlier_ids="${home_directory}/processed_data/genetic_data/genetic_outli
 methylation_ids="${home_directory}/processed_data/genetic_data/methylation_ids.txt"
 
 # Methylation files
-methylation_no_outliers="${home_directory}/processed_data/methylation_data/methylation_no_outliers.Robj"
+methylation_no_outliers_gwas="${home_directory}/processed_data/methylation_data/methylation_no_outliers_gwas.Robj"
+methylation_no_outliers_ewas="${home_directory}/processed_data/methylation_data/methylation_no_outliers_ewas.Robj"
 normalized_between_datasets="${home_directory}/processed_data/methylation_data/normalized_between_datasets.Robj"
 
 transformed_methylation_adjusted="${home_directory}/processed_data/methylation_data/transformed_methylation_adjusted"
