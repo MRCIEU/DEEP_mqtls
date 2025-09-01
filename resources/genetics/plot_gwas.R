@@ -40,14 +40,18 @@ main = function(){
 
   filenames <- arguments[1]
   pval_column <- as.numeric(arguments[2])
-  chr_column <- as.numeric(arguments[3])
-  pos_column <- as.numeric(arguments[4])
-  snp_column <- as.numeric(arguments[5])
-  header <- as.logical(arguments[6])
-  control_chr <- as.numeric(arguments[7])
-  control_pos <- as.numeric(arguments[8])
-  control_window <- as.numeric(arguments[9])
-  control_threshold <- as.numeric(arguments[10])
+  beta_column <- as.numeric(arguments[3])
+  chr_column <- as.numeric(arguments[4])
+  pos_column <- as.numeric(arguments[5])
+  snp_column <- as.numeric(arguments[6])
+  header <- as.logical(arguments[7])
+  control_chr <- as.numeric(arguments[8])
+  control_pos <- as.numeric(arguments[9])
+  control_window <- as.numeric(arguments[10])
+  control_threshold <- as.numeric(arguments[11])
+
+  plot_pval <- (pval_column != 0)
+  plot_beta <- (beta_column != 0)
 
   filenames = read.table(filenames, header = F, sep = "\t")[,1]
   for (filename in filenames) {
@@ -79,29 +83,35 @@ main = function(){
       GWAS_result = GWAS_result[-grep('PAR', GWAS_result[,chr_column], ignore.case = TRUE),]
     }
 
-    if( as.numeric(min(GWAS_result[,pval_column], na.rm=TRUE)) < 0 | as.numeric(max(GWAS_result[,pval_column], na.rm=TRUE)) > 1){
-      stop("Wrong column specified for p-values")
+    if (plot_pval){
+      if( as.numeric(min(GWAS_result[,pval_column], na.rm=TRUE)) < 0 | as.numeric(max(GWAS_result[, pval_column], na.rm=TRUE)) > 1){
+        stop("Wrong column specified for p-values")
+      }
+      if(any(GWAS_result[, pos_column] < 0)){
+        stop("Negative values in position column")
+    }
     }
 
-    if(any(GWAS_result[, pos_column] < 0)){
-      stop("Negative values in position column")
-    }
-    
     GWAS_result[,chr_column] = as.numeric(GWAS_result[,chr_column])
     GWAS_result[,pos_column] = as.numeric(GWAS_result[,pos_column])
     GWAS_result[,pval_column] = as.numeric(GWAS_result[,pval_column])
     GWAS_result[,snp_column] = paste0(GWAS_result[,chr_column],":",GWAS_result[,pos_column],"_",GWAS_result[,5], "_",GWAS_result[,4])
 
-    if(any(GWAS_result[, pval_column] == 0, na.rm=TRUE)){
-      w <- which(GWAS_result[,pval_column]==0)
-      GWAS_result[w,pval_column] <- as.numeric(.Machine$double.xmin)
+    if (plot_beta) {
+      GWAS_result[,beta_column] = abs(as.numeric(GWAS_result[,beta_column]))
+    }
+    
+    if (plot_pval){
+      if(any(GWAS_result[, pval_column] == 0, na.rm=TRUE)){
+        w <- which(GWAS_result[,pval_column]==0)
+        GWAS_result[w,pval_column] <- as.numeric(.Machine$double.xmin)
     }
     w <- which(GWAS_result[,chr_column]!=control_chr)
     a_minuschr <- GWAS_result[w,]
+    }
 
-    
-    if(control_chr != 0){
-      index <- GWAS_result[,pos_column] > (control_pos - control_window) & GWAS_result[,pos_column] < (control_pos + control_window)
+    if(control_chr != 0 && plot_pval){
+      index <- GWAS_result[,pos_column] >= (control_pos - control_window) & GWAS_result[,pos_column] <= (control_pos + control_window)
       
       GWAS_result_filter <- GWAS_result[index, ]
       min_pval <- min(GWAS_result_filter[,pval_column], na.rm=TRUE)
@@ -145,18 +155,34 @@ main = function(){
     
     message(paste0('Generating manhattan plot for ', outname))
     #man_data = GWAS_result[order(GWAS_result[,pos_column], decreasing = F),]
-    man_data = subset(GWAS_result, -log10(GWAS_result[,pval_column]) > 2)
-    
-    pdf(file=paste0(outname, '_manhattan.pdf'), width=50, height=10)
-    manhattan(man_data, bp=names(man_data)[pos_column], 
-              chr=names(man_data)[chr_column], 
-              snp=names(man_data)[snp_column],
-              ylim=c(2,max(-log10(man_data[,pval_column])+1)))
-    dev.off()
 
-    message("The following plots have been generated, please check!\n",
+    if (plot_pval) {
+      man_data = subset(GWAS_result, -log10(GWAS_result[,pval_column]) > 2)
+      pdf(file=paste0(outname, '_manhattan.pdf'), width=50, height=10)
+      manhattan(man_data, bp=names(man_data)[pos_column], 
+                chr=names(man_data)[chr_column], 
+                snp=names(man_data)[snp_column],
+                ylim=c(2,max(-log10(man_data[,pval_column])+1)))
+      dev.off()
+          message("The following plots have been generated, please check!\n",
             paste0(outname , "_qqplot.png\n"),
             paste0(outname ,"_manhattan.pdf"))
+    }
+    
+    if (plot_beta) {
+      man_data$correlation_abs <- abs(man_data[, beta_column])
+      pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=50, height=10)
+      manhattan(man_data, bp=names(man_data)[pos_column], 
+                chr=names(man_data)[chr_column], 
+                snp=names(man_data)[snp_column],
+                p="Correlation (absolute value)",
+                ylim=c(0, 1)
+      dev.off()
+      
+      message("The following plots have been generated, please check!\n",
+              paste0(outname , "_manhattan_beta.pdf"))
+    }
+
   }
 
 
