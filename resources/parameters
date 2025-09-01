@@ -81,6 +81,8 @@ section_17b_logfile="${section_17_dir}/logs_b/log.txt"
 meth_ids="${home_directory}/processed_data/ids/meth_ids.txt"
 intersect_ids_plink="${home_directory}/processed_data/ids/intersect_ids_plink.txt"
 intersect_ids="${home_directory}/processed_data/ids/intersect_ids.txt"
+covariates_intersect_gwas="${home_directory}/processed_data/covariate_data/covariates_gwas_intersectids.txt"
+covariates_intersect_ewas="${home_directory}/processed_data/covariate_data/covariates_ewas_intersectids.txt"
 
 # Sex prediction (methylation)
 sex_discrepancies="${home_directory}/results/01/sex_discrepancies.RData"
@@ -167,13 +169,14 @@ cor_matrix="${section_01_dir}/cor_matrix.txt"
 cor_plot="${section_01_dir}/cor_plot.pdf"
 
 # Covariates
-covariates_intersect_gwas="${home_directory}/processed_data/covariate_data/covariates_gwas_intersectids.txt"
-covariates_intersect_ewas="${home_directory}/processed_data/covariate_data/covariates_ewas_intersectids.txt"
 covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
 ccovar_file="${home_directory}/processed_data/methylation_data/ccovar_file.txt"
 qcovar_file="${home_directory}/processed_data/methylation_data/qcovar_file.txt"
 genetic_pc_gwas="${home_directory}/processed_data/genetic_data/genetic_pc_gwas.txt"
 qcovar_noPC_file="${home_directory}/processed_data/methylation_data/qcovar_noPC_file.txt"
+
+# phenotype files
+winsorized_pheno="${home_directory}/processed_data/phenotype_data/winsorized_pheno.Robj"
 
 meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_transformed"
 meth_pcs_untransformed="${home_directory}/processed_data/methylation_data/meth_pcs_untransformed"
@@ -211,9 +214,8 @@ outlier_count="${home_directory}/processed_data/methylation_data/outlier_count.t
 # Smoking prediction
 methylation_processed_dir="${home_directory}/processed_data/methylation_data"
 smoking_pred="${methylation_processed_dir}/smoking_prediction"
-smoking_pred_plot="${section_01_dir}/smoking_prediction.pdf"
+smoking_age_pred_plot="${section_01_dir}/smoking_age_prediction.pdf"
 smoking_pred_SD="5"
-
 
 # Age prediction
 age_pred="${home_directory}/processed_data/methylation_data/age_prediction"
