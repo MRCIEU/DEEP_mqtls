@@ -60,7 +60,6 @@ then
 		${covariates_intersect_gwas} \
 		${covariates_intersect_ewas} \
 
-
 fi
 
 if [ "$arg" = "check_phenotype" ] || [ "$arg" = "all" ]
@@ -89,10 +88,11 @@ then
 	echo "Predict age and smoking"
 	${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
 		${methylation_no_outliers_ewas} \
-		${bfile}.fam \
+		${winsorized_pheno} \
+		${covariates_intersect_ewas} \
 		${smoking_pred} \
-		${smoking_pred_plot} \
-		${smoking_pred_SD} \
+		${age} \
+		${smoking_age_pred_plot} \
 		${covariates}
 
 fi
@@ -107,7 +107,7 @@ then
 		${tissue} \
 		${age} \
 		${methylation_array} \
-		${methylation_no_outliers} \
+		${methylation_no_outliers_gwas} \
 		${cellcounts_cov} \
 		${cellcounts_plot} \
 		${cellcounts_summary} \
