@@ -121,6 +121,7 @@ do
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
             ${section_01_dir}/positive.control.untransformed.file.txt \
             10 \
+            0 \
             1 \
             3 \
             2 \
@@ -173,6 +174,7 @@ do
     #     ${R_directory}Rscript resources/genetics/plot_gwas.R \
     #         ${section_01_dir}/positive.control.transformed.file.txt \
     #         10 \
+    #         0 \
     #         1 \
     #         3 \
     #         2 \
@@ -249,6 +251,7 @@ do
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
         ${section_01_dir}/negative.control.untransformed.file.txt \
             10 \
+            0 \
             1 \
             3 \
             2 \
@@ -307,6 +310,7 @@ do
     #     ${R_directory}Rscript resources/genetics/plot_gwas.R \
     #         ${section_01_dir}/negative.control.transformed.file.txt \
     #         10 \
+    #         0 \
     #         1 \
     #         3 \
     #         2 \
