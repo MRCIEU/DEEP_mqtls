@@ -177,6 +177,11 @@ qcovar_noPC_file="${home_directory}/processed_data/methylation_data/qcovar_noPC_
 
 # phenotype files
 winsorized_pheno="${home_directory}/processed_data/phenotype_data/winsorized_pheno.Robj"
+raw_phenotype_distribution_plot="${home_directory}/results/01/raw_phenotype_distribution_plot"
+raw_phenotype_summary_file="${home_directory}/results/01/raw_phenotypes_summary"
+edited_phenotype_distribution_plot="${home_directory}/results/01/edited_phenotype_distribution_plot"
+edited_phenotype_summary_file="${home_directory}/results/01/edited_phenotypes_summary"
+winsorized_phenotype_file="${home_directory}/processed_data/phenotype_data/winsorized_phenotypes"
 
 meth_pcs_transformed="${home_directory}/processed_data/methylation_data/meth_pcs_transformed"
 meth_pcs_untransformed="${home_directory}/processed_data/methylation_data/meth_pcs_untransformed"
