@@ -16,7 +16,7 @@ suppressPackageStartupMessages(library(viridis))
 suppressPackageStartupMessages(library(ggpubr))
 
 args <- (commandArgs(TRUE));
-covariates_file <- as.character(args[1]);
+phenotypes_file <- as.character(args[1]);
 fam_file <- as.character(args[2]);
 meth_ids_file <- as.character(args[3]);
 raw_phenotype_distribution_plot <- as.character(args[4]);
@@ -37,30 +37,30 @@ winsorized_phenotype_file <- as.character(args[9])
 ################
 
 message("Checking covariates file: ", covariates_file)
-covar <- read.table(covariates_file,header=T,stringsAsFactors = F)
+pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F)
 
 # We don't require all DNAm samples to have genetic data
 # we'll print out what the differential is here
 meth_ids <- scan(meth_ids_file, what="character")
 fam <- read.table(fam_file, header=FALSE, stringsAsFactors=FALSE)
-commonids_mgc <- Reduce(intersect, list(meth_ids, covar$IID, fam[,2]))
+commonids_mgc <- Reduce(intersect, list(meth_ids, pheno$IID, fam[,2]))
 message("Number of samples with covariate, methylation and genetic data: ", length(commonids_mgc))
-participants <- as.character(intersect(meth_ids,covar$IID))
-covar <- covar[covar$IID%in%participants,]
+participants <- as.character(intersect(meth_ids,pheno$IID))
+pheno <- pheno[pheno$IID%in%participants,]
 message("Number of samples with covariate and methylation data: ", length(participants))
 
 
 # set all the numeric columns to numeric variables, and all the factors to factors
 # we've set stringsAsFactors = F so all the cols should currently be characters
-for (col_name in colnames(covar)[!colnames(covar)==IID]) {
+for (col_name in colnames(pheno)[!colnames(pheno)==IID]) {
   if (grepl("_numeric", col_name)) {
-    covar[[col_name]] <- as.numeric(covar[[col_name]])
+    pheno[[col_name]] <- as.numeric(pheno[[col_name]])
   } else if (grepl("_factor", col_name)) {
-    covar[[col_name]] <- as.factor(covar[[col_name]])
+    pheno[[col_name]] <- as.factor(pheno[[col_name]])
   }
 }
 
-# QUESTION - save out this version of covar here so we have a raw version?
+# QUESTION - save out this version of pheno here so we have a raw version?
 
 ################
 
@@ -69,7 +69,7 @@ for (col_name in colnames(covar)[!colnames(covar)==IID]) {
 ################
 
 # create list to save the plots to
-phenotypes <- colnames(covar)[!colnames(covar)==IID]
+phenotypes <- colnames(pheno)[!colnames(pheno)==IID]
 plot_list <- vector("list", length = length(phenotypes))
 names(plot_list) <- phenotypes
 summstats_list <- vector("list", length = length(phenotypes))
@@ -77,27 +77,27 @@ names(summstats_list) <- phenotypes
 
 # run loop to generate plots (density for numeric, bar for categorical)
 for(i in phenotypes){
-  if(is.numeric(covar[,i])){
+  if(is.numeric(pheno[,i])){
     # add variable summary and N of NAs to list
-    stats_out <- summary(covar[,i])
+    stats_out <- summary(pheno[,i])
   } else {
-    stats_out <- table(covar[,i])
+    stats_out <- table(pheno[,i])
   }
   summstats_list[[i]]$stats_out <- stats_out
-  summstats_list[[i]]$nas_out <- sum(is.na(covar[,i]))
+  summstats_list[[i]]$nas_out <- sum(is.na(pheno[,i]))
   
   # Warning if there is more than 10% missingness in a variable
-  if(sum(is.na(covar[,i]))>nrow(covar)/10){
+  if(sum(is.na(pheno[,i]))>nrow(pheno)/10){
     message("Warning: there is over 10% missingness in",i)
   }
   # remove missing cases to avoid missingness on plot
-  pheno.temp <- covar[!is.na(covar[,i]),]
+  pheno.temp <- pheno[!is.na(pheno[,i]),]
 
   # run plots (density for numeric variables and bar for categorical)
   if(is.numeric(pheno.temp[,i])){
     test <- ggplot() +
       geom_density(data=pheno.temp, aes_string(x=pheno.temp[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,", total N = ",nrow(covar),":n of NAs=",sum(is.na(covar[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,", total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno.temp[,i]))+
       theme_minimal()
     
@@ -106,7 +106,7 @@ for(i in phenotypes){
     test <- ggplot(data=pheno.temp, aes_string(x=pheno.temp[,i],fill=pheno.temp[,i])) +
       geom_bar()+
       scale_fill_viridis(discrete=T,begin=0,end=0.65)+
-      labs(title=paste0(i,", total N = ",nrow(covar),",NAs = ",sum(is.na(covar[,i]))),x=i)+
+      labs(title=paste0(i,", total N = ",nrow(pheno),",NAs = ",sum(is.na(pheno[,i]))),x=i)+
       theme_minimal()+
       theme(legend.position="none")+
       geom_text(stat='count', aes(label=..count..), color="black", vjust=-0.1)
@@ -153,7 +153,7 @@ save(summstats_list,file=paste0(raw_phenotype_summary_file,"_",study_name,".Rdat
   #         Is this a thing we need to code manually once we have the data harmonisation questionnaire?
 
 
-numeric_phenos <- grepl("_numeric", colnames(covar))
+numeric_phenos <- grepl("_numeric", colnames(pheno))
 # add in here removal of age etc from numeric_phenos
 plot_list <- vector("list", length = length(numeric_phenos))
 names(plot_list) <- numeric_phenos
@@ -161,29 +161,29 @@ summstats_list <- vector("list", length = length(numeric_phenos))
 names(summstats_list) <- numeric_phenos
 
 for(i in numeric_phenos){
-  if(is.numeric(covar[,i])){
+  if(is.numeric(pheno[,i])){
     # remove outliers
     # meeting 3/7/25 - we will winsorise as that will maintain the extreme values
     # we need to look at how that affects distribution (ie does it make it bimodal)
     
     # winsorize data
-    outlier_rm <- Winsorize(covar[,i], val = quantile(covar[,i], probs = c(0.05, 0.95), na.rm = T))
+    outlier_rm <- Winsorize(pheno[,i], val = quantile(pheno[,i], probs = c(0.05, 0.95), na.rm = T))
     # print out how many observations are Winsorized
-    diff_count <- sum(covar[,i] != outlier_rm & !is.na(covar[,i]) & !is.na(outlier_rm))
+    diff_count <- sum(pheno[,i] != outlier_rm & !is.na(pheno[,i]) & !is.na(outlier_rm))
     message("There are",length(diff_count),"outliers in the variable",i,"that have been replaced by the 5%-quantile")
     # change variable to the Winsorized version
       # QUESTION - do we want to keep the original version of the variable somehow? or will this just be the
       # covariate df that we load in at the start of the script? Or do we save out a version of 
       # raw covariates above once we've converted to factor/numeric?
-    if (length(diff_count)>0){covar[,i] <- outlier_rm}
+    if (length(diff_count)>0){pheno[,i] <- outlier_rm}
     # now re-plot and re-do summary stats
     test <- ggplot() +
-      geom_density(data=covar, aes_string(x=covar[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,", total N = ",nrow(covar),":n of NAs=",sum(is.na(covar[,i]))),x=i)+#,color="Legend")+
-      geom_vline(xintercept = mean(covar[,i]))+
+      geom_density(data=pheno, aes_string(x=pheno[,i]), colour="#1F968BFF")+
+      labs(title=paste0(i,", total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      geom_vline(xintercept = mean(pheno[,i]))+
       theme_minimal()
     plot_list[[i]] <- test
-    stats_out <- summary(covar[,i])
+    stats_out <- summary(pheno[,i])
     summstats_list[[i]] <- stats_out
     
   } else {
@@ -209,5 +209,5 @@ dev.off()
 
 save(summstats_list,file=paste0(edited_phenotype_summary_file,"_",study_name,".Rdata"))
 
-save(covar,file=paste0(winsorized_phenotype_file,"_",study_name,".Rdata"))
+save(pheno,file=paste0(winsorized_phenotype_file,"_",study_name,".Rdata"))
 
