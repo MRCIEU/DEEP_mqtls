@@ -398,8 +398,9 @@ celltype_aliases <- list(
   Eos = c("eosinophil", "eosinophils", "eos", "eosin"),
   Baso = c("basophil", "basophils", "baso", "bas"),
   Gran = c("granulocyte", "granulocytes", "gran", "grans", "granulo"),
-  Epi = c("epithelial", "epithelials", "epi", "epit"),
-  Fib = c("fibroblast", "fibroblasts", "fib", "fibr")
+  Epi = c("epithelial", "epithelials", "epi", "epit", "large"),
+  Fib = c("fibroblast", "fibroblasts", "fib", "fibr"),
+  CD45 = c("cd45", "cd45pos", "cd45+", "white_blood_cell", "white_blood_cells", "white_cell","white_cells")
 )
 
 # Function to standardize measured column names
