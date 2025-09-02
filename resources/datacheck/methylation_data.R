@@ -21,6 +21,7 @@ covar_file <- as.character(args[9]);
 sex_pred_plot_path <- as.character(args[10]);
 ids <- as.character(args[11]);
 ids_plink <- as.character(args[12]);
+cellcounts_output <- as.character(args[13]);
 
 message("Checking methylation data: ", betas_file)
 load(betas_file)
@@ -135,8 +136,6 @@ if(length(p.overlap) < no.overlap)
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
-
-
 
 #
 # Predict sex using DNA-methylation, and remove subjects with sex discrepancies.
@@ -384,12 +383,75 @@ if(file.exists(ids_plink)) {
 write.table(fam2[,2],ids,sep="\t",quote=F,row.names=F,col.names=F)
 write.table(fam2[,1:2],ids_plink,sep="\t",quote=F,row.names=F,col.names=F)
 
-
-# Measured cell counts
-
+# Measured cell counts format
 message("Checking measured cell counts data: ", cellcounts_file_measured)
 
+if(cellcounts_file_measured == "NULL")
+{	
+	message("No cell counts are provided")
+}
+
+celltype_aliases <- list(
+  Neu = c("neutrophil", "neutrophils", "neutro", "neu", "neut"),
+  Lym = c("lymphocyte", "lymphocytes", "lymph", "lym"),
+  Mono = c("monocyte", "monocytes", "mono", "mon"),
+  Eos = c("eosinophil", "eosinophils", "eos", "eosin"),
+  Baso = c("basophil", "basophils", "baso", "bas"),
+  Gran = c("granulocyte", "granulocytes", "gran", "grans", "granulo"),
+  Epi = c("epithelial", "epithelials", "epi", "epit"),
+  Fib = c("fibroblast", "fibroblasts", "fib", "fibr")
+)
+
+# Function to standardize measured column names
+standardize_measured_colnames <- function(df, mapping, prefix = "m.") {
+  cn <- colnames(df)
+
+  for (std in names(mapping)) {
+    pats <- mapping[[std]]
+    idx <- which(sapply(cn, function(x) any(tolower(x) %in% pats)))
+    if (length(idx) == 1) {
+      colnames(df)[idx] <- std
+      cn <- colnames(df)
+    } else if (length(idx) > 1) {
+      message("Please contact Haotian Tang (email: haotian.tang@bristol.ac.uk)")
+      stop(paste("Multiple columns matched for", std, ":", paste(cn[idx], collapse = ", ")))
+    } else if (length(idx) == 0) {
+      message(paste("No columns matched for", std))
+    }
+  }
+
+  # Warn about unmatched columns (except IID)
+  mapped_aliases <- unique(unlist(mapping))
+  unmatched <- setdiff(tolower(cn), c("iid", mapped_aliases))
+  if(length(unmatched) > 0) {
+    message("Warning: The following columns were not matched to any standard cell type: ", paste(unmatched, collapse = ", "))
+    stop(paste("Please email Haotian Tang (email: haotian.tang@bristol.ac.uk)"))
+  }
+
+  # Add prefix except for IID
+  colnames(df)[colnames(df) != "IID"] <- paste0(prefix, colnames(df)[colnames(df) != "IID"])
+  return(df)
+}
+
+# Function to check if all values (except IID) are <= 1 (assume percent if TRUE)
+is_percentage_matrix <- function(df) {
+  num_df <- df[, colnames(df) != "IID", drop = FALSE]
+  all(num_df <= 1, na.rm = TRUE)
+}
+
+# Function to convert to percentage (each row sum to 1)
+convert_to_percentage <- function(df) {
+  num_df <- df[, colnames(df) != "IID", drop = FALSE]
+  row_sums <- rowSums(num_df, na.rm = TRUE)
+  # Avoid division by zero
+  row_sums[row_sums == 0] <- NA
+  num_df <- num_df / row_sums
+  df[, colnames(df) != "IID"] <- num_df
+  return(df)
+}
+
 ccm.name<-"NULL"
+
 if(cellcounts_file_measured != "NULL")
 {
 	ccm <- read.table(cellcounts_file_measured,header=T)
@@ -412,15 +474,6 @@ if(cellcounts_file_measured != "NULL")
 		warning("ERROR: ", msg)
 	}
 
-    
-    w <- match(names(ccm),c("IID","Bcells","Tcells","Eos","Mono","Neu","Baso"))
-	if(length(na.omit(w))!=length(names(ccm)))
-	{
-		msg <- paste0("the names in the measured cellcounts file do not match Bcells, Tcells, Eos, Mono, Neu, Baso")
-		#errorlist <- c(errorlist, msg)
-		warning("ERROR: ", msg)
-	}
-
 	if(c2<3)
 	{
 		msg <- paste0("are there any columns with cell counts missing in the measured cell counts file?")
@@ -437,14 +490,20 @@ if(cellcounts_file_measured != "NULL")
 	}
 	message("Number of measured cell types: ", c2)
 	message("Cell types:\n", paste(names(ccm)[-1], collapse="\n"))
+
+  message("Reformat measured cell counts")
+  ccm <- standardize_measured_colnames(ccm, celltype_aliases, prefix = "m.")
+
+  message("Check whether cell counts are expressed as percentages or absolute numbers.")
+  if(!is_percentage_matrix(ccm))
+  {
+	  ccm <- convert_to_percentage(ccm)
+	  message("Converted to percentage")
+  }
+
+  write.table(ccm, file=cellcounts_output, sep="\t", row.names=F, col.names=T, quote=F)
+
 }
-
-if(cellcounts_file_measured == "NULL")
-{	
-	message("No cell counts are provided")
-}
-
-
 
 cohort_summary <- list()
 cohort_summary$n_CpGs <- nrow(norm.beta)
@@ -458,7 +517,6 @@ if(length(ccm.name)>0){cohort_summary$measured_cellcounts <- as.character(ccm.na
 if(length(ccm.name)==0){cohort_summary$measured_cellcounts <- "not_provided"}
 
 save(cohort_summary, file=cohort_descriptives_file)
-
 
 
 summariseMeth <- function(X)

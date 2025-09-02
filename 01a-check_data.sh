@@ -164,7 +164,8 @@ then
     	${covariates} \
     	${sex_pred_plot} \
 		${intersect_ids} \
-		${intersect_ids_plink}
+		${intersect_ids_plink} \
+		${format_measured_cellcounts}
     
 fi
 

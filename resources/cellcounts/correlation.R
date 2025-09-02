@@ -1,5 +1,6 @@
 #Correlation matrix between measured cell counts and predicted cell counts
 library(corrplot)
+library(ggplot2)
 
 arguments <- commandArgs(T);
 cellcounts_cov <- arguments[1];
@@ -7,70 +8,7 @@ measured_cellcounts <- arguments[2];
 cor_matrix <- arguments [3];
 cor_plot <- arguments [4];
 scripts_directory<-arguments[5];
-
-# Define mapping for common cell types and their possible aliases
-celltype_aliases <- list(
-  Neu = c("neutrophil", "neutrophils", "neutro", "neu", "neut"),
-  Lym = c("lymphocyte", "lymphocytes", "lymph", "lym"),
-  Mono = c("monocyte", "monocytes", "mono", "mon"),
-  Eos = c("eosinophil", "eosinophils", "eos", "eosin"),
-  Baso = c("basophil", "basophils", "baso", "bas"),
-  Gran = c("granulocyte", "granulocytes", "gran", "grans", "granulo")
-)
-
-# Function to standardize measured column names
-standardize_measured_colnames <- function(df, mapping, prefix = "m.") {
-  cn <- colnames(df)
-  for (std in names(mapping)) {
-    pats <- mapping[[std]]
-    idx <- which(sapply(cn, function(x) any(tolower(x) %in% pats)))
-    if (length(idx) == 1) {
-      colnames(df)[idx] <- std
-      cn <- colnames(df)
-    } else if (length(idx) > 1) {
-      stop(paste("Multiple columns matched for", std, ":", paste(cn[idx], collapse = ", ")))
-    }
-  }
-  # Add prefix except for IID
-  colnames(df)[colnames(df) != "IID"] <- paste0(prefix, colnames(df)[colnames(df) != "IID"])
-  return(df)
-}
-
-# Function to check if all values (except IID) are <= 1 (assume percent if TRUE)
-is_percentage_matrix <- function(df) {
-  num_df <- df[, colnames(df) != "IID", drop = FALSE]
-  all(num_df <= 1, na.rm = TRUE)
-}
-
-# Function to convert to percentage (each row sum to 1)
-convert_to_percentage <- function(df) {
-  num_df <- df[, colnames(df) != "IID", drop = FALSE]
-  row_sums <- rowSums(num_df, na.rm = TRUE)
-  # Avoid division by zero
-  row_sums[row_sums == 0] <- NA
-  num_df <- num_df / row_sums
-  df[, colnames(df) != "IID"] <- num_df
-  return(df)
-}
-
-if (measured_cellcounts != 0) {
-  measured <- read.table(measured_cellcounts, header=T)
-  if (!"IID" %in% colnames(measured)) {
-    stop("Set the name 'IID' to the column of individuals identifiers in measured cell count file")
-  }
-  print("Detecting columns in measured cell counts file")
-  measured <- standardize_measured_colnames(measured, celltype_aliases, prefix = "m.")
-
-  if (nrow(measured) > 0 && !is_percentage_matrix(measured)) {
-    message("Measured cell counts are not in percentage, converting to percentage (row sum = 1).")
-    measured <- convert_to_percentage(measured)
-  }
-  
-} else {
-  measured <- data.frame()
-  print("No measured cell counts available for comparison.")
-}
-
+study_name <- arguments[6];
 
 message("Reading in predicted cell counts")
 predicted<-read.table(cellcounts_cov, header=T)
@@ -117,6 +55,7 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
         if (length(available_b_cols) > 0) {
           combined_data[paste0(pref, ".Bcells")] <- rowSums(data[, available_b_cols, drop = FALSE], na.rm = TRUE)
         }
+
       } else if (pref == "zheng") {
         # Zheng: B
         b_col <- paste0(pref, ".B")
@@ -154,7 +93,7 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
           combined_data[paste0(pref, ".Tcells")] <- rowSums(data[, available_t_cols, drop = FALSE], na.rm = TRUE)
         }
       }
-
+      
       # Individual cell types - map to common names
       if (pref == "unilife") {
         # For unilife, combine base and adult cell types
@@ -176,8 +115,10 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
           }
         }
       } else {
+
         # For salas, zheng, middleton - keep original names but standardize Neutro to Neu
         individual_cols <- prefix_cols[!grepl("Bcells|Tcells", prefix_cols)]
+
         for (col in individual_cols) {
           # Standardize Neutro to Neu for zheng
           if (pref == "zheng" && grepl("Neutro$", col)) {
@@ -187,10 +128,32 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
             combined_data[col] <- data[, col]
           }
         }
+
+        # Add Granulocytes for salas and zheng
+        if (pref %in% c("salas", "zheng")) {
+          neu_col <- paste0(pref, ".Neu")
+          eos_col <- paste0(pref, ".Eos")
+          baso_col <- paste0(pref, ".Baso")
+          available_gran_cols <- c(neu_col, eos_col, baso_col)[c(neu_col, eos_col, baso_col) %in% colnames(data)]
+          if (length(available_gran_cols) > 0) {
+            combined_data[paste0(pref, ".Gran")] <- rowSums(data[, available_gran_cols, drop = FALSE], na.rm = TRUE)
+          }
+        }
+        # no Granulocytes in middleton
       }
+      
+    # Add Lymphocytes calculation for unilife, salas, zheng (Lymphocytes = Tcells + Bcells + NK)
+    for (pref in c("unilife", "salas", "zheng")) {
+    t_col <- paste0(pref, ".Tcells")
+    b_col <- paste0(pref, ".Bcells")
+    # unilife uses sumNK，others use NK
+    nk_col <- if (pref == "unilife") paste0(pref, ".sumNK") else paste0(pref, ".NK")
+    lymph_col <- paste0(pref, ".Lym")
+    available_lymph_cols <- c(t_col, b_col, nk_col)[c(t_col, b_col, nk_col) %in% colnames(predicted)]
+    if (length(available_lymph_cols) > 0) {
+      predicted[[lymph_col]] <- rowSums(predicted[, available_lymph_cols, drop = FALSE], na.rm = TRUE)
     }
   }
-
   return(combined_data)
 }
 
@@ -244,6 +207,56 @@ pdf(file = cor_plot, height = 54, width = 87)
 corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
 dev.off()
 
-# add correlation plot between predicted cell count and measured cell counts
+# Scatter plots between predicted cell counts
+# Define matching between unilife and salas columns
+# unilife: B, CD4T, CD8T, Mono, nRBC (only in babies), Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono, sumNK, sumMono, sumEos, sumBaso, sumNK, sumGran
 
-# add correlation plot between predicted cell counts
+# salas: CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono,
+
+# zheng: Epi, Fib, B, NK, CD4T, CD8T, Mono, Neu
+
+# middleton: CD45pos, large
+
+method_only_comparisons <- list(
+    B = list(unilife = "unilife.Bcells", salas = "salas.Bcells"),
+    T = list(unilife = "unilife.Tcells", salas = "salas.Tcells"),
+    Lym = list(unilife = "unilife.Lym", salas = "salas.Lym"),
+    Neu = list(unilife = "unilife.sumNeu", salas = "salas.Neu"),
+    Eos = list(unilife = "unilife.sumEos", salas = "salas.Eos"),
+    Baso = list(unilife = "unilife.sumBaso", salas = "salas.Baso"),
+    NK = list(unilife = "unilife.sumNK", salas = "salas.NK")
+)
+
+# Only plot if both unilife and salas are present
+if (all(c("unilife", "salas") %in% prefix)) {
+  message("Both unilife and salas predicted cell counts detected. Generating scatter plots between predicted cell counts.")
+
+  for (celltype in names(method_only_comparisons)) {
+    unilife_col <- method_only_comparisons[[celltype]]$unilife
+    salas_col <- method_only_comparisons[[celltype]]$salas
+    if (all(c(unilife_col, salas_col) %in% colnames(predicted))) {
+      df <- na.omit(predicted[, c(unilife_col, salas_col)])
+      colnames(df) <- c("unilife", "salas")
+      corr <- cor(df$unilife, df$salas)
+      residuals <- df$salas - df$unilife
+      rmse <- sqrt(mean(residuals^2))
+      plot_title <- paste0(celltype, ": unilife vs salas")
+      p <- ggplot(df, aes(x = unilife, y = salas)) + 
+        geom_point(alpha = 0.6) + 
+        geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+        geom_smooth(method = "lm", se = TRUE, color = "blue", linetype = "solid", linewidth = 0.8) +
+        labs(
+          title = plot_title,
+          subtitle = paste0("Pearson r = ", round(corr, 3), ", RMSE = ", round(rmse, 3)),
+          x = "unilife",
+          y = "salas"
+        ) +
+        coord_fixed(ratio = 1, xlim = c(0, max(c(df$unilife, df$salas), na.rm = TRUE)),
+                             ylim = c(0, max(c(df$unilife, df$salas), na.rm = TRUE))) +
+        theme_minimal()
+      ggsave(paste0(study_name,"_scatter_predicted_", celltype, "_unilife_vs_salas.pdf"), plot = p, width = 6, height = 5)
+    }
+  }
+}
+
+# add scatter plots between predicted cell count and measured cell counts

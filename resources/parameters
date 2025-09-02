@@ -153,6 +153,7 @@ pca="${home_directory}/processed_data/genetic_data/pca"
 pcs_all="${pca}.eigenvec"
 
 # Cell count
+format_measured_cellcounts="${home_directory}/processed_data/cellcounts/measured_cellcounts.format.txt"
 cellcounts="${home_directory}/processed_data/methylation_data/cellcounts.txt"
 cellcounts_tf="${home_directory}/processed_data/cellcounts/cellcounts.transformed.txt"
 cellcounts_tf_smok="${home_directory}/processed_data/cellcounts/cellcounts.transformed.smokingadj.txt"
