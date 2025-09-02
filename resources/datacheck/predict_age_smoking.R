@@ -10,8 +10,8 @@
 arguments <- commandArgs(T)
 
 beta_file <- arguments[1]
-cov_file <- arguments[2] # [winsorized_covariates_file from check_phenotypes]
-fam_file <- arguments[3]
+winsorized_pheno_file <- arguments[2] # [winsorized_pheno_file from check_phenotypes]
+cov_file <- arguments[3]
 out_file <- arguments[4]
 age_stats <- arguments[5]
 study_name <- arguments[6]
@@ -30,7 +30,7 @@ covar <- covar[covar$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 message("Number of samples with covariate and methylation data: ", length(participants))
 
-message(paste(nrow(fam), "samples with genetic data matched to methylation data"))
+# message(paste(nrow(fam), "samples with genetic data matched to methylation data"))
 
 message("Predicting DNAmAge")#############################################
 
@@ -105,3 +105,8 @@ plot.out <- ggarrange(hannum_plot, mcigarette_plot,
                       labels = c("A","B"),
                       ncol = 2, nrow = 1)
 print(plot.out)
+dev.off()
+
+# Save covariate file
+smk_covar = covar[, c("FID","IID", "p_smoking_mcigarette")]
+write.table(smk_covar, file=paste0(out_file), sep="\t", row.names=FALSE, quote=FALSE)
