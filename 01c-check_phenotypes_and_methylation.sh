@@ -69,15 +69,15 @@ then
 	echo "Check phenotypes"
 	# smoking from cohorts
 	${R_directory}Rscript resources/datacheck/check_phenotypes.R \
-		${betas} \
-		${methylation_no_outliers_ewas} \
-		${cohort_descriptives_commonids} \
-		${methylation_summary} \
-		${intersect_ids} \
 		${covariates} \
-		${covariates_intersect} \
 		${bfile}.fam \
-		${bfile}.bim 
+		${meth_ids} \
+		${raw_phenotype_distribution_plot} \
+		${raw_phenotype_summary_file} \
+		${study_name}
+		${edited_phenotype_distribution_plot} \
+		${edited_phenotype_summary_file} \
+		${winsorized_phenotype_file} 
 
 fi
 
