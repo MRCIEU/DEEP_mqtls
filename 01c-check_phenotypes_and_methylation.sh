@@ -74,7 +74,7 @@ then
 		${meth_ids} \
 		${raw_phenotype_distribution_plot} \
 		${raw_phenotype_summary_file} \
-		${study_name}
+		${study_name} \
 		${edited_phenotype_distribution_plot} \
 		${edited_phenotype_summary_file} \
 		${winsorized_phenotype_file} 
@@ -88,12 +88,12 @@ then
 	echo "Predict age and smoking"
 	${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
 		${methylation_no_outliers_ewas} \
-		${winsorized_pheno} \
-		${covariates_intersect_ewas} \
-		${smoking_pred} \
-		${age} \
-		${smoking_age_pred_plot} \
-		${covariates}
+		${winsorized_phenotype_file} \
+		${bfile}.fam \
+		${study_name} \
+		${age_smoking_prediction_plot} \
+		${updated_phenotype_file} \
+		${predicted_smoking}
 
 fi
 
