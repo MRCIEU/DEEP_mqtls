@@ -209,5 +209,5 @@ dev.off()
 
 save(summstats_list,file=paste0(edited_phenotype_summary_file,"_",study_name,".Rdata"))
 
-save(pheno,file=paste0(winsorized_phenotype_file,"_",study_name,".Rdata"))
+save(pheno,file=paste0(winsorized_phenotype_file))
 
