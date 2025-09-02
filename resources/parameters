@@ -223,6 +223,10 @@ smoking_pred="${methylation_processed_dir}/smoking_prediction"
 smoking_age_pred_plot="${section_01_dir}/smoking_age_prediction.pdf"
 smoking_pred_SD="5"
 
+age_smoking_prediction_plot="${home_directory}/results/01/age_smoking_prediction_plot"
+updated_phenotype_file="${home_directory}/processed_data/phenotype_data/updated_winsorized_phenotypes.RData"
+predicted_smoking="${home_directory}/results/01/predicted_smoking.txt"
+
 # Age prediction
 age_pred="${home_directory}/processed_data/methylation_data/age_prediction"
 age_pred_sumstats="${section_01_dir}/age_prediction_stats"
