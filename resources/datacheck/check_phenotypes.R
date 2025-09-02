@@ -19,16 +19,15 @@ args <- (commandArgs(TRUE));
 covariates_file <- as.character(args[1]);
 fam_file <- as.character(args[2]);
 meth_ids_file <- as.character(args[3]);
-sorted_methylation <- as.character(args[4]);
-raw_phenotype_distribution_plot <- as.character(args[5]);
-raw_phenotype_summary_file <- as.character(args[6])
-study_name <- arguments[7] # ${study_name} in bash
-edited_phenotype_distribution_plot <- as.character(args[8]);
-edited_phenotype_summary_file <- as.character(args[9])
+raw_phenotype_distribution_plot <- as.character(args[4]);
+raw_phenotype_summary_file <- as.character(args[5])
+study_name <- arguments[6] # ${study_name} in bash
+edited_phenotype_distribution_plot <- as.character(args[7]);
+edited_phenotype_summary_file <- as.character(args[8])
 # we'll save out the edited phenotype file as an Rdata file so we don't have to
 # do anything with the variables the next time we load them in
-phenotype_outfile <- as.character(args[10])
-winsorized_covariates_file <- as.character(args[11])
+#phenotype_outfile <- as.character(args[9])
+winsorized_phenotype_file <- as.character(args[9])
 
 
 ################
@@ -210,5 +209,5 @@ dev.off()
 
 save(summstats_list,file=paste0(edited_phenotype_summary_file,"_",study_name,".Rdata"))
 
-save(covar,file=paste0(winsorized_covariates_file,"_",study_name,".Rdata"))
+save(covar,file=paste0(winsorized_phenotype_file,"_",study_name,".Rdata"))
 
