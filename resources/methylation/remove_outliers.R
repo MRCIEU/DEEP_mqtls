@@ -62,8 +62,11 @@ summariseMeth <- function(X, out_file)
 
 message("Generating summary stats of methylation")
 
-meth_summary_gwas <- summariseMeth(norm.beta.shared, methylation_summary_file_gwas)
-meth_summary_ewas <- summariseMeth(norm.beta.meth, methylation_summary_file_ewas)
+meth_summary_gwas <- summariseMeth(norm.beta.shared, out_file_gwas)
+meth_summary_ewas <- summariseMeth(norm.beta.meth, out_file_ewas)
+
+save(meth_summary_gwas, file = methylation_summary_file_gwas)
+save(meth_summary_ewas, file = methylation_summary_file_ewas)
 
 message("Reading covariate data and remove outliers")
 
@@ -71,6 +74,7 @@ covs <- read.table(covar_file, header = T, colClasses=c('Sex_factor'='factor'))
 
 m_gwas<-match(intersect_ids[,1],covs$IID)
 covs_gwas<-covs[m_gwas,]
+
 
 m_ewas<-match(meth_id[,1],covs$IID)
 covs_ewas<-covs[m_ewas,]
@@ -80,7 +84,6 @@ write.table(covs_ewas,covariates_intersect_ewas,sep="\t",quote=F,row.names=F,col
 
 bim <- fread(bim_file)
 fam <- read.table(fam_file,header=F,stringsAsFactors=F)
-
 
 cohort_summary <- list()
 cohort_summary$methylation_sample_size_gwas <- ncol(norm.beta.shared)
