@@ -234,6 +234,9 @@ age_pred_plot="${section_01_dir}/age_prediction"
 age_pred_clock="${section_01_dir}/age_clock.txt"
 age_pred_SD="5"
 
+# EWAS QC1
+qc1_ewas_stats="${home_directory}/results/01/qc1_ewas_stats"
+qc1_ewas_report="${home_directory}/results/01/qc1_ewas_report"
 
 # Results locations
 matrixeqtl_mqtl_dir="${home_directory}/results/05"
