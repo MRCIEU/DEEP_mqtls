@@ -145,10 +145,34 @@ then
 
 	echo "EWAS of age and smoking"
 	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
-		${methylation_no_outliers} \
+		${methylation_no_outliers_ewas} \
+		${updated_phenotype_file} \
+		${methylation_array} \
 		${cellcounts_cov} \
-		${cellcounts_plot} \
-		${cellcounts_summary}
+		"unilife" \
+		${study_name} \
+		${study_specific_vars} \
+		${qc1_ewas_stats} \
+		${qc1_ewas_report} \
+		
+fi
+
+if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
+then
+	section_message "ewas"
+
+	echo "EWAS of age and smoking"
+	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
+		${methylation_no_outliers_ewas} \
+		${updated_phenotype_file} \
+		${methylation_array} \
+		${cellcounts_cov} \
+		"salas" \
+		${study_name} \
+		${study_specific_vars} \
+		${qc1_ewas_stats} \
+		${qc1_ewas_report} \
+		
 
 fi
 
