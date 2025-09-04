@@ -10,6 +10,16 @@ cor_plot <- arguments [4];
 scripts_directory<-arguments[5];
 study_name <- arguments[6];
 
+if (measured_cellcounts != "NULL"){
+  message("Reading in measured cell counts")
+  # already format in 01a
+  # colnames should be in prefix of m, e.g. m.Bcells, m.Tcells, m.Mono, m.Gran, m.NK, m.Lym, m.Baso, m.Eos, m.Neu, m.Epi, m.Fib
+  # units are in percentage
+  measured = read.table(measured_cellcounts, header=T)
+} else {
+  measured = data.frame()
+}
+
 message("Reading in predicted cell counts")
 predicted<-read.table(cellcounts_cov, header=T)
 prefix <- unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))]))
@@ -116,13 +126,26 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
         }
       } else {
 
-        # For salas, zheng, middleton - keep original names but standardize Neutro to Neu
+        # For salas, zheng, middleton - keep original names but standardize Neutro to Neu, large to Epi
         individual_cols <- prefix_cols[!grepl("Bcells|Tcells", prefix_cols)]
 
         for (col in individual_cols) {
           # Standardize Neutro to Neu for zheng
           if (pref == "zheng" && grepl("Neutro$", col)) {
             new_col_name <- sub("Neutro$", "Neu", col)
+            combined_data[new_col_name] <- data[, col]
+          } else if (pref == "zheng" && grepl("Eosino$", col)) {
+            new_col_name <- sub("Eosino$", "Eos", col)
+            combined_data[new_col_name] <- data[, col]
+          } else
+            combined_data[col] <- data[, col]
+          }
+        }
+
+        for (col in individual_cols) {
+          # standardize large to Epi for middleton
+          if (pref == "middleton" && grepl("large$", col)) {
+            new_col_name <- sub("large$", "Epi", col)
             combined_data[new_col_name] <- data[, col]
           } else {
             combined_data[col] <- data[, col]
@@ -141,7 +164,7 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
         }
         # no Granulocytes in middleton
       }
-      
+    
     # Add Lymphocytes calculation for unilife, salas, zheng (Lymphocytes = Tcells + Bcells + NK)
     for (pref in c("unilife", "salas", "zheng")) {
     t_col <- paste0(pref, ".Tcells")
@@ -209,22 +232,43 @@ dev.off()
 
 # Scatter plots between predicted cell counts
 # Define matching between unilife and salas columns
-# unilife: B, CD4T, CD8T, Mono, nRBC (only in babies), Gran, NK, aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono, sumNK, sumMono, sumEos, sumBaso, sumNK, sumGran
+# unilife: B, CD4T, CD8T, Mono, nRBC (only in babies), Gran, NK from cord blood;
+# aCD4Tnv, aBaso, aCD4Tmem, aBmem, aBnv, aTreg, aCD8Tmem, aCD8Tnv, aEos, aNK, aNeu, aMono, sumNK, sumMono, sumEos, sumBaso, sumNeu, sumGran, Bcells, Tcells, Lym
+# Tcells, Bcells
 
 # salas: CD4Tnv, Baso, CD4Tmem, Bmem, Bnv, Treg, CD8Tmem, CD8Tnv, Eos, NK, Neu, Mono,
+# Tcells, Bcells
 
-# zheng: Epi, Fib, B, NK, CD4T, CD8T, Mono, Neu
+# zheng: Epi, Fib, B, NK, CD4T, CD8T, Mono, Neu, Eos, 
+# Tcells
 
 # middleton: CD45pos, large
 
+# m: Bcells, Tcells, Lym, Baso, Eos, Neu, Mono, Epi, Fib
+
 method_only_comparisons <- list(
-    B = list(unilife = "unilife.Bcells", salas = "salas.Bcells"),
-    T = list(unilife = "unilife.Tcells", salas = "salas.Tcells"),
-    Lym = list(unilife = "unilife.Lym", salas = "salas.Lym"),
-    Neu = list(unilife = "unilife.sumNeu", salas = "salas.Neu"),
-    Eos = list(unilife = "unilife.sumEos", salas = "salas.Eos"),
-    Baso = list(unilife = "unilife.sumBaso", salas = "salas.Baso"),
-    NK = list(unilife = "unilife.sumNK", salas = "salas.NK")
+  # unilife and salas specific
+    CD4Tnv = list(unilife = "unilife.aCD4Tnv", salas = "salas.CD4Tnv"),
+    CD4Tmem = list(unilife = "unilife.aCD4Tmem", salas = "salas.CD4Tmem"),
+    Bmem = list(unilife = "unilife.aBmem", salas = "salas.Bmem"),
+    Bnv = list(unilife = "unilife.aBnv", salas = "salas.Bnv"),
+    Treg = list(unilife = "unilife.aTreg", salas = "salas.Treg"),
+    CD8Tmem = list(unilife = "unilife.aCD8Tmem", salas = "salas.CD8Tmem"),
+    CD8Tnv = list(unilife = "unilife.aCD8Tnv", salas = "salas.CD8Tnv"),
+
+  # unilife, salas, zheng
+    B = list(unilife = "unilife.Bcells", salas = "salas.Bcells", m = "m.Bcells", zheng = "zheng.Bcells"),
+    T = list(unilife = "unilife.Tcells", salas = "salas.Tcells", m = "m.Tcells", zheng = "zheng.Tcells"),
+    Lym = list(unilife = "unilife.Lym", salas = "salas.Lym", m = "m.Lym", zheng = "zheng.Lym"),
+    Neu = list(unilife = "unilife.sumNeu", salas = "salas.Neu", m= "m.Neu", zheng = "zheng.Neu"),
+    Eos = list(unilife = "unilife.sumEos", salas = "salas.Eos", m = "m.Eos", zheng = "zheng.Eos"),
+    Baso = list(unilife = "unilife.sumBaso", salas = "salas.Baso", m = "m.Baso"),
+    NK = list(unilife = "unilife.sumNK", salas = "salas.NK", m = "m.NK", zheng = "zheng.NK"),
+    Gran = list(unilife = "unilife.sumGran", salas = "salas.Gran", m = "m.Gran"),
+
+    # other cell types, Epi, Fib
+    Epi = list(middleton = "middleton.Epi", zheng = "zheng.Epi", m ="m.Epi"),
+    Fib = list(zheng = "zheng.Fib", m = "m.Fib")
 )
 
 # Only plot if both unilife and salas are present
@@ -259,4 +303,5 @@ if (all(c("unilife", "salas") %in% prefix)) {
   }
 }
 
-# add scatter plots between predicted cell count and measured cell counts
+# add correlationn (scatter) plots between predicted cell count and between predicted and measured cell counts
+
