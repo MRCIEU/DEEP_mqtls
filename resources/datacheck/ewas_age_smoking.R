@@ -11,7 +11,7 @@ meth_array <- arguments[3]
 cellcounts_cov <- arguments[4] 
 cellcount_panel <- arguments[5] 
 study_name <- arguments[6]
-study_specific_vars <- arguments[7] # these will be added in the config file - batch vars and study specific factors
+study_specific_vars <- strsplit(arguments[7], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
 ewas_stats <- arguments[8]
 ewas_report <- arguments[9]
 
@@ -38,7 +38,7 @@ if (cellcount_panel == "unilife") {
 # add cell counts to pheno
 
 cellcounts_temp <- cell_counts[,celltypes]
-pheno <- merge(pheno,cellcounts_temp,by.x="IID",by.y="row.names")
+pheno <- merge(pheno,cellcounts_temp,by="IID")
 
 message("Setting up EWAS")#######################################
 
