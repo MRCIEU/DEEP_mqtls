@@ -238,6 +238,12 @@ age_pred_SD="5"
 qc1_ewas_stats="${home_directory}/results/01/qc1_ewas_stats"
 qc1_ewas_report="${home_directory}/results/01/qc1_ewas_report"
 
+# meth PCs QC1
+meth_pcs_scree_plot"${home_directory}/results/01/meth_pcs_scree_plot"
+meth_pcs_screePC1PC2_plot"${home_directory}/results/01/meth_pcs_screePC1PC2_plot"
+meth_pcs_screePC3PC4_plot"${home_directory}/results/01/meth_pcs_screePC3PC4_plot"
+pc_var_association_plot"${home_directory}/results/01/pc_var_association_plot"
+
 # Results locations
 matrixeqtl_mqtl_dir="${home_directory}/results/05"
 matrixeqtl_vmqtl_dir="${home_directory}/results/06"
