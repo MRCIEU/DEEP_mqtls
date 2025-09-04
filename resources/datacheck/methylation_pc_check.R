@@ -2,18 +2,16 @@
 # QC phase 1
 # checking for PC distributions and associations
 
-# To do - add specificity to genetic PCs
-
 # Args
 arguments <- commandArgs(T)
 
 beta_file <- arguments[1]
-cov_file <- arguments[2] # [winsorized_covariates_file from check_phenotypes]
-out_file <- arguments[3]
-cellcount_file <- arguments[4] 
+updated_pheno_file <- arguments[2] # [winsorized_covariates_file from check_phenotypes]
+cellcounts_cov <- arguments[3] 
+cellcount_panel <- arguments[4] 
 study_name <- arguments[5]
-study_specific_vars <- arguments[6]
-genetic_pc_file <- arguments[7]
+study_specific_vars <- strsplit(arguments[6], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
+genetic_pc_file <- arguments[7] # ${pcs_all} \
 scree_plot <- arguments[8]
 PC1PC2_plot <- arguments[9]
 PC3PC4_plot <- arguments[10]
@@ -22,20 +20,34 @@ pc_var_association_plot <- arguments[11]
 suppressPackageStartupMessages(library(meffil))
 
 message("Reading in data and matching up samples across files")#######################################
-load(cov_file)
+load(updated_pheno_file)
 load(beta_file)
-load(cellcount_file)
-# TO DO: what kind of file is genetic_pc_file?
-load(genetic_pc_file)
+cell_counts <- read.table(cellcounts_cov, header=T)
+rownames(cell_counts) <- cell_counts$IID
 
-participants <- as.character(intersect(colnames(norm.beta),covar$IID))
-covar <- covar[covar$IID%in%participants,]
+# TO DO: what kind of file is genetic_pc_file?
+genetic_pcs <- read.table(genetic_pc_file)[,-1]
+colnames(genetic_pcs) <- c("IID", paste("genetic_pc", 1:(ncol(genetic_pcs)-1), sep=""))
+rownames(genetic_pcs) <- genetic_pcs$IID
+
+participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
+pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 
-# TO DO: merge genetic PCs 1:10 with covs file
-  # need to know format of genetic PC file
+if (cellcount_panel == "unilife") {
+  celltypes <- grep("^unilife", colnames(cell_counts), value = TRUE)
+} else if (cellcount_panel == "salas") {
+  celltypes <- grep("^salas", colnames(cell_counts), value = TRUE)
+} else {
+  message("Error: cell count panel not detected")
+}
 
-celltypes <- colnames(cellcount_file) # replace this - what is the name of the cell counts df??
+cellcounts_temp <- cell_counts[,celltypes]
+pheno <- merge(pheno,cellcounts_temp,by="IID")
+
+# TO DO: merge genetic PCs 1:10 with pheno file
+  # need to know format of genetic PC file
+pheno <- merge(pheno,genetic_pcs,by="IID")
 
 message("Generating PCs")#######################################
 
@@ -51,7 +63,7 @@ pca.var.explained <- pca.var / sum(pca.var)
 df <- data.frame(PC = 1:length(pca.var.explained),
                  Variance = pca.var.explained)
 
-jpeg(filename = paste0(scree_plot,"_",study_name,".jpg"),width = 4, height = 5, units = "in", res = 600)
+jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
 ggplot(df, aes(x = PC, y = Variance)) +
   geom_line() +
   geom_point() +
@@ -61,13 +73,13 @@ dev.off()
 
 # reduce to top 10 PCs because that's all we will test
 pcs <- pcs[,1:10]
-identical(rownames(pcs),rownames(covs))
-pcs <- merge(x=pcs,y=covs, by.x="row.names", by.y="IID")
+identical(rownames(pcs),rownames(pheno))
+pcs <- merge(x=pcs,y=pheno, by.x="row.names", by.y="IID")
 rownames(pcs) <- pcs$Row.names
 pcs <- pcs[,-1]
 
 # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
-test_pc_vars <- c("Age_numeric","Sex_factor",study_specific_vars, celltypes) 
+test_pc_vars <- c("Age_numeric","Sex_factor","population_group_factor",study_specific_vars, celltypes,colnames(genetic_pcs)[2:11]) 
 plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
 names(plot_pc1pc2_list) <- test_pc_vars
 plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
@@ -111,14 +123,14 @@ for(i in test_pc_vars){
 n_plot_rows <- ceiling(test_pc_vars/4)
 row_dimensions <- n_plot_rows*4
 
-jpeg(filename = paste0(PC1PC2_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+jpeg(filename = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
 makeplots <- ggarrange(plotlist=plot_pc1pc2_list, ncol = 4, nrow = n_plot_rows)
 annotate_figure(makeplots, top = text_grob(paste0(study_name,"; PC1 vs PC2 plots"), 
                                            color = "black", face = "bold", size = 14))
 print(makeplots)
 dev.off()
 
-jpeg(filename = paste0(PC3PC4_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+jpeg(filename = paste0(PC3PC4_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
 makeplots <- ggarrange(plotlist=plot_pc3pc4_list, ncol = 4, nrow = n_plot_rows)
 annotate_figure(makeplots, top = text_grob(paste0(study_name,"; PC3 vs PC4 plots"), 
                                            color = "black", face = "bold", size = 14))
@@ -156,25 +168,34 @@ for(i in 1:10){
   # the plot is awful if you leave them all in
   batchvars <- as.character(temp$var)
   # TO DO: edit the below batch names:
-  slidevars <- grep("^slide|^row",batchvars, value = T)
+  slidevars <- grep("^slide|^row|^plate",batchvars, value = T)
   
   temp_slide_row <- temp[temp$var %in% slidevars & temp$p < 0.05, ]
   # Calculate mean estimate for slide variables
   slide_effects <- temp_slide_row[grep("^slide", temp_slide_row$var), "estimate"]
   mean_slide_effect <- mean(slide_effects, na.rm = TRUE)
-  mean_slide_p <- mean(slide_subset$p, na.rm = TRUE)
+  slide_p <- temp_slide_row[grep("^slide", temp_slide_row$var), "p"]
+  mean_slide_p <- mean(slide_p, na.rm = TRUE)
   # Calculate mean estimate for row variables
   row_effects <- temp_slide_row[grep("^row", temp_slide_row$var), "estimate"]
   mean_row_effect <- mean(row_effects, na.rm = TRUE)
+  row_p <- temp_slide_row[grep("^row", temp_slide_row$var), "p"]
   mean_row_p <- mean(row_subset$p, na.rm = TRUE)
+  # Calculate mean estimate for plate variables
+  plate_effects <- temp_slide_row[grep("^plate", temp_slide_row$var), "estimate"]
+  mean_plate_effect <- mean(plate_effects, na.rm = TRUE)
+  plate_p <- temp_slide_row[grep("^plate", temp_slide_row$var), "p"]
+  mean_plate_p <- mean(plate_subset$p, na.rm = TRUE)
+  
   
   temp <- temp[!temp$var %in% slidevars,]
   temp <- temp[complete.cases(temp),]
   
   summary_slide <- data.frame(estimate = mean_slide_effect, se=NA, t=NA, p = mean_slide_p, var = "mean_slide")
   summary_row <- data.frame(estimate = mean_row_effect, se=NA, t=NA, p = mean_row_p, var = "mean_row")
+  summary_plate <- data.frame(estimate = mean_plate_effect, se=NA, t=NA, p = mean_plate_p, var = "mean_plate")
   # Bind summary rows back to temp
-  temp <- rbind(temp, summary_slide, summary_row)
+  temp <- rbind(temp, summary_slide, summary_row, summary_plate)
   
   pc_plot <- ggplot(temp, aes(x=var, y=estimate, fill=var)) +
     #scale_fill_viridis(discrete = T) +  
@@ -187,7 +208,7 @@ for(i in 1:10){
   pc_plotlist[[i]] <- pc_plot
 }
 
-jpeg(filename = paste0(pc_var_association_plot,"_",study_name,".jpg"),width = 15, height = 20, units = "in", res = 600)
+jpeg(filename = paste0(pc_var_association_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 15, height = 20, units = "in", res = 600)
 makeplots <- ggarrange(plotlist=plot_list, ncol = 3, nrow = 4)
 annotate_figure(makeplots, top = text_grob(paste0(study_name,"; methylation PC associations"), 
                                            color = "black", face = "bold", size = 14))
