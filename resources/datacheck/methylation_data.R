@@ -113,7 +113,7 @@ if(any(grepl("rs", rownames(norm.beta))))
 }
 
 feat <- meffil.get.features(methylation_array)
-#866553
+
 xy<-which(feat$chromosome%in%c("chrX","chrY"))
 probes_xy<-as.character(feat[xy,"name"])
 xy_overlap<-intersect(row.names(norm.beta),probes_xy)
