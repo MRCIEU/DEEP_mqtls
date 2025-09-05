@@ -118,9 +118,10 @@ then
 		${R_directory}Rscript resources/cellcounts/correlation.R \
 			${cellcounts_cov} \
 			${measured_cellcounts} \
+			${cellcounts_cov_total} \
 			${cor_matrix} \
 			${cor_plot} \
-			${scripts_directory} \
+			${cor_plot_cc} \
 			${study_name}
 			
 	elif [ "${measured_cellcounts}" == "NULL" ]; then
@@ -128,9 +129,10 @@ then
 		${R_directory}Rscript resources/cellcounts/correlation.R \
 			${cellcounts_cov} \
 			0 \
+			${cellcounts_cov_total} \
 			${cor_matrix} \
 			${cor_plot} \
-			${scripts_directory} \
+			${cor_plot_cc} \
 			${study_name}
 	else
 		echo "Error: measured_cellcounts is not 'NULL' but the file does not exist. Please check your config file."
