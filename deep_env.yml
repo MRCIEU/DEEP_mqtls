@@ -24,6 +24,7 @@ dependencies:
   - r-vioplot
   - r-qqman
   - r-ggtext
+  - r-ggextra
   - r-diptest
   - r-mixtools
   - r-corrplot
