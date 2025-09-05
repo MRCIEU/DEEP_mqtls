@@ -10,6 +10,9 @@ cor_plot <- arguments [4];
 scripts_directory<-arguments[5];
 study_name <- arguments[6];
 
+cor_matrix <- "cor_matrix.txt"
+cor_plot <- "cor_plot.pdf"
+
 if (measured_cellcounts != "NULL"){
   message("Reading in measured cell counts")
   # already format in 01a
@@ -22,7 +25,10 @@ if (measured_cellcounts != "NULL"){
 
 message("Reading in predicted cell counts")
 predicted<-read.table(cellcounts_cov, header=T)
-prefix <- unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))]))
+predicted<-read.table("processed_data/cellcounts/cellcounts.covariates.txt",head=T)
+
+prefix <- c(unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))])))
+
 print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse = ", ")))
 
 # there are several situations:
@@ -34,8 +40,8 @@ print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse =
 
 # Function to combine cell types for each prefix
 combine_cell_types_by_prefix <- function(data, prefixes) {
-  combined_data <- data.frame(IID = data$IID)
-  
+  combined_data <- data
+
   for (pref in prefixes) {
     print(paste("Processing prefix:", pref))
     
@@ -177,38 +183,22 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
       predicted[[lymph_col]] <- rowSums(predicted[, available_lymph_cols, drop = FALSE], na.rm = TRUE)
     }
   }
+}
   return(combined_data)
 }
 
 # Apply the function to combine cell types by prefix
 predicted <- combine_cell_types_by_prefix(predicted, prefix)
 
-print("Final predicted columns:")
-print(colnames(predicted))
-
-# Continue with the rest of the correlation analysis
-
-available_cols <- c("IID")
-for (pref in prefix) {
-  potential_cols <- c(paste0(pref, ".Tcells"), paste0(pref, ".Bcells"), 
-                      paste0(pref, ".Neu"), paste0(pref, ".Mono"), 
-                      paste0(pref, ".Eos"), paste0(pref, ".Baso"))
-  if (pref == "unilife") {
-    potential_cols <- c(paste0(pref, ".Tcells"), paste0(pref, ".Bcells"), 
-                        paste0(pref, ".sumNeu"), paste0(pref, ".sumMono"), 
-                        paste0(pref, ".sumEos"), paste0(pref, ".sumBaso"))
-  }
-  available_cols <- c(available_cols, potential_cols[potential_cols %in% colnames(predicted)])
-}
-
-predicted <- predicted[, colnames(predicted) %in% available_cols]
+message("Final predicted columns:")
+message(colnames(predicted))
 
 if (nrow(predicted) == 0) {
   stop("No valid predicted cell counts found.")
 }
 
 if (nrow(measured) == 0) {
-  print("Correlation analysis without measured cell counts")
+  message("Correlation analysis without measured cell counts")
   data <- predicted
   # add correlation plot between predicted cell counts
   correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], use = "complete.obs", method="spearman")
@@ -271,37 +261,54 @@ method_only_comparisons <- list(
     Fib = list(zheng = "zheng.Fib", m = "m.Fib")
 )
 
-# Only plot if both unilife and salas are present
-if (all(c("unilife", "salas") %in% prefix)) {
-  message("Both unilife and salas predicted cell counts detected. Generating scatter plots between predicted cell counts.")
+# add correlation (scatter) plots between predicted cell count and between predicted and measured cell counts
 
-  for (celltype in names(method_only_comparisons)) {
-    unilife_col <- method_only_comparisons[[celltype]]$unilife
-    salas_col <- method_only_comparisons[[celltype]]$salas
-    if (all(c(unilife_col, salas_col) %in% colnames(predicted))) {
-      df <- na.omit(predicted[, c(unilife_col, salas_col)])
-      colnames(df) <- c("unilife", "salas")
-      corr <- cor(df$unilife, df$salas)
-      residuals <- df$salas - df$unilife
-      rmse <- sqrt(mean(residuals^2))
-      plot_title <- paste0(celltype, ": unilife vs salas")
-      p <- ggplot(df, aes(x = unilife, y = salas)) + 
-        geom_point(alpha = 0.6) + 
-        geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
-        geom_smooth(method = "lm", se = TRUE, color = "blue", linetype = "solid", linewidth = 0.8) +
-        labs(
-          title = plot_title,
-          subtitle = paste0("Pearson r = ", round(corr, 3), ", RMSE = ", round(rmse, 3)),
-          x = "unilife",
-          y = "salas"
-        ) +
-        coord_fixed(ratio = 1, xlim = c(0, max(c(df$unilife, df$salas), na.rm = TRUE)),
-                             ylim = c(0, max(c(df$unilife, df$salas), na.rm = TRUE))) +
-        theme_minimal()
-      ggsave(paste0(study_name,"_scatter_predicted_", celltype, "_unilife_vs_salas.pdf"), plot = p, width = 6, height = 5)
+compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
+  if (all(c(x, y) %in% colnames(data))) {
+    df <- na.omit(data[, c(x, y)])
+    colnames(df) <- c("x", "y")
+
+    if (sd(df$x) == 0 | sd(df$y) == 0) {
+      message(paste("Skip plot for", x, "vs", y, ": at least one of them has standard deviation zero"))
+      return(NULL)
     }
+
+    corr <- cor(df$x, df$y)
+    rmse <- sqrt(mean((df$y - df$x)^2))
+
+    plot_title <- paste0(celltype, ": ", prefix_x, " vs ", prefix_y)
+    p <- ggplot(df, aes(x = x, y = y)) +
+      geom_point(alpha = 0.6) +
+      geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+      geom_smooth(method = "lm", se = TRUE, color = "blue", linetype = "solid", linewidth = 0.8) +
+      labs(
+        title = plot_title,
+        subtitle = paste0("Pearson r = ", round(corr, 3), ", RMSE = ", round(rmse, 3)),
+        x = x,
+        y = y
+      ) +
+      coord_fixed(ratio = 1) +
+      theme_minimal()
+    filename <- paste0("comp_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
+    ggsave(filename, plot = p, width = 6, height = 5)
   }
 }
 
-# add correlationn (scatter) plots between predicted cell count and between predicted and measured cell counts
-
+for (celltype in names(method_only_comparisons)) {
+  mapping <- method_only_comparisons[[celltype]]
+  available_vars <- unlist(mapping)
+  available_vars <- available_vars[available_vars %in% colnames(data)]
+  print(paste("Processing cell type:", celltype, "with variables:", paste(available_vars, collapse = ", ")))
+  
+  if (length(available_vars) >= 2) {
+    for (i in 1:(length(available_vars)-1)) {
+      for (j in (i+1):length(available_vars)) {
+        x <- available_vars[i]
+        y <- available_vars[j]
+        prefix_x <- names(mapping)[which(mapping == x)]
+        prefix_y <- names(mapping)[which(mapping == y)]
+        compare_and_plot(data, x, y, celltype, prefix_x, prefix_y)
+      }
+    }
+  }
+}
