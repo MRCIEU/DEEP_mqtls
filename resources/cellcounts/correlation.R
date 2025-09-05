@@ -1,33 +1,45 @@
 #Correlation matrix between measured cell counts and predicted cell counts
 library(corrplot)
 library(ggplot2)
+library(ggExtra)
 
 arguments <- commandArgs(T);
 cellcounts_cov <- arguments[1];
 measured_cellcounts <- arguments[2];
-cor_matrix <- arguments [3];
-cor_plot <- arguments [4];
-scripts_directory<-arguments[5];
-study_name <- arguments[6];
+cellcounts_cov_total <- arguments[3];
+cor_matrix <- arguments[4];
+cor_plot_ori <- arguments[5];
+cor_plot_comb <- arguments[6];
+study_name <- arguments[7];
 
-cor_matrix <- "cor_matrix.txt"
-cor_plot <- "cor_plot.pdf"
-
-if (measured_cellcounts != "NULL"){
+if (measured_cellcounts != "NULL") {
   message("Reading in measured cell counts")
-  # already format in 01a
+  # already formatted in 01a
   # colnames should be in prefix of m, e.g. m.Bcells, m.Tcells, m.Mono, m.Gran, m.NK, m.Lym, m.Baso, m.Eos, m.Neu, m.Epi, m.Fib
   # units are in percentage
   measured = read.table(measured_cellcounts, header=T)
+  
 } else {
   measured = data.frame()
 }
 
 message("Reading in predicted cell counts")
 predicted<-read.table(cellcounts_cov, header=T)
-predicted<-read.table("processed_data/cellcounts/cellcounts.covariates.txt",head=T)
 
 prefix <- c(unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))])))
+
+# standardize predicted column names
+standardize_predicted_colnames <- function(data) {
+  new_names <- colnames(data)
+  # zheng: Neutro -> Neu, Eosino -> Eos
+  new_names <- sub("^zheng\\.Neutro$", "zheng.Neu", new_names)
+  new_names <- sub("^zheng\\.Eosino$", "zheng.Eos", new_names)
+  # middleton: large -> Epi
+  new_names <- sub("^middleton\\.large$", "middleton.Epi", new_names)
+  colnames(data) <- new_names
+  return(data)
+}
+predicted <- standardize_predicted_colnames(predicted)
 
 print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse = ", ")))
 
@@ -40,185 +52,130 @@ print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse =
 
 # Function to combine cell types for each prefix
 combine_cell_types_by_prefix <- function(data, prefixes) {
-  combined_data <- data
+  combined_data <- data.frame(IID = data$IID)
 
   for (pref in prefixes) {
-    print(paste("Processing prefix:", pref))
+    message("Processing prefix: ", pref)
     
-    # Get columns for this prefix
-    prefix_cols <- colnames(data)[grepl(paste0("^", pref, "\\."), colnames(data))]
-    
-    if (length(prefix_cols) > 0) {
-      print(paste("Using combine_cell_types_by_prefix function, found columns for", pref, ":", paste(prefix_cols, collapse = ", ")))
-      
-      # B cells combination based on reference type
-      if (pref == "unilife") {
-        # UniLife: B + aBmem + aBnv
-        b_base <- paste0(pref, ".B")
-        b_mem <- paste0(pref, ".aBmem")
-        b_nv <- paste0(pref, ".aBnv")
-        
-        available_b_cols <- c(b_base, b_mem, b_nv)[c(b_base, b_mem, b_nv) %in% colnames(data)]
-        if (length(available_b_cols) > 0) {
-          combined_data[paste0(pref, ".Bcells")] <- rowSums(data[, available_b_cols, drop = FALSE], na.rm = TRUE)
-        }
-      } else if (pref == "salas") {
-        # Salas: Bmem + Bnv
-        b_mem <- paste0(pref, ".Bmem")
-        b_nv <- paste0(pref, ".Bnv")
-        
-        available_b_cols <- c(b_mem, b_nv)[c(b_mem, b_nv) %in% colnames(data)]
-        if (length(available_b_cols) > 0) {
-          combined_data[paste0(pref, ".Bcells")] <- rowSums(data[, available_b_cols, drop = FALSE], na.rm = TRUE)
-        }
+    # B cells
+    if (pref == "unilife") {
+      b_cols <- c(paste0(pref, ".B"), paste0(pref, ".aBmem"), paste0(pref, ".aBnv"))
+    } else if (pref == "salas") {
+      b_cols <- c(paste0(pref, ".Bmem"), paste0(pref, ".Bnv"))
+    } else if (pref == "zheng") {
+      b_cols <- c(paste0(pref, ".B"))
+    } else {
+      b_cols <- character(0)
+    }
+    available_b_cols <- b_cols[b_cols %in% colnames(data)]
+    if (length(available_b_cols) > 0) {
+      combined_data[paste0(pref, ".Bcells")] <- rowSums(data[, available_b_cols, drop = FALSE], na.rm = TRUE)
+    }
 
-      } else if (pref == "zheng") {
-        # Zheng: B
-        b_col <- paste0(pref, ".B")
-        if (b_col %in% colnames(data)) {
-          combined_data[paste0(pref, ".Bcells")] <- data[, b_col]
+    # T cells
+    if (pref == "unilife") {
+      t_cols <- c(paste0(pref, ".CD4T"), paste0(pref, ".CD8T"),
+                  paste0(pref, ".aCD4Tmem"), paste0(pref, ".aCD4Tnv"), 
+                  paste0(pref, ".aTreg"), paste0(pref, ".aCD8Tmem"), paste0(pref, ".aCD8Tnv"))
+    } else if (pref == "salas") {
+      t_cols <- c(paste0(pref, ".CD4Tmem"), paste0(pref, ".CD4Tnv"), 
+                  paste0(pref, ".Treg"), paste0(pref, ".CD8Tmem"), paste0(pref, ".CD8Tnv"))
+    } else if (pref == "zheng") {
+      t_cols <- c(paste0(pref, ".CD4T"), paste0(pref, ".CD8T"))
+    } else {
+      t_cols <- character(0)
+    }
+    available_t_cols <- t_cols[t_cols %in% colnames(data)]
+    if (length(available_t_cols) > 0) {
+      combined_data[paste0(pref, ".Tcells")] <- rowSums(data[, available_t_cols, drop = FALSE], na.rm = TRUE)
+    }
+    
+    # Monocytes / NK / Gran for unilife
+    if (pref == "unilife") {
+      mapping <- list(
+        "sumMono" = c("Mono", "aMono"),
+        "sumNK"   = c("NK", "aNK"),
+        "sumGran" = c("Gran", "aNeu", "aEos", "aBaso")
+      )
+      for (nm in names(mapping)) {
+        cols <- paste0(pref, ".", mapping[[nm]])
+        available_cols <- cols[cols %in% colnames(data)]
+        if (length(available_cols) > 0) {
+          combined_data[paste0(pref, ".", nm)] <- rowSums(data[, available_cols, drop = FALSE], na.rm = TRUE)
         }
       }
-      
-      # T cells combination based on reference type
-      if (pref == "unilife") {
-        # UniLife: CD4T + CD8T + aCD4Tmem + aCD4Tnv + aTreg + aCD8Tmem + aCD8Tnv
-        t_base <- c(paste0(pref, ".CD4T"), paste0(pref, ".CD8T"))
-        t_adult <- c(paste0(pref, ".aCD4Tmem"), paste0(pref, ".aCD4Tnv"), 
-                     paste0(pref, ".aTreg"), paste0(pref, ".aCD8Tmem"), paste0(pref, ".aCD8Tnv"))
-        
-        available_t_cols <- c(t_base, t_adult)[c(t_base, t_adult) %in% colnames(data)]
-        if (length(available_t_cols) > 0) {
-          combined_data[paste0(pref, ".Tcells")] <- rowSums(data[, available_t_cols, drop = FALSE], na.rm = TRUE)
-        }
-      } else if (pref == "salas") {
-        # Salas: CD4Tmem + CD4Tnv + Treg + CD8Tmem + CD8Tnv
-        t_cols <- c(paste0(pref, ".CD4Tmem"), paste0(pref, ".CD4Tnv"), paste0(pref, ".Treg"),
-                    paste0(pref, ".CD8Tmem"), paste0(pref, ".CD8Tnv"))
-        
-        available_t_cols <- t_cols[t_cols %in% colnames(data)]
-        if (length(available_t_cols) > 0) {
-          combined_data[paste0(pref, ".Tcells")] <- rowSums(data[, available_t_cols, drop = FALSE], na.rm = TRUE)
-        }
-      } else if (pref == "zheng") {
-        # Zheng: CD4T + CD8T
-        t_cols <- c(paste0(pref, ".CD4T"), paste0(pref, ".CD8T"))
-        
-        available_t_cols <- t_cols[t_cols %in% colnames(data)]
-        if (length(available_t_cols) > 0) {
-          combined_data[paste0(pref, ".Tcells")] <- rowSums(data[, available_t_cols, drop = FALSE], na.rm = TRUE)
-        }
+    }
+
+    # Gran for salas/zheng
+    if (pref %in% c("salas", "zheng")) {
+      g_cols <- c(paste0(pref, ".Neu"), paste0(pref, ".Eos"), paste0(pref, ".Baso"))
+      available_g_cols <- g_cols[g_cols %in% colnames(data)]
+      if (length(available_g_cols) > 0) {
+        combined_data[paste0(pref, ".Gran")] <- rowSums(data[, available_g_cols, drop = FALSE], na.rm = TRUE)
       }
-      
-      # Individual cell types - map to common names
-      if (pref == "unilife") {
-        # For unilife, combine base and adult cell types
-        cell_type_mapping <- list(
-          "sumNeu" = c("Neu", "aNeu"),
-          "sumMono" = c("Mono", "aMono"),
-          "sumEos" = c("Eos", "aEos"),
-          "sumBaso" = c("Baso", "aBaso"),
-          "sumNK" = c("NK", "aNK"),
-          "sumGran" = c("Gran", "aNeu", "aEos", "aBaso") # Granulocytes as sum of Neu, Eos, Baso
-        )
-        
-        for (cell_type in names(cell_type_mapping)) {
-          possible_cols <- paste0(pref, ".", cell_type_mapping[[cell_type]])
-          available_cols <- possible_cols[possible_cols %in% colnames(data)]
-          
-          if (length(available_cols) > 0) {
-            combined_data[paste0(pref, ".", cell_type)] <- rowSums(data[, available_cols, drop = FALSE], na.rm = TRUE)
-          }
-        }
-      } else {
+    }
 
-        # For salas, zheng, middleton - keep original names but standardize Neutro to Neu, large to Epi
-        individual_cols <- prefix_cols[!grepl("Bcells|Tcells", prefix_cols)]
-
-        for (col in individual_cols) {
-          # Standardize Neutro to Neu for zheng
-          if (pref == "zheng" && grepl("Neutro$", col)) {
-            new_col_name <- sub("Neutro$", "Neu", col)
-            combined_data[new_col_name] <- data[, col]
-          } else if (pref == "zheng" && grepl("Eosino$", col)) {
-            new_col_name <- sub("Eosino$", "Eos", col)
-            combined_data[new_col_name] <- data[, col]
-          } else
-            combined_data[col] <- data[, col]
-          }
-        }
-
-        for (col in individual_cols) {
-          # standardize large to Epi for middleton
-          if (pref == "middleton" && grepl("large$", col)) {
-            new_col_name <- sub("large$", "Epi", col)
-            combined_data[new_col_name] <- data[, col]
-          } else {
-            combined_data[col] <- data[, col]
-          }
-        }
-
-        # Add Granulocytes for salas and zheng
-        if (pref %in% c("salas", "zheng")) {
-          neu_col <- paste0(pref, ".Neu")
-          eos_col <- paste0(pref, ".Eos")
-          baso_col <- paste0(pref, ".Baso")
-          available_gran_cols <- c(neu_col, eos_col, baso_col)[c(neu_col, eos_col, baso_col) %in% colnames(data)]
-          if (length(available_gran_cols) > 0) {
-            combined_data[paste0(pref, ".Gran")] <- rowSums(data[, available_gran_cols, drop = FALSE], na.rm = TRUE)
-          }
-        }
-        # no Granulocytes in middleton
+    if (pref %in% c("unilife","salas", "zheng")) {
+      # Lymphocytes = T + B + NK
+      t_col <- paste0(pref, ".Tcells")
+      b_col <- paste0(pref, ".Bcells")
+      nk_col <- if (pref == "unilife") paste0(pref, ".sumNK") else paste0(pref, ".NK")
+      available_lymph_cols <- c(t_col, b_col, nk_col)[c(t_col, b_col, nk_col) %in% colnames(combined_data)]
+      if (length(available_lymph_cols) > 0) {
+        combined_data[paste0(pref, ".Lym")] <- rowSums(combined_data[, available_lymph_cols, drop = FALSE], na.rm = TRUE)
       }
-    
-    # Add Lymphocytes calculation for unilife, salas, zheng (Lymphocytes = Tcells + Bcells + NK)
-    for (pref in c("unilife", "salas", "zheng")) {
-    t_col <- paste0(pref, ".Tcells")
-    b_col <- paste0(pref, ".Bcells")
-    # unilife uses sumNK，others use NK
-    nk_col <- if (pref == "unilife") paste0(pref, ".sumNK") else paste0(pref, ".NK")
-    lymph_col <- paste0(pref, ".Lym")
-    available_lymph_cols <- c(t_col, b_col, nk_col)[c(t_col, b_col, nk_col) %in% colnames(predicted)]
-    if (length(available_lymph_cols) > 0) {
-      predicted[[lymph_col]] <- rowSums(predicted[, available_lymph_cols, drop = FALSE], na.rm = TRUE)
     }
   }
-}
   return(combined_data)
 }
 
 # Apply the function to combine cell types by prefix
-predicted <- combine_cell_types_by_prefix(predicted, prefix)
+predicted_comb <- combine_cell_types_by_prefix(predicted, prefix)
 
-message("Final predicted columns:")
-message(colnames(predicted))
+message("==== Original predicted columns ====")
+message(paste(colnames(predicted), collapse = ", "))
 
-if (nrow(predicted) == 0) {
-  stop("No valid predicted cell counts found.")
-}
+message("==== Final predicted columns after combine_cell_types_by_prefix ====")
+message(paste(colnames(predicted_comb), collapse = ", "))
+
+predicted_total <- merge(predicted, predicted_comb, by = "IID", all = TRUE)
+write.table(predicted_total, file = cellcounts_cov_total, row.names = FALSE, col.names = TRUE, quote = FALSE, sep = "\t")
 
 if (nrow(measured) == 0) {
   message("Correlation analysis without measured cell counts")
-  data <- predicted
   # add correlation plot between predicted cell counts
-  correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], use = "complete.obs", method="spearman")
+  correlation_matrix1 <- cor(predicted[,-which(names(predicted) == "IID")], use = "complete.obs", method="spearman")
+
+  pdf(file = cor_plot_ori, height = 54, width = 87)
+  corrplot(correlation_matrix1, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
+  dev.off()
+
+  new_cols <- setdiff(names(predicted_total), names(predicted))
+  new_cols <- setdiff(new_cols, "IID")
+  correlation_matrix2 <- cor(predicted_total[ , new_cols ], use = "complete.obs", method = "spearman")
+
+  pdf(file = cor_plot_comb, height = 54, width = 87)
+  corrplot(correlation_matrix2, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
+  dev.off()
+
+  correlation_matrix <- cor(predicted_total[,-which(names(predicted_total) == "IID")], use = "complete.obs", method="spearman")
+
+  data <- predicted_total
 
 } else {
-  data <- merge(measured, predicted, by = "IID", all = F)
+  message("Correlation analysis with measured cell counts")
+
+  data <- merge(measured, predicted_total, by = "IID", all = TRUE)
   ids <- data$IID
 
   measured <- measured[match(ids, measured$IID), ]
   predicted <- predicted[match(ids, predicted$IID), ]
   
-  # correlation will include multiple prefixes
-  correlation_matrix <- cor(predicted[,-which(names(predicted) == "IID")], measured[,-which(names(measured) == "IID")], use = "complete.obs", method="spearman")
+  correlation_matrix <- cor(data[,-which(names(data) == "IID")], use = "complete.obs", method="spearman")
 
 }
 
 write.table(correlation_matrix, file = cor_matrix, row.names = TRUE, col.names = TRUE, quote = FALSE, sep = "\t")
-pdf(file = cor_plot, height = 54, width = 87)
-corrplot(correlation_matrix, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
-dev.off()
 
 # Scatter plots between predicted cell counts
 # Define matching between unilife and salas columns
@@ -236,7 +193,7 @@ dev.off()
 
 # m: Bcells, Tcells, Lym, Baso, Eos, Neu, Mono, Epi, Fib
 
-method_only_comparisons <- list(
+method_comp <- list(
   # unilife and salas specific
     CD4Tnv = list(unilife = "unilife.aCD4Tnv", salas = "salas.CD4Tnv"),
     CD4Tmem = list(unilife = "unilife.aCD4Tmem", salas = "salas.CD4Tmem"),
@@ -250,9 +207,9 @@ method_only_comparisons <- list(
     B = list(unilife = "unilife.Bcells", salas = "salas.Bcells", m = "m.Bcells", zheng = "zheng.Bcells"),
     T = list(unilife = "unilife.Tcells", salas = "salas.Tcells", m = "m.Tcells", zheng = "zheng.Tcells"),
     Lym = list(unilife = "unilife.Lym", salas = "salas.Lym", m = "m.Lym", zheng = "zheng.Lym"),
-    Neu = list(unilife = "unilife.sumNeu", salas = "salas.Neu", m= "m.Neu", zheng = "zheng.Neu"),
-    Eos = list(unilife = "unilife.sumEos", salas = "salas.Eos", m = "m.Eos", zheng = "zheng.Eos"),
-    Baso = list(unilife = "unilife.sumBaso", salas = "salas.Baso", m = "m.Baso"),
+    Neu = list(unilife = "unilife.aNeu", salas = "salas.Neu", m= "m.Neu", zheng = "zheng.Neu"),
+    Eos = list(unilife = "unilife.aEos", salas = "salas.Eos", m = "m.Eos", zheng = "zheng.Eos"),
+    Baso = list(unilife = "unilife.aBaso", salas = "salas.Baso", m = "m.Baso"),
     NK = list(unilife = "unilife.sumNK", salas = "salas.NK", m = "m.NK", zheng = "zheng.NK"),
     Gran = list(unilife = "unilife.sumGran", salas = "salas.Gran", m = "m.Gran"),
 
@@ -276,7 +233,7 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
     corr <- cor(df$x, df$y)
     rmse <- sqrt(mean((df$y - df$x)^2))
 
-    plot_title <- paste0(celltype, ": ", prefix_x, " vs ", prefix_y)
+    plot_title <- paste0(celltype, ": ", x, " vs ", y)
     p <- ggplot(df, aes(x = x, y = y)) +
       geom_point(alpha = 0.6) +
       geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
@@ -287,19 +244,22 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
         x = x,
         y = y
       ) +
-      coord_fixed(ratio = 1) +
+      coord_fixed(ratio = 1) + 
+      scale_x_continuous(limits = c(0, NA)) +
+      scale_y_continuous(limits = c(0, NA)) +
       theme_minimal()
-    filename <- paste0("comp_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
-    ggsave(filename, plot = p, width = 6, height = 5)
+    p_marginal <- ggMarginal(p, type = "density", fill = "lightblue", alpha = 0.5)
+    filename <- paste0(study_name,"_comp_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
+    ggsave(filename, plot = p_marginal, width = 10, height = 9)
   }
 }
 
-for (celltype in names(method_only_comparisons)) {
-  mapping <- method_only_comparisons[[celltype]]
+for (celltype in names(method_comp)) {
+  mapping <- method_comp[[celltype]]
   available_vars <- unlist(mapping)
   available_vars <- available_vars[available_vars %in% colnames(data)]
   print(paste("Processing cell type:", celltype, "with variables:", paste(available_vars, collapse = ", ")))
-  
+
   if (length(available_vars) >= 2) {
     for (i in 1:(length(available_vars)-1)) {
       for (j in (i+1):length(available_vars)) {
