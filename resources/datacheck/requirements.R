@@ -47,6 +47,11 @@ pkglist <- c(
     "scoreInvHap"
 )
 
+y <- packageVersion("meffil")
+if (y < "1.5.0") {
+    stop("Meffil warning: please update to at least version 1.5.0")
+}
+
 index <- pkglist %in% rownames(installed.packages())
 if (any(!index)) {
     stop("Before continuing, the following packages need to be installed:\n", paste(pkglist[!index], collapse = "\n"))
