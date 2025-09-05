@@ -18,7 +18,7 @@ containsElement () {
 }
 
 arg="all"
-declare -a sections=('all' 'methy_outlier' 'check_phenotype' 'predict_age_smoking' 'cell_counts' 'ewas' 'combine_covariates')
+declare -a sections=('all' 'methy_outlier' 'check_phenotype' 'predict_age_smoking' 'cell_counts' 'ewas' 'meth_pcs' 'combine_covariates')
 
 if [ -n "${1}" ]; then
 	arg="${1}"
@@ -141,9 +141,9 @@ fi
 
 if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
 then
-	section_message "ewas"
+	section_message "ewas unilife"
 
-	echo "EWAS of age and smoking"
+	echo "EWAS of age and smoking - unilife"
 	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
@@ -159,9 +159,9 @@ fi
 
 if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
 then
-	section_message "ewas"
+	section_message "ewas salas"
 
-	echo "EWAS of age and smoking"
+	echo "EWAS of age and smoking - salas"
 	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
@@ -173,6 +173,46 @@ then
 		${qc1_ewas_stats} \
 		${qc1_ewas_report} \
 		
+
+fi
+
+if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
+then
+	section_message "meth pcs unilife"
+
+	echo "EWAS of age and smoking - unilife"
+	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
+		${methylation_no_outliers_ewas} \
+		${updated_phenotype_file} \
+		${cellcounts_cov} \
+		"unilife" \
+		${study_name} \
+		${study_specific_vars} \
+		${pcs_all} \
+		${meth_pcs_scree_plot} \
+		${meth_pcs_screePC1PC2_plot} \
+		${meth_pcs_screePC3PC4_plot} \
+		${pc_var_association_plot} \
+
+fi
+
+if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
+then
+	section_message "meth pcs salas"
+
+	echo "EWAS of age and smoking - salas"
+	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
+		${methylation_no_outliers_ewas} \
+		${updated_phenotype_file} \
+		${cellcounts_cov} \
+		"salas" \
+		${study_name} \
+		${study_specific_vars} \
+		${pcs_all} \
+		${meth_pcs_scree_plot} \
+		${meth_pcs_screePC1PC2_plot} \
+		${meth_pcs_screePC3PC4_plot} \
+		${pc_var_association_plot} \
 
 fi
 
