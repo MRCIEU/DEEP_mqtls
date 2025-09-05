@@ -15,6 +15,7 @@ pkglist <- c(
     "GenomicRanges",
     "lattice",
     "ggplot2",
+    "ggExtra",
     "data.table",
     "MatrixEQTL",
     "parallel",
