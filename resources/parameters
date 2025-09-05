@@ -166,8 +166,10 @@ cellcounts_plot="${section_01_dir}/cellcounts_plot.pdf"
 cellcounts_summary="${section_01_dir}/cellcounts_summary.txt"
 cellcounts_gwa="${home_directory}/processed_data/cellcounts/cellcounts.houseman.txt"
 cellcounts_cov="${home_directory}/processed_data/cellcounts/cellcounts.covariates.txt"
+cellcounts_cov_total="${home_directory}/processed_data/cellcounts/cellcounts.covariates.total.txt"
 cor_matrix="${section_01_dir}/cor_matrix.txt"
-cor_plot="${section_01_dir}/cor_plot.pdf"
+cor_plot_ori="${section_01_dir}/cor_plot_ori.pdf"
+cor_plot_comb="${section_01_dir}/cor_plot_comb.pdf"
 
 # Covariates
 covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
@@ -239,10 +241,10 @@ qc1_ewas_stats="${home_directory}/results/01/qc1_ewas_stats"
 qc1_ewas_report="${home_directory}/results/01/qc1_ewas_report"
 
 # meth PCs QC1
-meth_pcs_scree_plot"${home_directory}/results/01/meth_pcs_scree_plot"
-meth_pcs_screePC1PC2_plot"${home_directory}/results/01/meth_pcs_screePC1PC2_plot"
-meth_pcs_screePC3PC4_plot"${home_directory}/results/01/meth_pcs_screePC3PC4_plot"
-pc_var_association_plot"${home_directory}/results/01/pc_var_association_plot"
+meth_pcs_scree_plot="${home_directory}/results/01/meth_pcs_scree_plot"
+meth_pcs_screePC1PC2_plot="${home_directory}/results/01/meth_pcs_screePC1PC2_plot"
+meth_pcs_screePC3PC4_plot="${home_directory}/results/01/meth_pcs_screePC3PC4_plot"
+pc_var_association_plot="${home_directory}/results/01/pc_var_association_plot"
 
 # Results locations
 matrixeqtl_mqtl_dir="${home_directory}/results/05"
