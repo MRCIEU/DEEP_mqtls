@@ -115,25 +115,28 @@ then
 
 	if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
 		echo "Comparing measured cellcounts with predicted ones"
+		
 		${R_directory}Rscript resources/cellcounts/correlation.R \
-			${cellcounts_cov} \
-			${format_measured_cellcounts} \
-			${cellcounts_cov_total} \
-			${cor_matrix} \
-			${cor_plot} \
-			${cor_plot_cc} \
-			${study_name}
-			
+			"${cellcounts_cov}" \
+			"${format_measured_cellcounts}" \
+			"${cellcounts_cov_total}" \
+			"${cor_matrix}" \
+			"${cor_plot}" \
+			"${cor_plot_cc}" \
+			"${study_name}" \
+			"${home_directory}"
+
 	elif [ "${measured_cellcounts}" == "NULL" ]; then
 		echo "No measured cell counts available for comparison; only compare predicted cell counts if multiple reference available"
 		${R_directory}Rscript resources/cellcounts/correlation.R \
-			${cellcounts_cov} \
+			"${cellcounts_cov}" \
 			0 \
-			${cellcounts_cov_total} \
-			${cor_matrix} \
-			${cor_plot} \
-			${cor_plot_cc} \
-			${study_name}
+			"${cellcounts_cov_total}" \
+			"${cor_matrix}" \
+			"${cor_plot}" \
+			"${cor_plot_cc}" \
+			"${study_name}" \
+			"${home_directory}"
 	else
 		echo "Error: measured_cellcounts is not 'NULL' but the file does not exist. Please check your config file."
 		exit 1
