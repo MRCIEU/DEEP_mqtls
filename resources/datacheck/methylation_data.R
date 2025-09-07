@@ -10,15 +10,25 @@ library(ewaff)
 
 args <- (commandArgs(TRUE));
 betas_file <- as.character(args[1]);
+print(betas_file)
 fam_file <- as.character(args[2]);
+print(fam_file)
 sorted_methylation <- as.character(args[3]);
+print(sorted_methylation)
 methylation_array <- as.character(args[4]);
+print(methylation_array)
 cellcounts_file_measured <- as.character(args[5]);
+print(cellcounts_file_measured)
 meth_ids_file <- as.character(args[6]);
+print(meth_ids_file)
 cohort_descriptives_file <- as.character(args[7]);
+print(cohort_descriptives_file)
 methylation_summary_file <- as.character(args[8]);
+print(methylation_summary_file)
 covar_file <- as.character(args[9]);
+print(covar_file)
 sex_pred_plot_path <- as.character(args[10]);
+print(sex_pred_plot_path)
 ids <- as.character(args[11]);
 ids_plink <- as.character(args[12]);
 cellcounts_output <- as.character(args[13]);
@@ -142,7 +152,9 @@ if(length(p.overlap) < no.overlap)
 #
 
 # In preparation of the sex prediction, do a quick check of the covariate data (full check will be done later).
+message("Reading covariate file: ", covar_file)
 covar <- read.table(covar_file, header = T)
+
 
 if(! "Sex_factor" %in% names(covar))
 {
@@ -392,6 +404,9 @@ if(cellcounts_file_measured == "NULL")
 }
 
 celltype_aliases <- list(
+  Bcells = c("bcell", "bcells", "b_cell", "b_cells", "b lymphocyte", "b lymphocytes", "b_lymphocyte", "b_lymphocytes", "b-lymphocyte", "b-lymphocytes", "b-lym", "b_lym"),
+  Tcells = c("tcell", "tcells", "t_cell", "t_cells", "t lymphocyte", "t lymphocytes", "t_lymphocyte", "t_lymphocytes", "t-lymphocyte", "t-lymphocytes", "t-lym", "t_lym"),
+  NK = c("nk","nkcell", "nkcells", "nk_cell", "nk_cells", "natural_killer", "natural_killers", "nklym"),
   Neu = c("neutrophil", "neutrophils", "neutro", "neu", "neut"),
   Lym = c("lymphocyte", "lymphocytes", "lymph", "lym"),
   Mono = c("monocyte", "monocytes", "mono", "mon"),
@@ -549,12 +564,12 @@ summariseMeth <- function(X)
 	return(dat)
 }
 
-#message("Generating summary stats of methylation")
+message("Generating summary stats of methylation")
 
-#meth_summary <- summariseMeth(norm.beta)
+meth_summary <- summariseMeth(norm.beta)
 
 #save(cohort_summary, file=cohort_descriptives_file)
-#save(meth_summary, file=methylation_summary_file)
+save(meth_summary, file=methylation_summary_file)
 write.table(colnames(norm.beta), file=meth_ids_file, row=F, col=F, qu=F)
 
 

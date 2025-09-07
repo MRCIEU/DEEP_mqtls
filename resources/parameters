@@ -113,6 +113,7 @@ covariate_descriptives="${home_directory}/processed_data/ids/covariate_descripti
 phenotype_descriptives="${home_directory}/processed_data/ids/phenotype_descriptives.RData"
 
 cohort_descriptives="${section_01_dir}/cohort_descriptives.RData"
+methylation_summary="${section_01_dir}/methylation_summary.RData"
 methylation_summary_gwas="${section_01_dir}/methylation_summary_gwas.RData"
 methylation_summary_ewas="${section_01_dir}/methylation_summary_ewas.RData"
 cohort_descriptives_was="${section_01_dir}/cohort_descriptives_was.RData"
