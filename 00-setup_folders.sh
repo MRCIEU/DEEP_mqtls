@@ -21,6 +21,7 @@ for i in {1..14}; do
    mkdir -p "${home_directory}/results/${idx}"
 done
 
+mkdir -p "${section_01_dir}/logs/"
 mkdir -p "${section_01_dir}/logs_a/"
 mkdir -p "${section_01_dir}/logs_b/"
 mkdir -p "${section_01_dir}/logs_c/"
