@@ -11,6 +11,9 @@ cor_matrix <- arguments[4];
 cor_plot_ori <- arguments[5];
 cor_plot_comb <- arguments[6];
 study_name <- arguments[7];
+print(study_name)
+output_dir <- arguments[8];
+print(output_dir)
 
 if (measured_cellcounts != "NULL") {
   message("Reading in measured cell counts")
@@ -234,6 +237,7 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
     rmse <- sqrt(mean((df$y - df$x)^2))
 
     plot_title <- paste0(celltype, ": ", x, " vs ", y)
+    suppressMessages(
     p <- ggplot(df, aes(x = x, y = y)) +
       geom_point(alpha = 0.6) +
       geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
@@ -247,9 +251,11 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
       coord_fixed(ratio = 1) + 
       scale_x_continuous(limits = c(0, NA)) +
       scale_y_continuous(limits = c(0, NA)) +
-      theme_minimal()
+      theme_minimal())
+
     p_marginal <- ggMarginal(p, type = "density", fill = "lightblue", alpha = 0.5)
-    filename <- paste0(study_name,"_comp_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
+
+    filename <- paste0(output_dir,"/results/01/",study_name,"_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
     ggsave(filename, plot = p_marginal, width = 10, height = 9)
   }
 }
