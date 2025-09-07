@@ -10,25 +10,15 @@ library(ewaff)
 
 args <- (commandArgs(TRUE));
 betas_file <- as.character(args[1]);
-print(betas_file)
 fam_file <- as.character(args[2]);
-print(fam_file)
 sorted_methylation <- as.character(args[3]);
-print(sorted_methylation)
 methylation_array <- as.character(args[4]);
-print(methylation_array)
 cellcounts_file_measured <- as.character(args[5]);
-print(cellcounts_file_measured)
 meth_ids_file <- as.character(args[6]);
-print(meth_ids_file)
 cohort_descriptives_file <- as.character(args[7]);
-print(cohort_descriptives_file)
 methylation_summary_file <- as.character(args[8]);
-print(methylation_summary_file)
 covar_file <- as.character(args[9]);
-print(covar_file)
 sex_pred_plot_path <- as.character(args[10]);
-print(sex_pred_plot_path)
 ids <- as.character(args[11]);
 ids_plink <- as.character(args[12]);
 cellcounts_output <- as.character(args[13]);
