@@ -114,10 +114,10 @@ then
 		${scripts_directory} 
 
 	if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
-		echo "Comparing measured with predicted cellcounts"
+		echo "Comparing measured cellcounts with predicted ones"
 		${R_directory}Rscript resources/cellcounts/correlation.R \
 			${cellcounts_cov} \
-			${measured_cellcounts} \
+			${format_measured_cellcounts} \
 			${cellcounts_cov_total} \
 			${cor_matrix} \
 			${cor_plot} \
