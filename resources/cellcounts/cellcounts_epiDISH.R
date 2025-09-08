@@ -9,7 +9,6 @@ arguments <- commandArgs(T);
 tissue<-tolower(arguments[1]);
 age<-arguments[2];
 methylation_array<-tolower(arguments[3]);
-
 methylation_file<-arguments[4];
 cellcounts_cov<-arguments[5];
 cellcounts_plot<-arguments[6];
@@ -25,12 +24,13 @@ data(centBloodSub.m);
 
 print("Loading methylation file")
 load(methylation_file)
+print(paste0("Dimensions of methylation betas for mQTLs: ", dim(norm.beta)))
 print("Sourcing reference selection function")
 source(paste0(scripts_directory,"/resources/cellcounts/fn-select_ref.R"))
 
 # Validate inputs and select reference matrices
 refs <- validate_and_select_reference(tissue, methylation_array, age)
-print(paste0("Using reference matrices ",paste(names(refs), collapse=", ")," for tissue: ", tissue, ", methylation array: ", methylation_array, ", age range: ", age))
+print(paste0("Using reference matrices: ",paste(names(refs), collapse=", ")," for tissue: ", tissue, ", methylation array: ", methylation_array, ", age range: ", age))
 
 cellcounts_total <- data.frame()
 
@@ -80,13 +80,15 @@ for(ref in names(refs)) {
     cellcounts_total <- merge(cellcounts_total, cellcounts, by = "IID", all = TRUE)
   }
 }
-
+print(dim(cellcounts_total))
 #Check if the cellcounts could be calculated for every sample.
 cc_na <- table(apply(cellcounts_total, 1, anyNA))
+print(dim(cc_na))
 message(sprintf("Cell counts were successfully predicted for %s individuals.", cc_na[1]))
 if(length(cc_na) > 1){
   message(sprintf("Cell counts contain NAs for for %s individuals. Please check the input data.", cc_na[2]))
   }
+
 
 # Loop through each cell type and generate the distribution plot.
 pdf(cellcounts_plot, width=12, height=8)
