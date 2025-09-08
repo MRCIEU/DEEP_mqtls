@@ -56,6 +56,10 @@ sorted_methylation="no"
 
 # Age of samples (one of the following: <18, >18, all.)
 age=">18"
+
+# Smoking: Method for smoking prediction. (one of the following: "own", "maternal"). Own smoking is smoking of the individual. Maternal is smoking history of mother or environmental smoke exposure (for childhood cohorts)
+smoking="own"
+
 # Relatedness
 # Are the samples related? e.g. Complex family data, twin data etc. If so set this to "yes"
 # If these samples are expected to be unrelated set this to "no" (even if there may be cryptic relatedness)
