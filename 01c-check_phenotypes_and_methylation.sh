@@ -100,18 +100,18 @@ fi
 if [ "$arg" = "cell_counts" ] || [ "$arg" = "all" ]
 then
 	section_message "cell_counts"
-
+	
 	echo "cell counts and correlations"
 
 	${R_directory}Rscript resources/cellcounts/cellcounts_epiDISH.R \
-		${tissue} \
-		${age} \
-		${methylation_array} \
-		${methylation_no_outliers_gwas} \
-		${cellcounts_cov} \
-		${cellcounts_plot} \
-		${cellcounts_summary} \
-		${scripts_directory} 
+		"${tissue}" \
+		"${age}" \
+		"${methylation_array}" \
+		"${methylation_no_outliers_gwas}" \
+		"${cellcounts_cov}" \
+		"${cellcounts_plot}" \
+		"${cellcounts_summary}" \
+		"${scripts_directory}"
 
 	if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
 		echo "Comparing measured cellcounts with predicted ones"
@@ -121,8 +121,8 @@ then
 			"${format_measured_cellcounts}" \
 			"${cellcounts_cov_total}" \
 			"${cor_matrix}" \
-			"${cor_plot}" \
-			"${cor_plot_cc}" \
+			"${cor_plot_ori}" \
+			"${cor_plot_comb}" \
 			"${study_name}" \
 			"${home_directory}"
 
@@ -133,8 +133,8 @@ then
 			0 \
 			"${cellcounts_cov_total}" \
 			"${cor_matrix}" \
-			"${cor_plot}" \
-			"${cor_plot_cc}" \
+			"${cor_plot_ori}" \
+			"${cor_plot_comb}" \
 			"${study_name}" \
 			"${home_directory}"
 	else
@@ -227,12 +227,12 @@ then
 
 	echo "Combining covariates for mQTL analysis"
 	${R_directory}Rscript resources/genetics/covariates.R \
-		${covariates_intersect_gwas} \
-		${pcs_all} \
-		${cellcounts_cov} \
-		${smoking_pred}.txt \
-		${bfile}.fam \
-		${covariates_combined}
+		"${covariates_intersect_gwas}" \
+		"${pcs_all}" \
+		"${cellcounts_cov}" \
+		"${smoking_pred}.txt" \
+		"${bfile}.fam" \
+		"${covariates_combined}"
 
 fi
 
