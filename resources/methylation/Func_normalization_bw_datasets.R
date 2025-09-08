@@ -1,50 +1,61 @@
+# https://github.com/perishky/meffil/wiki/Functional-normalizing-separate-datasets
+# https://github.com/perishky/meffil/blob/master/R/shrink.r
+
+# Remove any information not absolutely needed for normalizing quantiles
+
 suppressPackageStartupMessages(library(meffil))
 
-# on DEEP server, we will receive .RData files for control probe and then do normalization
-# We will need the list of .RData files to process (list_RData)
-# list_RData <- c("file1.RData", "file2.RData")
-# cohort_names <- c("cohort1", "cohort2")
-# qc_names_list <- lapply(seq_along(list_RData), function(i) c(list_RData[i], cohort_names[i]))
-# names(qc_names_list) <- paste0("names", seq_along(list_RData))
+arguments <- commandArgs(T);
+betas <- arguments[1];
+qc_input_file <- arguments[2];
+study_name <- arguments[3];
+output_path <- arguments[4];
+stage <- arguments[5];
 
-# qc.objects <- list()
-# for (rdata_file in list_RData) {
-#     message("Processing ", rdata_file)
-#     before <- ls()
-#     load(rdata_file)
-#     after <- ls()
-#     # would have issue if variable names are same between any cohorts
-#     new_vars <- setdiff(after, before)
-#     print(new_vars)
-#     for (v in new_vars) {
-#         qc.objects[[v]] <- get(v)
-#     }
-# }
-# # Before normalization, we estimate the correct number of control probe principal components to include in the normalization.
-# y <- meffil.plot.pc.fit(qc.objects)
-# ggsave(y$plot,filename="pc-fit-combined.pdf",height=6,width=6)
+# qc stage 1 shrink ======= remove unnecessary information from qc objects
 
-# norm.objects <- meffil.normalize.quantiles(qc.objects, number.pcs=10)
+if (stage == "shrink" && betas == 0) {
+required_var <- c("controls", "quantiles")
 
-# for (i in seq_along(qc_names_list)) {
-#     cohort_obj_names <- names(qc.objects[[i]]) 
-#     norm_sub <- norm.objects[names(norm.objects) %in% cohort_obj_names]
-#     cohort <- qc_names_list[[i]][2]
-#     save(norm_sub, file = paste0("norm_objects_", cohort, ".rda"))
-# }
+vars_before <- ls()
+load(qc_input_file)
+vars_after <- ls()
+new_vars <- setdiff(vars_after, vars_before)
+message("Loaded variable(s) from qc.object: ", paste(new_vars, collapse = ", "))
 
-# Then on the server of each DEEP user
+qc_objects_shrink <- meffil.shrink.qc.object(get(new_vars[1]), keep.vars = required_var)
 
-main <- function() {
-    args <- commandArgs(trailingOnly = TRUE)
-    cohort_name <- args[1]
-    out_file <- args[2]
+save(qc_objects_shrink, file=paste0(output_path, "/",study_name, "qc_objects_shrink.rda"))
 
-    load(paste0("norm_objects_", cohort_name, ".rda"))
-    var = ls()
-    beta_aft <- meffil.normalize.samples(var)
-    save(beta_aft, file = out_file)
-    message("Functional normalization between datasets [Done]")
+message("Shrunk QC objects created")
+
 }
 
-main()
+# DEEP receives shrunk data from cohorts
+# to do normalization between cohorts by dev team
+# qc.objects = c(cohort1.objects, cohort2.objects...)
+# norm.objects = meffil.normalize.quantiles(qc.objects, number.pcs=...)
+# cohort1.norms = norm.objects[names(cohort1.objects)] ...
+# send back shrunk objects after normalization in DEEP
+# format: study__name + "objects.rda"
+
+# qc stage 2.  ========= restore information
+
+if (stage == "expand" && betas != 0) {
+
+    vars_before <- ls()
+    load(qc_input_file)
+    load(paste0(output_path, "/",study_name, "objects.rda"))
+    vars_after <- ls()
+    new_vars <- setdiff(vars_after, vars_before)
+
+    qc.object.ori = get(new_vars[1])
+    dat.norms = get(new_vars[2])
+
+    norm.objects = meffil.expand.norm.object(dat.norms, qc.object.ori)
+    
+    save(norm.objects, file=paste0(output_path, "/processed_data/",study_name, "_harmonized_meth.rda"))
+
+    message("Information restored")
+
+}
