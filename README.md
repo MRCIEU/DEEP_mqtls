@@ -1,4 +1,4 @@
-## Welcome to DEEP pipeline.
+## Welcome to the DEEP pipeline.
 
 ![DEEP Logo](./images/DEEP.png)
 
