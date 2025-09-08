@@ -255,7 +255,7 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
 
     p_marginal <- ggMarginal(p, type = "density", fill = "lightblue", alpha = 0.5)
 
-    filename <- paste0(output_dir,"/results/01/",study_name,"_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
+    filename <- paste0(output_dir,"/results/01/cellcounts_comp/",study_name,"_scatter_", gsub("\\s+", "_", celltype), "_", prefix_x, "_vs_", prefix_y, ".pdf")
     ggsave(filename, plot = p_marginal, width = 10, height = 9)
   }
 }
