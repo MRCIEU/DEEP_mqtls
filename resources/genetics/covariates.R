@@ -37,8 +37,6 @@ if(cellcount_file=="NULL")
 } else {
 
   cellcount <- read.table(cellcount_file, header=TRUE)
-  print(colnames(cellcount))
-
   # Check for unexpected columns
   if (length(grep("lym", tolower(colnames(cellcount)))) > 0) {
     stop("There might be unexpected columns in cell count file. Please check the file format.")
