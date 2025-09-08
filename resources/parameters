@@ -175,11 +175,11 @@ cor_plot_ori="${section_01_dir}/cor_plot_ori.pdf"
 cor_plot_comb="${section_01_dir}/cor_plot_comb.pdf"
 
 # Covariates
-covariates_combined="${home_directory}/processed_data/methylation_data/all_covariates"
-ccovar_file="${home_directory}/processed_data/methylation_data/ccovar_file.txt"
-qcovar_file="${home_directory}/processed_data/methylation_data/qcovar_file.txt"
+covariates_combined="${home_directory}/processed_data/covariate_data/all_covariates"
+ccovar_file="${home_directory}/processed_data/covariate_data/ccovar_file.txt"
+qcovar_file="${home_directory}/processed_data/covariate_data/qcovar_file.txt"
 genetic_pc_gwas="${home_directory}/processed_data/genetic_data/genetic_pc_gwas.txt"
-qcovar_noPC_file="${home_directory}/processed_data/methylation_data/qcovar_noPC_file.txt"
+qcovar_noPC_file="${home_directory}/processed_data/covariate_data/qcovar_noPC_file.txt"
 
 # phenotype files
 winsorized_pheno="${home_directory}/processed_data/phenotype_data/winsorized_pheno.Robj"
