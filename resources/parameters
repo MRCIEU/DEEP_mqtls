@@ -23,11 +23,13 @@ section_15_dir="${home_directory}/results/15"
 section_16_dir="${home_directory}/results/16"
 section_17_dir="${home_directory}/results/17"
 
-section_01_logfiles="${section_01_dir}/logs/log${timetemp}.txt"
-section_01a_logfile="${section_01_dir}/logs_a/log.txt"
+section_01a_logfile="${section_01_dir}/logs_a/log${timetemp}.txt"
 section_01b_logfile="${section_01_dir}/logs_b/log.txt"
-section_01c_logfile="${section_01_dir}/logs_c/log.txt"
+section_01c_logfile="${section_01_dir}/logs_c/log${timetemp}.txt"
 section_01d_logfile="${section_01_dir}/logs_d/log.txt"
+section_01e_logfile="${section_01_dir}/logs_e/log.txt"
+section_01f_logfile="${section_01_dir}/logs_f/log${timetemp}.txt"
+
 section_02a_logfile="${section_02_dir}/logs_a/log.txt"
 section_02b_logfile="${section_02_dir}/logs_b/log.txt"
 section_03a_logfile="${section_03_dir}/logs_a/log.txt"
@@ -212,6 +214,8 @@ methylation_ids="${home_directory}/processed_data/genetic_data/methylation_ids.t
 methylation_no_outliers_gwas="${home_directory}/processed_data/methylation_data/methylation_no_outliers_gwas.Robj"
 methylation_no_outliers_ewas="${home_directory}/processed_data/methylation_data/methylation_no_outliers_ewas.Robj"
 normalized_between_datasets="${home_directory}/processed_data/methylation_data/normalized_between_datasets.Robj"
+
+meth_qc_obj="${home_directory}/processed_data/methylation_data/meth_qc_obj.Robj"
 
 transformed_methylation_adjusted="${home_directory}/processed_data/methylation_data/transformed_methylation_adjusted"
 untransformed_methylation_adjusted="${home_directory}/processed_data/methylation_data/untransformed_methylation_adjusted"
