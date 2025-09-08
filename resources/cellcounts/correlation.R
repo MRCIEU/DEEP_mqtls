@@ -11,9 +11,7 @@ cor_matrix <- arguments[4];
 cor_plot_ori <- arguments[5];
 cor_plot_comb <- arguments[6];
 study_name <- arguments[7];
-print(study_name)
 output_dir <- arguments[8];
-print(output_dir)
 
 if (measured_cellcounts != "NULL") {
   message("Reading in measured cell counts")
@@ -179,6 +177,7 @@ if (nrow(measured) == 0) {
   correlation_matrix <- cor(data[,-which(names(data) == "IID")], use = "complete.obs", method="spearman")
 
   correlation_matrix1 <- cor(data[,-which(names(data) %in% new_cols)], use = "complete.obs", method = "spearman")
+
   pdf(file = cor_plot_ori, height = 54, width = 87)
   corrplot(correlation_matrix1, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
   dev.off()
@@ -250,7 +249,6 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
     rmse <- sqrt(mean((df$y - df$x)^2))
 
     plot_title <- paste0(celltype, ": ", x, " vs ", y)
-    suppressMessages(
     p <- ggplot(df, aes(x = x, y = y)) +
       geom_point(alpha = 0.6) +
       geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
@@ -264,7 +262,7 @@ compare_and_plot <- function(data, x, y, celltype, prefix_x, prefix_y) {
       coord_fixed(ratio = 1) + 
       scale_x_continuous(limits = c(0, NA)) +
       scale_y_continuous(limits = c(0, NA)) +
-      theme_minimal())
+      theme_minimal()
 
     p_marginal <- ggMarginal(p, type = "density", fill = "lightblue", alpha = 0.5)
 
@@ -291,3 +289,5 @@ for (celltype in names(method_comp)) {
     }
   }
 }
+
+if (file.exists("Rplots.pdf")) file.remove("Rplots.pdf")
