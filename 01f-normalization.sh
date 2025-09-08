@@ -51,17 +51,24 @@ section_message () {
 
 }
 
+if [ -z "${idat_directory}" ]; then
+    echo "Error: idat_directory is empty. Please set idat_directory before running this script."
+	echo "If you only have access to qc.objects data, instead of idat files. Please contact Haotian.tang@bristol.ac.uk"
+    exit 1
+fi
+
 if [ "$arg" = "shrink" ]
 then
 	section_message "shrink"
 
 	${R_directory}Rscript resources/methylation/Func_normalization_bw_datasets.R \
-		0 \
-		${meth_qc_obj} \
-		${study_name} \
-		${section_01_dir} \
+		"${idat_directory}" \
+		"${study_name}" \
+		"${home_directory}" \
 		"shrink"
 
+	echo "Shrunk QC objects created"
+	echo "Please upload the results to DEEP SFTP server"
 fi
 
 if [ "$arg" = "expand" ]
@@ -69,9 +76,8 @@ then
 	section_message "expand"
 
 	${R_directory}Rscript resources/methylation/Func_normalization_bw_datasets.R \
-		${betas} \
-		${meth_qc_obj} \
-		${study_name} \
-		${home_directory} \
+		"${idat_directory}" \
+		"${study_name}" \
+		"${home_directory}" \
 		"expand"
 fi
