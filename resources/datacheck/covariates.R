@@ -25,9 +25,9 @@ commonids_mgc <- Reduce(intersect, list(meth_ids, covar$IID, fam[,2]))
 message("Number of samples with covariate, methylation and genetic data: ", length(commonids_mgc))
 
 if(sorted_methylation == "no"){
-if(length(commonids_mgc) < 200)
+if(length(commonids_mgc) < 100)
 {
-	msg <- paste0("must have at least 200 individuals with covariate, methylation and genetic data.")
+	msg <- paste0("must have at least 100 individuals with covariate, methylation and genetic data.")
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
