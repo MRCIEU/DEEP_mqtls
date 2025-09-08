@@ -1,1 +1,0 @@
-Here is the rules file for snakemake.
