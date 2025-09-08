@@ -106,7 +106,7 @@ for (i in 2:ncol(cellcounts_total)) {
   qqline(cellcounts_total[,i], col = "steelblue", lwd = 1)
 }
 
-suppressMessages(dev.off())
+dev.off()
 
 # Save the distribution of cell counts for this cohort.
 library(matrixStats)
