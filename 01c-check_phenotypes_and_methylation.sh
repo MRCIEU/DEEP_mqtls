@@ -227,7 +227,7 @@ then
 
 	echo "Combining covariates for mQTL analysis"
 	${R_directory}Rscript resources/genetics/covariates.R \
-		${covariates_intersect} \
+		${covariates_intersect_gwas} \
 		${pcs_all} \
 		${cellcounts_cov} \
 		${smoking_pred}.txt \
