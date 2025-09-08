@@ -20,6 +20,7 @@ pkglist <- c(
     "MatrixEQTL",
     "parallel",
     "matrixStats",
+    "viridis",
     "plyr",
     "Cairo",
     "plotrix",

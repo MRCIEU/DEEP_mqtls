@@ -36,6 +36,7 @@ dependencies:
   - r-ggrepel
   - r-magrittr
   - r-r.utils
+  - r-viridis
   - r-biocmanager
   - r-desctools
   - zlib
