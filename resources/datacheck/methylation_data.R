@@ -361,9 +361,9 @@ if((length(covar$Sex_factor[covar$Sex_factor == "M"]) < 0.05 * length(covar$Sex_
 overlap <- intersect(colnames(norm.beta),fam[,2])
 n.overlap <- length(overlap)
 if(sorted_methylation == "no"){
-if(n.overlap < 200)
+if(n.overlap < 100)
 {
-	msg <- paste0("fewer than 200 subjects with methylation and genotype data")
+	msg <- paste0("fewer than 100 subjects with methylation and genotype data")
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
