@@ -109,31 +109,26 @@ if [ "$n23" -gt "0" ]; then
 			--new-id-max-allele-len 70 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
 			--make-bed \
-			--out ${bfile}_xpar_temp1
-
-		mv ${bfile}_xpar_temp1.bed ${bfile}.bed
-		mv ${bfile}_xpar_temp1.bim ${bfile}.bim
-		mv ${bfile}_xpar_temp1.fam ${bfile}.fam
+			--out ${bfile}_format
 
 		rm ${bfile}_xpar_temp*
-	    rm ${bfile}_format*
 	fi
 
 fi
 
-cp ${bfile}.bim ${bfile}.bim.original
+cp ${bfile}_format.bim ${bfile}.bim.original
 
 # format SNP ids to chr:position_A1_A2 (ascii sorted order)
 echo "Formatting SNP IDs to chr:pos_A1_A2"
 ${plink2} \
-	--bfile ${bfile} \
+	--bfile "${bfile}_format" \
 	--new-id-max-allele-len 70 \
 	--set-all-var-ids @:#_\$1_\$2 \
 	--make-bed \
 	--out ${bfile}1 \
     --threads ${nthreads}
 
-cp ${bfile}.bim ${bfile}.bim.original1
+cp ${bfile}_format.bim ${bfile}.bim.original1
 mv ${bfile}1.bed ${bfile}.bed
 mv ${bfile}1.bim ${bfile}.bim
 mv ${bfile}1.fam ${bfile}.fam
@@ -360,6 +355,12 @@ rm ${easyQCscript%.ecf}_temp.ecf
 easyqc_edit_ecf_cp="${genetic_processed_dir}/easyQC_topmed_edit.ecf"
 mv ${easyQCscript%.ecf}_edit.ecf ${easyqc_edit_ecf_cp}
 
+if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${ancestry} == "EAS" || ${ancestry} == "SAS" ]]; then
+	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
+elif [[ ${ancestry} == "None" ]]; then
+	rm -rf ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
+fi
+
 # run easyQC
 echo "Running EasyQC"
 ${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.afreq ${easyQC} ${easyQCfile} ${easyqc_edit_ecf_cp}
@@ -450,12 +451,12 @@ ${plink2} \
 
 gzip -f -c ${quality_scores} > ${section_01_dir}/data.info.gz
 gzip ${section_01_dir}/data.hardy
-gzip ${section_01_dir}/data.smiss
+gzip ${home_directory}/processed_data/genetic_data/data.smiss
 gzip ${section_01_dir}/data.vmiss
 gzip ${section_01_dir}/data.afreq
 
 # Check missingness
-missingness=`zcat ${section_01_dir}/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
+missingness=`zcat ${home_directory}/processed_data/genetic_data/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
 
 echo "Average missingness: ${missingness}"
 
