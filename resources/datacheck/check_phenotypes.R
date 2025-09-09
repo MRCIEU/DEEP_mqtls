@@ -15,19 +15,19 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(viridis))
 suppressPackageStartupMessages(library(ggpubr))
 
-args <- (commandArgs(TRUE));
-phenotypes_file <- as.character(args[1]);
-fam_file <- as.character(args[2]);
-meth_ids_file <- as.character(args[3]);
-raw_phenotype_distribution_plot <- as.character(args[4]);
-raw_phenotype_summary_file <- as.character(args[5])
+arguments <- commandArgs(T)
+phenotypes_file <- as.character(arguments[1]);
+fam_file <- as.character(arguments[2]);
+meth_ids_file <- as.character(arguments[3]);
+raw_phenotype_distribution_plot <- as.character(arguments[4]);
+raw_phenotype_summary_file <- as.character(arguments[5])
 study_name <- arguments[6] # ${study_name} in bash
-edited_phenotype_distribution_plot <- as.character(args[7]);
-edited_phenotype_summary_file <- as.character(args[8])
+edited_phenotype_distribution_plot <- as.character(arguments[7]);
+edited_phenotype_summary_file <- as.character(arguments[8])
 # we'll save out the edited phenotype file as an Rdata file so we don't have to
 # do anything with the variables the next time we load them in
-#phenotype_outfile <- as.character(args[9])
-winsorized_phenotype_file <- as.character(args[9])
+#phenotype_outfile <- as.character(arguments[9])
+winsorized_phenotype_file <- as.character(arguments[9])
 
 
 ################
