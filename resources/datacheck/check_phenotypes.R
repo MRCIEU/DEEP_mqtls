@@ -69,7 +69,7 @@ for (col_name in colnames(pheno)[!colnames(pheno)==IID]) {
 ################
 
 # create list to save the plots to
-phenotypes <- colnames(pheno)[!colnames(pheno)==IID]
+phenotypes <- colnames(pheno)[!colnames(pheno)=="IID"]
 plot_list <- vector("list", length = length(phenotypes))
 names(plot_list) <- phenotypes
 summstats_list <- vector("list", length = length(phenotypes))
