@@ -153,7 +153,7 @@ save(summstats_list,file=paste0(raw_phenotype_summary_file,"_",study_name,".Rdat
   #         Is this a thing we need to code manually once we have the data harmonisation questionnaire?
 
 
-numeric_phenos <- grepl("_numeric", colnames(pheno))
+numeric_phenos <- grep("_numeric", colnames(pheno), value = TRUE)
 # add in here removal of age etc from numeric_phenos
 plot_list <- vector("list", length = length(numeric_phenos))
 names(plot_list) <- numeric_phenos
