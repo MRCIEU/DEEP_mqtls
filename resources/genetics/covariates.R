@@ -24,7 +24,6 @@ if(cov_file=="NULL"){
 
 # Remove FID column if it is present
 if("FID" %in% names(covs)) covs <- subset(covs, select=-c(FID))
-
 smok <- read.table(smoking_file, he=T)[,c('IID', 'p_smoking_mcigarette')]
 
 if(cellcount_file=="NULL")
@@ -49,14 +48,12 @@ if(cellcount_file=="NULL")
   allcovs <- merge(allcovs, smok, by="IID", all=TRUE)
 }
 
-fam<-read.table(fam_file)
-m<-match(fam[,2],allcovs[,1])
-allcovs<-data.frame(FID=fam[,2],allcovs[m,])
+fam <- read.table(fam_file)
+common_iid <- intersect(fam[,2], allcovs$IID)
+allcovs <- allcovs[allcovs$IID %in% common_iid, ]
 
-write.table(allcovs,file=paste(out_file,".plink",sep=""),row.names=F,col.names=F,quote=F)
-write.table(allcovs[,-1], file=paste0(out_file, ".txt"), row=F, col=T, qu=F)
+# write.table(allcovs,file=paste(out_file,".plink",sep=""),row.names=F,col.names=F,quote=F)
+write.table(allcovs, file=paste0(out_file, ".txt"), row=F, col=T, qu=F)
 
 mat <- t(as.matrix(allcovs[,-1]))
 write.table(mat, file=paste0(out_file, ".matrixeqtl"), row=TRUE, col=FALSE, qu=FALSE, sep="\t")
-
-# to split covariates into quantitative and categorical
