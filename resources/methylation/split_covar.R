@@ -27,7 +27,7 @@ for (i in seq_along(arguments)) {
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
 
-comb_cov <- read.table(comb_cov_file, header = TRUE, stringsAsFactors = FALSE)
+comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character"))
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 
