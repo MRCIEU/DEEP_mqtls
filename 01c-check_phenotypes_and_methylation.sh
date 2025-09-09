@@ -100,6 +100,7 @@ fi
 if [ "$arg" = "cell_counts" ] || [ "$arg" = "all" ]
 then
 	section_message "cell_counts"
+
 	
 	echo "cell counts and correlations"
 
