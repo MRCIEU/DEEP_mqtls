@@ -52,7 +52,7 @@ message("Number of samples with covariate and methylation data: ", length(partic
 
 # set all the numeric columns to numeric variables, and all the factors to factors
 # we've set stringsAsFactors = F so all the cols should currently be characters
-for (col_name in colnames(pheno)[!colnames(pheno)==IID]) {
+for (col_name in colnames(pheno)[!colnames(pheno)=="IID"]) {
   if (grepl("_numeric", col_name)) {
     pheno[[col_name]] <- as.numeric(pheno[[col_name]])
   } else if (grepl("_factor", col_name)) {
