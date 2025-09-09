@@ -370,12 +370,6 @@ echo "Moving allele freq check figure"
 mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.multi.AFCHECK.png ${home_directory}/results/01/easyQC_topmed.multi.AFCHECK.png
 mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.rep ${home_directory}/results/01/easyQC_topmed.rep
 
-if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${ancestry} == "EAS" || ${ancestry} == "SAS" ]]; then
-	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
-elif [[ ${ancestry} == "None" ]]; then
-	rm -rf ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
-fi
-
 # Remove mismatched SNPs and flip misaligned SNPs
 # echo "Remove mismatched SNPs and NO FLIPPING"
 
@@ -435,7 +429,7 @@ echo "previous frequencies, missingness, hwe, info scores files present from pre
 	rm -f ${section_01_dir}/data.hardy.gz
 	rm -f ${section_01_dir}/data.info.gz
 	rm -f ${section_01_dir}/data.vmiss.gz
-	rm -f ${section_01_dir}/data.smiss.gz
+	rm -f ${home_directory}/processed_data/genetic_data/data.smiss.gz
 else
 	echo "passed file check"
 fi
