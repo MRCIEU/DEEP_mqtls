@@ -36,7 +36,7 @@ winsorized_phenotype_file <- as.character(arguments[9])
 
 ################
 
-message("Checking covariates file: ", covariates_file)
+message("Checking covariates file: ", phenotypes_file)
 pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F)
 
 # We don't require all DNAm samples to have genetic data
