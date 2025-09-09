@@ -15,13 +15,19 @@ qcovar_noPC_file <- arguments[7]
 
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 
+for (i in seq_along(arguments)) {
+  if (is.na(arguments[i]) || arguments[i] == "") {
+    stop(paste0("Argument ", i, " is NA or empty! Please check your input arguments."))
+  }
+}
+
 # comb_cov file should contain all covariates for mqtl analysis
 # including, IID, cell counts prediction, genetic 20 PCs, Age_numeric Sex_factor Slide_factor predicted_smoking
 
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
 
-comb_cov <- read.table(comb_cov_file, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+comb_cov <- read.table(comb_cov_file, header = TRUE, stringsAsFactors = FALSE)
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 
