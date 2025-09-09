@@ -10,7 +10,7 @@ echo "Running GWAS for genetic PCs (PC1-PC10)"
 
 for pc in {1..2}; do
     pc_col="PC${pc}"
-    pheno_file="genetic_pc_gwas.PC${pc}.pheno"
+    pheno_file="${home_directory}/processed_data/genetic_pc_gwas.PC${pc}.pheno"
 
     awk -v col="$((pc+2))" 'NR==1{next} {print $1, $2, $col}' ${genetic_pc_gwas} > ${pheno_file}
 
