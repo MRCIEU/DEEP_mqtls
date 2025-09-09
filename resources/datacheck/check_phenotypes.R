@@ -121,7 +121,7 @@ for(i in phenotypes){
 # size will be something like 4xn of rows and 4 columns
 # add title that has cohort name and raw distribution
 
-n_plot_rows <- ceiling(phenotypes/4)
+n_plot_rows <- ceiling(length(phenotypes)/4)
 row_dimensions <- n_plot_rows*4
 
 jpeg(filename = paste0(raw_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
