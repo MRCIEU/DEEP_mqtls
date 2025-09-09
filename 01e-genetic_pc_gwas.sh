@@ -21,8 +21,8 @@ for pc in {1..2}; do
             --grm-sparse "${grmfile_fast}_rel" \
             --fastGWA-mlm \
             --pheno "${pheno_file}" \
-            --qcovar "${qcovar_file}" \
-            --covar "${qcovar_noPC_file}" \
+            --qcovar "${qcovar_noPC_file}" \
+            --covar "${ccovar_file}" \
             --out "${section_01_dir}/gwas_${pc_col}" \
             --thread-num "${nthreads}"
 
@@ -32,8 +32,8 @@ for pc in {1..2}; do
             --grm-sparse "${grmfile_fast}_unrel" \
             --fastGWA-mlm \
             --pheno "${pheno_file}" \
-            --qcovar "${qcovar_file}" \
-            --covar "${qcovar_noPC_file}" \
+            --qcovar "${qcovar_noPC_file}" \
+            --covar "${ccovar_file}" \
             --out "${section_01_dir}/gwas_${pc_col}" \
             --thread-num "${nthreads}"
     fi
