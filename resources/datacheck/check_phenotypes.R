@@ -197,7 +197,7 @@ for(i in numeric_phenos){
 
 ################
 
-n_plot_rows <- ceiling(numeric_phenos/4)
+n_plot_rows <- ceiling(length(numeric_phenos)/4)
 row_dimensions <- n_plot_rows*4
 
 jpeg(filename = paste0(edited_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
