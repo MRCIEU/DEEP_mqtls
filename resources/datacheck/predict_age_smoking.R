@@ -32,7 +32,7 @@ pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 message("Number of samples with covariate and methylation data: ", length(participants))
 
-message(paste(nrow(fam), "samples with genetic data matched to methylation data"))
+message(paste(nrow(fam_file), "samples with genetic data matched to methylation data"))
 
 message("Predicting DNAmAge")#############################################
 
