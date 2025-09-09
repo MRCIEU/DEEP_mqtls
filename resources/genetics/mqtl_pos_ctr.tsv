@@ -1,13 +1,13 @@
-positive_control_cpg	positive_control_snp_chr	positive_control_snp_pos    rsid	positive_control_snp_window	positive_control_threshold  positive_control_source pop array   a1  a2  beta    se  scale
-cg07959070	22	49660223    rs12485195  100000	0.001	godmc2pos_main;Kassam2021_SupTab2	eur;sas_meta	450k;epic   A   G   -0.150625   0.0113505
-cg26684673	11	122659883   rs7115089   100000	0.001	Hawe2020_main	sas 450k    C   G   0.022607583 0.0004577318
-cg12334488  2   20702513    rs13403407  100000  0.001   Hawe2020_st5    eur_sas 450k    C    T  0.10062725  0.0016476811
-cg04850017  11  63987514    rs483340    100000  0.001   Hawe2020_st5    eur_sas 450k    A   G   -0.15486795 0.0021684387
-cg15059639	2	170363417   rs876778	100000	0.001	Kassam2021_SupTab2	sas_meta	epic    A   G   0.252876    0.0162361 
-cg00269725	6	156657891   rs17087692  100000	0.001	Kassam2021_SupTab2	sas_meta	epic    A   G   -0.158008   0.0117713
-cg00116315	6	35498009    rs1051952	100000	0.001	Kassam2021_SupTab2	sas_meta	epic    A   C   0.07643     0.00651907
-cg22495460	2   24892374    rs10165451	100000	0.001	Shang2023_zenodo	aframr	epic    A   G   -0.3588024  0.05901314
-cg05589743	3	41954644    rs2272007	100000	0.001	Shang2023_zenodo	aframr	epic    C   T   -0.3754838  0.0473355
-cg14817867  17  18875817    rs7220661   100000	0.001   Shang2023_zenodo    aframr  epic    A   G   -0.4405635  0.04666113
-cg26403843	5	159221712   rs79710691	100000	0.001	Jhun_2021_SupTab3	afr_eur	450k    NA  NA  NA  NA
-cg14476101	1	119726456	rs2843023   100000	0.001	Jhun_2021_SupTab3	afr_hisp	450k    NA  NA  NA  NA
+positive_control_cpg	positive_control_snp_chr	positive_control_snp_pos	rsid	positive_control_snp_window	positive_control_threshold	positive_control_source	pop	array	a1	a2	beta	se
+cg07959070	22	49660223	rs12485195	1e+05	0.001	godmc2pos_main;Kassam2021_SupTab2	eur;sas_meta	450k;epic	A	G	-0.150625	0.0113505
+cg26684673	11	122659883	rs7115089	1e+05	0.001	Hawe2020_main	sas	450k	C	G	0.022607583	0.0004577318
+cg12334488	2	20702513	rs13403407	1e+05	0.001	Hawe2020_st5	eur_sas	450k	C	T	0.10062725	0.0016476811
+cg04850017	11	63987514	rs483340	1e+05	0.001	Hawe2020_st5	eur_sas	450k	A	G	-0.15486795	0.0021684387
+cg15059639	2	170363417	rs876778	1e+05	0.001	Kassam2021_SupTab2	sas_meta	epic	A	G	0.252876	0.0162361
+cg00269725	6	156657891	rs17087692	1e+05	0.001	Kassam2021_SupTab2	sas_meta	epic	A	G	-0.158008	0.0117713
+cg00116315	6	35498009	rs1051952	1e+05	0.001	Kassam2021_SupTab2	sas_meta	epic	A	C	0.07643	0.00651907
+cg22495460	2	24892374	rs10165451	1e+05	0.001	Shang2023_zenodo	aframr	epic	A	G	-0.3588024	0.05901314
+cg05589743	3	41954644	rs2272007	1e+05	0.001	Shang2023_zenodo	aframr	epic	C	T	-0.3754838	0.0473355
+cg14817867	17	18875817	rs7220661	1e+05	0.001	Shang2023_zenodo	aframr	epic	A	G	-0.4405635	0.04666113
+cg26403843	5	159221712	rs79710691	1e+05	0.001	Jhun_2021_SupTab3	afr_eur	450k	NA	NA	NA	NA
+cg14476101	1	119726456	rs2843023	1e+05	0.001	Jhun_2021_SupTab3	afr_hisp	450k	NA	NA	NA	NA
