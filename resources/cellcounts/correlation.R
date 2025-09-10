@@ -13,15 +13,15 @@ cor_plot_comb <- arguments[6];
 study_name <- arguments[7];
 output_dir <- arguments[8];
 
-if (measured_cellcounts != "NULL") {
-  message("Reading in measured cell counts")
-  # already formatted in 01a
-  # colnames should be in prefix of m, e.g. m.Bcells, m.Tcells, m.Mono, m.Gran, m.NK, m.Lym, m.Baso, m.Eos, m.Neu, m.Epi, m.Fib
-  # units are in percentage
-  measured = read.table(measured_cellcounts, header=T)
-  
+measured <- data.frame()
+if (!is.na(measured_cellcounts) && nzchar(measured_cellcounts) && !measured_cellcounts %in% c("NULL", "0")) {
+  if (!file.exists(measured_cellcounts)) {
+    stop("Measured cellcounts file not found: ", measured_cellcounts)
+  }
+  message("Reading in measured cell counts: ", measured_cellcounts)
+  measured <- read.table(measured_cellcounts, header = TRUE)
 } else {
-  measured = data.frame()
+  message("No measured cell counts provided (got: '", measured_cellcounts, "'); proceeding without measured data.")
 }
 
 message("Reading in predicted cell counts")
