@@ -42,7 +42,7 @@ if (cellcount_panel == "unilife") {
   message("Error: cell count panel not detected")
 }
 
-cellcounts_temp <- cell_counts[,celltypes]
+cellcounts_temp <- cell_counts[,c("IID",celltypes)]
 pheno <- merge(pheno,cellcounts_temp,by="IID")
 
 # TO DO: merge genetic PCs 1:10 with pheno file
