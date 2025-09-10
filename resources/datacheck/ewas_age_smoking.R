@@ -37,7 +37,7 @@ if (cellcount_panel == "unilife") {
 
 # add cell counts to pheno
 
-cellcounts_temp <- cell_counts[,celltypes]
+cellcounts_temp <- cell_counts[,c("IID",celltypes)]
 pheno <- merge(pheno,cellcounts_temp,by="IID")
 
 message("Setting up EWAS")#######################################
