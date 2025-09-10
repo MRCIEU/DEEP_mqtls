@@ -31,7 +31,7 @@ comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="ch
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 
-force_category <- c("sex", "Sex", "Sex_factor")
+force_category <- c("sex", "Sex", "Sex_factor", "slide", "slide_factor", "Slide_factor")
 
 quant_cols <- sapply(merged, is.numeric)
 category_cols <- sapply(merged, function(x) is.character(x) || is.factor(x))
