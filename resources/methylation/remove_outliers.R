@@ -83,7 +83,7 @@ head(covs_gwas)
 
 m_ewas<-match(meth_id[,1],covs$IID)
 covs_ewas<-covs[m_ewas,]
-head(covs_ewas)
+#head(covs_ewas)
 
 message("Data size of covariates for GWAS: ", nrow(covs_gwas), " individuals and ", ncol(covs_gwas)-1, " covariates.")
 
