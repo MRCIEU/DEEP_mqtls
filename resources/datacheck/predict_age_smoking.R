@@ -52,13 +52,13 @@ pheno$Hannum_age <- ret$score
 
 hannum_plot <- ggplot(data=pheno, aes(x=Age_numeric,y=Hannum_age)) +
             geom_point(alpha=0.5,colour="#440154FF") +
-            labs(title=paste0(cohort_name," Hannum age vs age, cor =",cor(pheno$Age_numeric,ret$score),"p =",signif(cor.test(pheno$Age_numeric,ret$score)$p.value),digits=2))+
+            labs(title=paste0(study_name," Hannum age vs age, cor =",cor(pheno$Age_numeric,ret$score),"p =",signif(cor.test(pheno$Age_numeric,ret$score)$p.value),digits=2))+
             geom_smooth(method='lm')+
             theme_minimal()
 
 message("Recoding smoking to yes/no")#############################################
 
-# in case some cohorts only have smoking quantity,
+# in case some studies only have smoking quantity,
 # recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
 
 if ("Smoking_factor" %in% colnames(pheno)) {
@@ -84,7 +84,7 @@ if ("Smoking_factor" %in% colnames(df)) {
   mcigarette_plot <- ggplot(data=pheno, aes(x=Smoking_factor,y=p_smoking_mcigarette,color=Smoking_factor)) +
     geom_boxplot()+
     scale_colour_viridis(discrete=T,begin=0,end=0.65)+
-    labs(title=paste0(cohort_name," reported vs predicted smoking (mcigarette), p=",signif(wilcox.test(p_smoking_mcigarette ~ Smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
+    labs(title=paste0(study_name," reported vs predicted smoking (mcigarette), p=",signif(wilcox.test(p_smoking_mcigarette ~ Smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
     theme_minimal()+
     theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
     theme(legend.position = "none")
@@ -115,7 +115,7 @@ if ("Smoking_factor" %in% colnames(df)) {
   elliott_plot <- ggplot(data=pheno, aes(x=Smoking_factor,y=p_smoking_elliott,color=Smoking_factor)) +
     geom_boxplot()+
     scale_colour_viridis(discrete=T,begin=0,end=0.65)+
-    labs(title=paste0(cohort_name," reported vs predicted smoking (Elliott), p=",signif(wilcox.test(p_smoking_elliott ~ Smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
+    labs(title=paste0(study_name," reported vs predicted smoking (Elliott), p=",signif(wilcox.test(p_smoking_elliott ~ Smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
     theme_minimal()+
     theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
     theme(legend.position = "none")
