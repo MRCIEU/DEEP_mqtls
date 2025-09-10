@@ -18,21 +18,21 @@ methylation_summary_file_ewas <- arguments[11];
 covariates_intersect_gwas <- arguments[12];
 covariates_intersect_ewas <- arguments[13];
 
-message("Reading methylation data...")
+message("Loading methylation data...")
 load(methylationfile)
-message("Data size: ", ncol(norm.beta), " individuals and ", nrow(norm.beta), " CpGs.")
+message("Original methylation input data size: ", ncol(norm.beta), " individuals and ", nrow(norm.beta), " CpGs.")
 
 meth_id<-read.table(meth_id,he=F)
-message("Data size: ", nrow(meth_id), " individuals after 01a-qc")
 ori_id <- intersect(colnames(norm.beta), meth_id[,1])
 norm.beta.meth <- norm.beta[,ori_id]
 
 intersect_ids<-read.table(commonids,he=F)
-message("Data size: ", nrow(intersect_ids), " individuals with qc-ed genetic data")
-shared_samples <- intersect(colnames(norm.beta), intersect_ids[,1])
-norm.beta.shared <- norm.beta[,shared_samples]
+message("Sample size: ", nrow(intersect_ids), " individuals who have qc-ed genetic data from 01b")
 
-message("Data size after removal of samples without genetic data: ", ncol(norm.beta.shared), " individuals and ", nrow(norm.beta.shared), " CpGs.")
+fam <- read.table(fam_file,header=F,stringsAsFactors=F)
+shared_samples <- intersect(colnames(norm.beta), fam[,2])
+norm.beta.shared <- norm.beta[,shared_samples]
+message("Methylation Data size after removal of samples without genetic data: ", ncol(norm.beta.shared), " individuals and ", nrow(norm.beta.shared), " CpGs.")
 
 message("Identifying methylation outliers")
 
@@ -60,9 +60,12 @@ summariseMeth <- function(X, out_file)
 	return(dat)
 }
 
-message("Generating summary stats of methylation")
+message("Generating summary stats of methylation for GWAS")
 
 meth_summary_gwas <- summariseMeth(norm.beta.shared, out_file_gwas)
+
+message("Generating summary stats of methylation for EWAS")
+
 meth_summary_ewas <- summariseMeth(norm.beta.meth, out_file_ewas)
 
 save(meth_summary_gwas, file = methylation_summary_file_gwas)
@@ -72,18 +75,24 @@ message("Reading covariate data and remove outliers")
 
 covs <- read.table(covar_file, header = T, colClasses=c('Sex_factor'='factor'))
 
+message("Data size of covariates: ", nrow(covs), " individuals and ", ncol(covs)-1, " covariates.")
+
 m_gwas<-match(intersect_ids[,1],covs$IID)
 covs_gwas<-covs[m_gwas,]
-
+head(covs_gwas)
 
 m_ewas<-match(meth_id[,1],covs$IID)
 covs_ewas<-covs[m_ewas,]
+head(covs_ewas)
+
+message("Data size of covariates for GWAS: ", nrow(covs_gwas), " individuals and ", ncol(covs_gwas)-1, " covariates.")
+
+message("Data size of covariates for EWAS: ", nrow(covs_ewas), " individuals and ", ncol(covs_ewas)-1, " covariates.")
 
 write.table(covs_gwas,covariates_intersect_gwas,sep="\t",quote=F,row.names=F,col.names=T)
 write.table(covs_ewas,covariates_intersect_ewas,sep="\t",quote=F,row.names=F,col.names=T)
 
 bim <- fread(bim_file)
-fam <- read.table(fam_file,header=F,stringsAsFactors=F)
 
 cohort_summary <- list()
 cohort_summary$methylation_sample_size_gwas <- ncol(norm.beta.shared)
