@@ -44,7 +44,7 @@ message("The r squared between predicted DNAm age and actual age is ", cor(ret$s
 # warning if the correlation is lower than 0.5-0.6
 if(hannum_cor<0.6){
   message("The correlation between predicted DNAm age and actual age is ", cor(ret$score, pheno$Age_numeric),
-          "; this seems a little bit low. Is the variance in age low in your dataset? The age range is",range(pheno$Age_numeric))
+          "; this seems a bit low. Is the variance in age low in your dataset? The age range is ",range(pheno$Age_numeric))
 }
 message("There were ",length(ret$sites)," DNAm sites used out of a possible 71 for prediction of Hannum age")
 
@@ -95,7 +95,7 @@ if ("Smoking_factor" %in% colnames(df)) {
         :running mcigarette plot of DNAm-estimated smoking")
   mcigarette_plot <- ggplot() +
     geom_density(data=pheno, aes(x=pheno$p_smoking_mcigarette), colour="#1F968BFF")+
-    labs(title=paste0(i,":n of NAs=",sum(is.na(pheno$p_smoking_mcigarette))))+#,color="Legend")+
+    labs(title=paste0(study_name," predicted smoking (mcigarette)"))+#,color="Legend")+
     geom_vline(xintercept = mean(pheno$p_smoking_mcigarette))+
     theme_minimal()
   
@@ -126,7 +126,7 @@ if ("Smoking_factor" %in% colnames(df)) {
         :running Elliott plot of DNAm-estimated smoking")
   Elliott_plot <- ggplot() +
     geom_density(data=pheno, aes(x=pheno$p_smoking_elliott), colour="#1F968BFF")+
-    labs(title=paste0(i,":n of NAs=",sum(is.na(pheno$p_smoking_elliott))))+#,color="Legend")+
+    labs(title=paste0(study_name," predicted smoking (Elliott)"))+#,color="Legend")+
     geom_vline(xintercept = mean(pheno$p_smoking_elliott))+
     theme_minimal()
   
