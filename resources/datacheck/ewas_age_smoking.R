@@ -86,7 +86,7 @@ if ("Smoking_factor" %in% colnames(df)) {
   # make sure meth and pheno are in same order
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
-  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$Smoking_factor, covariates=pheno[,ewas_covars_smoking], sva=T, isva=F, random.seed=23) 
+  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$Smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23) 
   # save out the ewas summary stats:
   ewas.out <- ewas.smoking$analyses
   save(ewas.out, file=paste0(ewas_stats,"_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -115,7 +115,7 @@ ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specifi
 participants <- as.character(pheno$IID)
 meth.temp <- norm.beta[,participants]
 
-ewas.age <- meffil.ewas(meth.temp, variable=pheno$Age_numeric, covariates=pheno[,ewas_covars_age], sva=T, isva=F, random.seed=23) 
+ewas.age <- meffil.ewas(meth.temp, variable=pheno$Age_numeric, covariates=pheno[,colnames(pheno)%in%ewas_covars_age], sva=T, isva=F, random.seed=23) 
 ewas.out <- ewas.age$analyses
 save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
 ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
@@ -154,7 +154,7 @@ if ("maternal_smoking_factor" %in% colnames(df)) {
   # make sure meth and pheno are in same order
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
-  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$maternal_smoking_factor, covariates=pheno[,ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
+  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$maternal_smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
   # save out the ewas summary stats:
   ewas.out <- ewas.smoking$analyses
   save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -180,11 +180,11 @@ if ("maternal_smoking_factor" %in% colnames(df)) {
 
 message("Starting sex EWAS")#######################################
 
-ewas_covars_age <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
 participants <- as.character(pheno$IID)
 meth.temp <- norm.beta[,participants]
 
-ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,ewas_covars_age], sva=T, isva=F, random.seed=23) 
+ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
 ewas.out <- ewas.sex$analyses
 save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
 ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
@@ -200,12 +200,12 @@ message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associ
 
 message("Starting scrambled sex (negative control) EWAS")#######################################
 
-ewas_covars_age <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
 participants <- as.character(pheno$IID)
 meth.temp <- norm.beta[,participants]
 pheno$Sex_factor <- sample(pheno$Sex_factor)
 
-ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,ewas_covars_age], sva=T, isva=F, random.seed=23) 
+ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
 ewas.out <- ewas.sex$analyses
 save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
 ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
