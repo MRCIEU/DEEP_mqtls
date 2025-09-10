@@ -176,7 +176,7 @@ main = function(){
                 chr=names(man_data)[chr_column], 
                 snp=names(man_data)[snp_column],
                 p="Correlation (absolute value)",
-                ylim=c(0, 1)
+                ylim=c(0, 1))
       dev.off()
       
       message("The following plots have been generated, please check!\n",
