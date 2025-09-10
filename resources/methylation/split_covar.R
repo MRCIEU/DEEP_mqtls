@@ -39,7 +39,8 @@ category_cols <- sapply(merged, function(x) is.character(x) || is.factor(x))
 category_cols[names(merged) %in% force_category] <- TRUE
 quant_cols[names(merged) %in% force_category] <- FALSE
 
-quant_cov <- merged[, c("FID", "IID", names(merged)[quant_cols & !(names(merged) %in% c("FID", "IID"))])]
+pcs_exclude <- paste0("genetic_pc", 11:20)
+quant_cov <- merged[, c("FID", "IID", names(merged)[quant_cols & !(names(merged) %in% c("FID", "IID", pcs_exclude))])]
 category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(merged) %in% c("FID", "IID"))])]
 
 quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
