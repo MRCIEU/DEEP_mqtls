@@ -8,6 +8,18 @@ print_version
 
 echo "Running GWAS for genetic PCs (PC1-PC10)"
 
+covar_option=""
+if [ -f "${ccovar_file}" ]; then
+  ncols=$(awk -F'\t' 'NR==1{print NF; exit}' "${ccovar_file}" 2>/dev/null || echo 0)
+  if [ "${ncols}" -gt 2 ]; then
+    covar_option="--covar ${ccovar_file}"
+  else
+    echo "No categorical covariates detected in ${ccovar_file}; skipping --covar for GCTA."
+  fi
+else
+  echo "Warning: ccovar file not found: ${ccovar_file}"
+fi
+
 for pc in {1..2}; do
     pc_col="PC${pc}"
     pheno_file="${home_directory}/processed_data/genetic_pc_gwas.PC${pc}.pheno"
@@ -22,7 +34,7 @@ for pc in {1..2}; do
             --fastGWA-mlm \
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
-            --covar "${ccovar_file}" \
+            ${covar_option} \
             --out "${section_01_dir}/gwas_${pc_col}" \
             --thread-num "${nthreads}"
 
@@ -33,7 +45,7 @@ for pc in {1..2}; do
             --fastGWA-mlm \
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
-            --covar "${ccovar_file}" \
+            ${covar_option} \
             --out "${section_01_dir}/gwas_${pc_col}" \
             --thread-num "${nthreads}"
     fi
