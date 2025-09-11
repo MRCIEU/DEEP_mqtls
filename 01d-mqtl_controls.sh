@@ -134,7 +134,7 @@ do
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
             "${section_01_dir}/positive.control.untransformed.file.txt" \
             10 \
-            0 \
+            8 \
             1 \
             3 \
             2 \
@@ -142,7 +142,8 @@ do
             "${positive_control_snp_chr}" \
             "${positive_control_snp_pos}" \
             "${positive_control_snp_window}" \
-            "${positive_control_threshold}"
+            "${positive_control_threshold}" \
+            p
     fi
 
 done
@@ -211,7 +212,7 @@ do
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
         "${section_01_dir}/negative.control.untransformed.file.txt" \
             10 \
-            0 \
+            8 \
             1 \
             3 \
             2 \
@@ -219,7 +220,8 @@ do
             "${positive_control_snp_chr}" \
             "${positive_control_snp_pos}" \
             "${positive_control_snp_window}" \
-            "${positive_control_threshold}"
+            "${positive_control_threshold}" \
+            "p"
     fi
 
 done
