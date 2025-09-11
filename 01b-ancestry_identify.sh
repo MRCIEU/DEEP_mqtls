@@ -282,31 +282,31 @@ n_outliers=`wc -l ${genetic_outlier_ids} | awk '{ print $1 }'`
 if [ "${n_outliers}" -eq "0" ]
 then
 	echo "No genetic outliers detected"
-else
-	# Remove genetic outliers from data
-	echo "Removing ${n_outliers} genetic outliers from data"
-	${plink2} \
-		--bfile ${bfile} \
-		--new-id-max-allele-len 70 \
-		--remove ${genetic_outlier_ids} \
-		--make-bed \
-		--out ${bfile}1 \
-		--threads ${nthreads}
+# else
+# 	# Remove genetic outliers from data
+# 	echo "Removing ${n_outliers} genetic outliers from data"
+# 	${plink2} \
+# 		--bfile ${bfile} \
+# 		--new-id-max-allele-len 70 \
+# 		--remove ${genetic_outlier_ids} \
+# 		--make-bed \
+# 		--out ${bfile}1 \
+# 		--threads ${nthreads}
 	
-	mv ${bfile}1.bed ${bfile}.bed
-	mv ${bfile}1.bim ${bfile}.bim
-	mv ${bfile}1.fam ${bfile}.fam
+# 	mv ${bfile}1.bed ${bfile}.bed
+# 	mv ${bfile}1.bim ${bfile}.bim
+# 	mv ${bfile}1.fam ${bfile}.fam
 
-	${gcta} \
-		--grm ${grmfile_all} \
-		--remove ${genetic_outlier_ids} \
-		--make-grm-bin \
-		--out ${grmfile_all}1 \
-		--thread-num ${nthreads}
+# 	${gcta} \
+# 		--grm ${grmfile_all} \
+# 		--remove ${genetic_outlier_ids} \
+# 		--make-grm-bin \
+# 		--out ${grmfile_all}1 \
+# 		--thread-num ${nthreads}
 
-mv ${grmfile_all}1.grm.N.bin ${grmfile_all}.grm.N.bin
-mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
-mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
+# mv ${grmfile_all}1.grm.N.bin ${grmfile_all}.grm.N.bin
+# mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
+# mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
 
 fi
 
