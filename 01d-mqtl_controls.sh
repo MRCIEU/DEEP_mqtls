@@ -156,7 +156,7 @@ echo "Running negative control"
 # 4 for D, 5 for E, 16 for P
 seed=45516
 
-tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
 do
     negative_control_cpg="NEG_${positive_control_cpg}"
 
