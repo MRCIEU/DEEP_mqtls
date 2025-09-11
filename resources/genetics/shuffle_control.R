@@ -4,7 +4,7 @@ output_file <- args[2]
 seed <- as.integer(args[3])
 
 set.seed(seed)
-df <- read.csv(input_file, check.names=FALSE)
+df <- read.csv(input_file, header = TRUE, sep = "\t")
 header <- colnames(df)
 df_shuffled <- df
 for (i in 1:nrow(df)) {
