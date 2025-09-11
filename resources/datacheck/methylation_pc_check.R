@@ -53,8 +53,8 @@ message("Generating PCs")#######################################
 
 # Create PC matrix to test PC associations (probe.range means take that number of 
 # the most variable probes)
-pcs <- meffil.methylation.pcs(meth,probe.range=50000)
-message("there are",ncol(pcs),"PCs generated")
+pcs <- meffil.methylation.pcs(norm.beta,probe.range=50000,full.obj=T)
+message("there are ",ncol(pcs)," PCs generated")
 
 # make scree plot
 pca.var <- pcs$sdev^2
@@ -70,6 +70,9 @@ ggplot(df, aes(x = PC, y = Variance)) +
   labs(title = paste("Scree Plot",study_name), x = "Principal Component", y = "Proportion of Variance Explained") +
   theme_minimal()
 dev.off()
+
+pcs <- meffil.methylation.pcs(norm.beta,probe.range=50000,full.obj=F)
+message("there are ",ncol(pcs)," PCs generated")
 
 # reduce to top 10 PCs because that's all we will test
 pcs <- pcs[,1:10]
