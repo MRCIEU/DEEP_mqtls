@@ -46,8 +46,8 @@ category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(m
 quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
 category_cov <- remove_constant_cols(category_cov, "category_cov")
 
-print(head(category_cov))
-print(head(quant_cov))
+#print(head(category_cov))
+#print(head(quant_cov))
 
 slide_cols <- grep("Slide_factor", colnames(category_cov), value = TRUE)
 if (length(slide_cols) > 0) {
