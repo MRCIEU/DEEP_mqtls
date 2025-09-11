@@ -200,8 +200,7 @@ gwas_covariates="${home_directory}/processed_data/genetic_data/gwas_covariates"
 ilmn_probesnps="${scripts_directory}/resources/qc/probesnps.txt"
 #hm3_snps_no_ld="${scripts_directory}/resources/genetics/hapmap3_autosome.snplist_withoutlong-range.LDSNPs.txt.gz"
 #hm3_snps_no_ld2="${scripts_directory}/resources/genetics/hapmap3_autosome.snplist_withoutlong-range.LDSNPs.txt"
-hm3_snps="${scripts_directory}/resources/genetics/hapmap3_autosome_withoutlong-range.LDSNPs.recode.snplist.gz"
-
+hm3_snps="${scripts_directory}/resources/genetics/hapmap3_autosome_withoutlong-range.LDSNPs.b38.recode.snplist.gz"
 
 # Sample mixup checks
 bfile_probesnps="${bfile}_probesnps"
