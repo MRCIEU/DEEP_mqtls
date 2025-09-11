@@ -23,7 +23,7 @@ for (i in seq_along(arguments)) {
 
 # comb_cov file should contain all covariates for mqtl analysis
 # including, IID, cell counts prediction, genetic 20 PCs, Age_numeric Sex_factor Slide_factor predicted_smoking
-
+message("Reading files:")
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
 
@@ -46,7 +46,10 @@ category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(m
 quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
 category_cov <- remove_constant_cols(category_cov, "category_cov")
 
-slide_cols <- grep("^slide(_factor)?$", tolower(colnames(category_cov)), value = TRUE)
+print(head(category_cov))
+print(head(quant_cov))
+
+slide_cols <- grep("Slide_factor", colnames(category_cov), value = TRUE)
 if (length(slide_cols) > 0) {
   message("Removing slide factor columns from category_cov: ", paste(slide_cols, collapse = ", "))
   category_cov <- category_cov[, !(colnames(category_cov) %in% slide_cols), drop = FALSE]
@@ -95,7 +98,7 @@ if (ncol(quant_cov) < 3) {
   stop("After removing constant columns, quant_cov only contains FID and IID. Please check your input data.")
 }
 if (ncol(category_cov) < 3) {
-  stop("After removing constant columns, category_cov only contains FID and IID. Please check your input data.")
+  message("After removing constant columns, category_cov only contains FID and IID. Please check your input data. No categorical covariates will be used in GCTA.")
 }
 
 qc_cols <- setdiff(colnames(quant_cov), c("FID","IID"))
@@ -115,8 +118,8 @@ pc_cov <- quant_cov[, c("FID", "IID", intersect(pc_cols, colnames(quant_cov)))]
 all_pc_cols <- paste0("genetic_pc", 1:20)
 quant_cov_noPC <- quant_cov[, !(colnames(quant_cov) %in% all_pc_cols), drop = FALSE]
 
-write.table(quant_cov, file = qcovar_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-write.table(category_cov, file = ccovar_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(quant_cov, file = qcovar_file, sep = "\t", row.names = FALSE,  quote = FALSE)
+write.table(category_cov, file = ccovar_file, sep = "\t", row.names = FALSE,  quote = FALSE)
 
-write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
-write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE,  quote = FALSE)
+write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE,  quote = FALSE)
