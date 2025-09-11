@@ -35,6 +35,8 @@ if (cellcount_panel == "unilife") {
   message("Error: cell count panel not detected")
 }
 
+celltypes <- celltypes[!grepl("treg", celltypes, ignore.case = TRUE)]
+
 # add cell counts to pheno
 
 cellcounts_temp <- cell_counts[,c("IID",celltypes)]
