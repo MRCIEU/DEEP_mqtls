@@ -20,9 +20,9 @@ else
   echo "Warning: ccovar file not found: ${ccovar_file}"
 fi
 
-for pc in {1..2}; do
+for pc in {1..5}; do
     pc_col="PC${pc}"
-    pheno_file="${home_directory}/processed_data/genetic_pc_gwas.PC${pc}.pheno"
+    pheno_file="${home_directory}/processed_data/covariate_data/genetic_pc_gwas.PC${pc}.pheno"
 
     awk -v col="$((pc+2))" 'NR==1{next} {print $1, $2, $col}' ${genetic_pc_gwas} > ${pheno_file}
 
@@ -53,12 +53,12 @@ for pc in {1..2}; do
     tr -s " " < "${section_01_dir}/gwas_${pc_col}.fastGWA" | gzip -c > "${section_01_dir}/gwas_${pc_col}.fastGWAmlm.gz"
     rm "${section_01_dir}/gwas_${pc_col}.fastGWA"
 
-    echo "make manhattan and qq plots for genetic PC ${pc_col}"
+    echo "make manhattan and qq plots for genetic ${pc_col}"
     echo "${section_01_dir}/gwas_${pc_col}.fastGWAmlm.gz" > "${section_01_dir}/gwas_${pc_col}.file.txt"
 
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
         "${section_01_dir}/gwas_${pc_col}.file.txt" \
-            0 \
+            10 \
             8 \
             1 \
             3 \
@@ -67,7 +67,8 @@ for pc in {1..2}; do
             0 \
             0 \
             0 \
-            0
+            0 \
+            beta
 
 done
 
