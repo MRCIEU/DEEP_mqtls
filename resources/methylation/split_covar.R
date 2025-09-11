@@ -69,29 +69,63 @@ if (length(salas_cols) > 0 && length(unilife_cols) > 0) {
   cell_idx <- grep(cell_pattern, colnames(quant_cov))
 }
 
-# if (length(cell_idx) > 1) {
-#   cell_cols <- colnames(quant_cov)[cell_idx]
-#   remove_indices <- integer(0)
-#   for (i in seq_along(cell_cols)) {
-#     for (j in seq((i+1), length(cell_cols))) {
-#       # skip if already marked for removal
-#       if (j %in% remove_indices) next
-#       x <- as.numeric(quant_cov[[cell_cols[i]]])
-#       y <- as.numeric(quant_cov[[cell_cols[j]]])
-#       corr_val <- suppressWarnings(cor(x, y, use = "pairwise.complete.obs"))
-#       if (!is.na(corr_val) && abs(corr_val) >= 0.9) {
-#         # mark the second column (j) for removal
-#         remove_indices <- unique(c(remove_indices, j))
-#         message(sprintf("Removing collinear cell-count column '%s' (|cor|=%.3f) due to collinearity with '%s'",
-#                         cell_cols[j], corr_val, cell_cols[i]))
-#       }
-#     }
-#   }
-#   if (length(remove_indices) > 0) {
-#     remove_names <- cell_cols[remove_indices]
-#     quant_cov <- quant_cov[, !(colnames(quant_cov) %in% remove_names), drop = FALSE]
-#   }
-# }
+cell_cols <- if (exists("cell_idx") && length(cell_idx) > 0) colnames(quant_cov)[cell_idx] else character(0)
+
+if (length(cell_cols) >= 2) {
+  message("Computing pairwise correlations for cell columns: ", paste(cell_cols, collapse = ", "))
+  cor_mat <- tryCatch(
+    cor(quant_cov[, cell_cols, drop = FALSE], use = "pairwise.complete.obs"),
+    error = function(e) { warning("Correlation matrix failed: ", e$message); return(NULL) }
+  )
+  if (!is.null(cor_mat)) {
+    abs_mat <- abs(cor_mat)
+    diag(abs_mat) <- 0
+    thresh <- 0.9
+    pairs_idx <- which(abs_mat >= thresh, arr.ind = TRUE)
+    pairs_idx <- pairs_idx[pairs_idx[,1] < pairs_idx[,2], , drop = FALSE]
+    if (nrow(pairs_idx) == 0) {
+      message("No cell columns with abs(cor) >= ", thresh)
+    } else {
+      message("Highly correlated cell column pairs (abs(cor) >= ", thresh, "):")
+      apply(pairs_idx, 1, function(ii) {
+        i <- ii[1]; j <- ii[2]
+        message(sprintf("  %s <-> %s : cor = %.3f", cell_cols[i], cell_cols[j], cor_mat[i,j]))
+      })
+
+      # Greedy removal: iteratively remove the column with highest number of high-corr partners;
+      # tie-breaker: highest mean absolute correlation with remaining columns.
+      to_remove <- character(0)
+      remaining <- cell_cols
+      adj <- abs_mat >= thresh
+      while (TRUE) {
+        sub_adj <- adj[remaining, remaining, drop = FALSE]
+        if (!any(sub_adj)) break
+        deg <- rowSums(sub_adj, na.rm = TRUE)
+        maxdeg <- max(deg)
+        candidates <- names(deg)[deg == maxdeg]
+        if (length(candidates) > 1) {
+          meanabs <- rowMeans(abs_mat[remaining, remaining, drop = FALSE], na.rm = TRUE)
+          candidate_means <- meanabs[candidates]
+          chosen <- candidates[which.max(candidate_means)]
+        } else {
+          chosen <- candidates[1]
+        }
+        to_remove <- c(to_remove, chosen)
+        message("Removing redundant column: ", chosen, " (degree=", maxdeg, ")")
+        remaining <- setdiff(remaining, chosen)
+      }
+
+      if (length(to_remove) > 0) {
+        quant_cov <- quant_cov[, !(colnames(quant_cov) %in% to_remove), drop = FALSE]
+        message("Removed cell columns due to high correlation: ", paste(to_remove, collapse = ", "))
+        # update cell_idx to reflect removed columns
+        cell_idx <- which(colnames(quant_cov) %in% setdiff(cell_cols, to_remove))
+      }
+    }
+  }
+} else {
+  message("Not enough cell columns for correlation filtering (found ", length(cell_cols), ")")
+}
 
 # Check that at least one covariate column remains (besides FID and IID)
 if (ncol(quant_cov) < 3) {
