@@ -54,6 +54,18 @@ ${R_directory}Rscript resources/genetics/check_positive_controls.R \
 # Step 4: Loop through each positive control locus
 echo "Running positive controls"
 
+covar_option=""
+if [ -f "${ccovar_file}" ]; then
+  ncols=$(awk -F'\t' 'NR==1{print NF; exit}' "${ccovar_file}" 2>/dev/null || echo 0)
+  if [ "${ncols}" -gt 2 ]; then
+    covar_option="--covar ${ccovar_file}"
+  else
+    echo "No categorical covariates detected in ${ccovar_file}; skipping --covar for GCTA."
+  fi
+else
+  echo "Warning: ccovar file not found: ${ccovar_file}"
+fi
+
 ############################################################################################################
 # positive control
 ############################################################################################################
@@ -94,7 +106,7 @@ do
                 --fastGWA-mlm \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
-                --covar "${ccovar_file}" \
+                ${covar_option} \
                 --out "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -109,7 +121,7 @@ do
                 --fastGWA-mlm \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
-                --covar "${ccovar_file}" \
+                ${covar_option} \
                 --out "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
@@ -175,7 +187,7 @@ do
                 --fastGWA-mlm \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
-                --covar "${ccovar_file}" \
+                ${covar_option} \
                 --out "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -186,7 +198,7 @@ do
                 --fastGWA-mlm \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
-                --covar "${ccovar_file}" \
+                ${covar_option} \
                 --out "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
