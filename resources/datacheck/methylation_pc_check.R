@@ -63,13 +63,27 @@ pca.var.explained <- pca.var / sum(pca.var)
 df <- data.frame(PC = 1:length(pca.var.explained),
                  Variance = pca.var.explained)
 
-jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
-ggplot(df, aes(x = PC, y = Variance)) +
-  geom_line() +
-  geom_point() +
-  labs(title = paste("Scree Plot",study_name), x = "Principal Component", y = "Proportion of Variance Explained") +
-  theme_minimal()
-dev.off()
+# plot a max of 50 PCs so we can read the plot easily
+if(length(pca.var.explained)>50){
+  df <- df[1:50,]
+  jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
+  ggplot(df, aes(x = PC, y = Variance)) +
+    geom_line() +
+    geom_point() +
+    labs(title = paste("Scree Plot",study_name,"; ",length(pca.var.explained),"  total PCs"), x = "Principal Component", y = "Proportion of Variance Explained") +
+    theme_minimal()
+  dev.off()
+  
+} else {
+  jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
+  ggplot(df, aes(x = PC, y = Variance)) +
+    geom_line() +
+    geom_point() +
+    labs(title = paste("Scree Plot",study_name), x = "Principal Component", y = "Proportion of Variance Explained") +
+    theme_minimal()
+  dev.off()
+  
+}
 
 #pcs <- meffil.methylation.pcs(norm.beta,probe.range=50000,full.obj=F)
 pcs <- as.data.frame(pcs$x)
