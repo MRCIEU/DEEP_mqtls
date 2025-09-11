@@ -50,8 +50,14 @@ main = function(){
   control_window <- as.numeric(arguments[10])
   control_threshold <- as.numeric(arguments[11])
 
-  plot_pval <- (pval_column != 0)
-  plot_beta <- (beta_column != 0)
+  plot_mode <- tolower(arguments[12])
+  if (!plot_mode %in% c("p","beta","both")) {
+  stop("plot_mode must be one of: p, beta, both")
+  }
+
+  plot_pval <- plot_mode %in% c("p","both")
+  plot_beta <- plot_mode %in% c("beta","both")
+  message("plot_pval=", plot_pval, " plot_beta=", plot_beta)
 
   filenames = read.table(filenames, header = F, sep = "\t")[,1]
   for (filename in filenames) {
@@ -96,11 +102,8 @@ main = function(){
     GWAS_result[,pos_column] = as.numeric(GWAS_result[,pos_column])
     GWAS_result[,pval_column] = as.numeric(GWAS_result[,pval_column])
     GWAS_result[,snp_column] = paste0(GWAS_result[,chr_column],":",GWAS_result[,pos_column],"_",GWAS_result[,5], "_",GWAS_result[,4])
+    GWAS_result[,beta_column] = as.numeric(GWAS_result[,beta_column])
 
-    if (plot_beta) {
-      GWAS_result[,beta_column] = abs(as.numeric(GWAS_result[,beta_column]))
-    }
-    
     if (plot_pval){
       if(any(GWAS_result[, pval_column] == 0, na.rm=TRUE)){
         w <- which(GWAS_result[,pval_column]==0)
@@ -124,7 +127,7 @@ main = function(){
         message("There doesn't appear to be a QTL for this positive control")
         message("Please upload this section and contact GoDMC analysts before continuing.\n\n")
       	}
-      
+    
     chisq = qchisq(a_minuschr[,pval_column],1,lower.tail=FALSE)
     lambda = median(chisq, na.rm = TRUE) / qchisq(0.5,1)
     qqplot(data=a_minuschr[,pval_column], filename=paste0(outname, "_nocisChr"),lambda=lambda)
@@ -146,17 +149,15 @@ main = function(){
           paste0(outname ,"_nocisChr_manhattan.png"))
     }
     
-    
+    if (plot_pval) {
     chisq = qchisq(GWAS_result[,pval_column],1,lower.tail=FALSE)
     lambda = median(chisq, na.rm = TRUE) / qchisq(0.5,1)
     qqplot(data=GWAS_result[,pval_column], filename=outname, lambda=lambda)
     message("Generating QQ-plot for", outname, " with lambda ", lambda)
 
-    
     message(paste0('Generating manhattan plot for ', outname))
     #man_data = GWAS_result[order(GWAS_result[,pos_column], decreasing = F),]
 
-    if (plot_pval) {
       man_data = subset(GWAS_result, -log10(GWAS_result[,pval_column]) > 2)
       pdf(file=paste0(outname, '_manhattan.pdf'), width=50, height=10)
       manhattan(man_data, bp=names(man_data)[pos_column], 
@@ -170,23 +171,26 @@ main = function(){
     }
     
     if (plot_beta) {
+      man_data = GWAS_result[order(GWAS_result[,pos_column], decreasing = F),]
+      ncolumns = ncol(man_data)
       man_data$correlation_abs <- abs(man_data[, beta_column])
+      threshold_80 <- quantile(man_data$correlation_abs, probs = 0.8, na.rm = TRUE)
+      man_data <- subset(man_data, correlation_abs > threshold_80)
       pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=50, height=10)
       manhattan(man_data, bp=names(man_data)[pos_column], 
-                chr=names(man_data)[chr_column], 
+                chr=names(man_data)[chr_column],
                 snp=names(man_data)[snp_column],
-                p="Correlation (absolute value)",
-                ylim=c(0, 1))
+                p=names(man_data)[ncolumns + 1],
+                ylab = "abs(beta)",
+                ylim = c(0, max(man_data$correlation_abs, na.rm = TRUE)*1.1),
+                logp = F)
       dev.off()
       
       message("The following plots have been generated, please check!\n",
               paste0(outname , "_manhattan_beta.pdf"))
     }
-
   }
 
-
 }
-  
 
 main()
