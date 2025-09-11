@@ -27,7 +27,7 @@ for (i in seq_along(arguments)) {
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
 
-comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character"))
+comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character", "Slide_factor"="character"))
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 
@@ -45,6 +45,12 @@ category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(m
 
 quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
 category_cov <- remove_constant_cols(category_cov, "category_cov")
+
+slide_cols <- grep("^slide(_factor)?$", tolower(colnames(category_cov)), value = TRUE)
+if (length(slide_cols) > 0) {
+  message("Removing slide factor columns from category_cov: ", paste(slide_cols, collapse = ", "))
+  category_cov <- category_cov[, !(colnames(category_cov) %in% slide_cols), drop = FALSE]
+}
 
 message("Dectecting prefix in quantitative covariates file")
 cell_prefixes <- c("salas\\.", "unilife\\.", "zheng\\.", "middleton\\.")
@@ -92,14 +98,25 @@ if (ncol(category_cov) < 3) {
   stop("After removing constant columns, category_cov only contains FID and IID. Please check your input data.")
 }
 
+qc_cols <- setdiff(colnames(quant_cov), c("FID","IID"))
+cc_cols <- setdiff(colnames(category_cov), c("FID","IID"))
+
+qc_uniques <- sapply(quant_cov[, qc_cols, drop = FALSE], function(x) length(unique(x)))
+cc_uniques <- sapply(category_cov[, cc_cols, drop = FALSE], function(x) length(unique(as.character(x))))
+
+message("Quantitative covariates unique counts:")
+print(qc_uniques)
+message("Categorical covariates unique counts:")
+print(cc_uniques)
+
 pc_cols <- paste0("genetic_pc", 1:20)
 pc_cov <- quant_cov[, c("FID", "IID", intersect(pc_cols, colnames(quant_cov)))]
 
 all_pc_cols <- paste0("genetic_pc", 1:20)
 quant_cov_noPC <- quant_cov[, !(colnames(quant_cov) %in% all_pc_cols), drop = FALSE]
 
-write.table(quant_cov, file=qcovar_file, sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(category_cov, file=ccovar_file, sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(quant_cov, file = qcovar_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(category_cov, file = ccovar_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
 
-write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
