@@ -52,7 +52,7 @@ pheno$Hannum_age <- ret$score
 
 hannum_plot <- ggplot(data=pheno, aes(x=Age_numeric,y=Hannum_age)) +
             geom_point(alpha=0.5,colour="#440154FF") +
-            labs(title=paste0(study_name," Hannum age vs age, cor =",cor(pheno$Age_numeric,ret$score),"p =",signif(cor.test(pheno$Age_numeric,ret$score)$p.value),digits=2))+
+            labs(title=paste0(study_name," Hannum age vs age, cor =",signif(cor(pheno$Age_numeric,ret$score),digits = 2),"p =",signif(cor.test(pheno$Age_numeric,ret$score)$p.value),digits=2))+
             geom_smooth(method='lm')+
             theme_minimal()
 
