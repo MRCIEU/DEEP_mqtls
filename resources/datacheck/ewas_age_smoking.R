@@ -37,6 +37,12 @@ if (cellcount_panel == "unilife") {
 
 celltypes <- celltypes[!grepl("treg", celltypes, ignore.case = TRUE)]
 
+if(mean(pheno$Age_numeric)<1){
+  message("Using nRBC as mean age is less than 1")
+} else{
+  celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
+}
+  
 # add cell counts to pheno
 
 cellcounts_temp <- cell_counts[,c("IID",celltypes)]
