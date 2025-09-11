@@ -170,7 +170,7 @@ for(i in numeric_phenos){
     outlier_rm <- Winsorize(pheno[,i], val = quantile(pheno[,i], probs = c(0.05, 0.95), na.rm = T))
     # print out how many observations are Winsorized
     diff_count <- sum(pheno[,i] != outlier_rm & !is.na(pheno[,i]) & !is.na(outlier_rm))
-    message("There are",length(diff_count),"outliers in the variable",i,"that have been replaced by the 5%-quantile")
+    message("There are ",length(diff_count)," outliers in the variable ",i," that have been replaced by the 5%-quantile")
     # change variable to the Winsorized version
       # QUESTION - do we want to keep the original version of the variable somehow? or will this just be the
       # covariate df that we load in at the start of the script? Or do we save out a version of 
@@ -179,7 +179,7 @@ for(i in numeric_phenos){
     # now re-plot and re-do summary stats
     test <- ggplot() +
       geom_density(data=pheno, aes_string(x=pheno[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,", total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,"\n, total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno[,i]))+
       theme_minimal()
     plot_list[[i]] <- test
@@ -187,7 +187,7 @@ for(i in numeric_phenos){
     summstats_list[[i]] <- stats_out
     
   } else {
-    message(i,"is a categorical variable. Please check for small cell counts, as small cell counts may require some categories to be collapsed")
+    message(i," is a categorical variable. Please check for small cell counts, as small cell counts may require some categories to be collapsed")
   }
 }
 
