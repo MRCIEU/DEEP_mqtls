@@ -93,8 +93,8 @@ message("there are ",ncol(pcs)," PCs generated")
 pcs <- pcs[,1:10]
 identical(rownames(pcs),rownames(pheno))
 pcs <- merge(x=pcs,y=pheno, by.x="row.names", by.y="IID")
-rownames(pcs) <- pcs$Row.names
-pcs <- pcs[,-1]
+#rownames(pcs) <- pcs$Row.names
+#pcs <- pcs[,-1]
 
 # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
 test_pc_vars <- c("Age_numeric","Sex_factor","population_group_factor",study_specific_vars, celltypes,colnames(genetic_pcs)[2:11]) 
