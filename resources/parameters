@@ -178,7 +178,7 @@ cor_plot_comb="${section_01_dir}/cor_plot_comb.pdf"
 covariates_combined="${home_directory}/processed_data/covariate_data/all_covariates"
 ccovar_file="${home_directory}/processed_data/covariate_data/ccovar_file.txt"
 qcovar_file="${home_directory}/processed_data/covariate_data/qcovar_file.txt"
-genetic_pc_gwas="${home_directory}/processed_data/genetic_data/genetic_pc_gwas.txt"
+genetic_pc_gwas="${home_directory}/processed_data/covariate_data/genetic_pc_gwas.txt"
 qcovar_noPC_file="${home_directory}/processed_data/covariate_data/qcovar_noPC_file.txt"
 
 # phenotype files
