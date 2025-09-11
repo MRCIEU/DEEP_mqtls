@@ -82,7 +82,7 @@ ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_var
 
 message("Starting smoking EWAS")#######################################
 
-if ("Smoking_factor" %in% colnames(df)) {
+if ("Smoking_factor" %in% colnames(pheno)) {
   # make sure meth and pheno are in same order
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
@@ -150,7 +150,7 @@ ewas_covars_mat_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific
 
 message("Starting maternal smoking EWAS")#######################################
 
-if ("maternal_smoking_factor" %in% colnames(df)) {
+if ("maternal_smoking_factor" %in% colnames(pheno)) {
   # make sure meth and pheno are in same order
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
