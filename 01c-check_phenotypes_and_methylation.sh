@@ -186,7 +186,7 @@ if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
 then
 	section_message "meth pcs unilife"
 
-	echo "EWAS of age and smoking - unilife"
+	echo "meth PCs - unilife"
 	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
@@ -206,7 +206,7 @@ if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
 then
 	section_message "meth pcs salas"
 
-	echo "EWAS of age and smoking - salas"
+	echo "meth PCs - salas"
 	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
