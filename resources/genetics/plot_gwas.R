@@ -137,7 +137,7 @@ main = function(){
     man_data = a_minuschr[order(a_minuschr[,pos_column], decreasing = F),]
     man_data = subset(man_data, -log10(man_data[,pval_column]) > 2)
     
-    pdf(file=paste0(outname, '_nocisChr_manhattan.pdf'), width=50, height=10)
+    pdf(file=paste0(outname, '_nocisChr_manhattan.pdf'), width=25, height=5)
     manhattan(man_data, bp=names(man_data)[pos_column], 
             chr=names(man_data)[chr_column], 
             snp=names(man_data)[snp_column],
@@ -159,7 +159,7 @@ main = function(){
     #man_data = GWAS_result[order(GWAS_result[,pos_column], decreasing = F),]
 
       man_data = subset(GWAS_result, -log10(GWAS_result[,pval_column]) > 2)
-      pdf(file=paste0(outname, '_manhattan.pdf'), width=50, height=10)
+      pdf(file=paste0(outname, '_manhattan.pdf'), width=25, height=5)
       manhattan(man_data, bp=names(man_data)[pos_column], 
                 chr=names(man_data)[chr_column], 
                 snp=names(man_data)[snp_column],
