@@ -18,6 +18,8 @@ PC3PC4_plot <- arguments[10]
 pc_var_association_plot <- arguments[11]
 
 suppressPackageStartupMessages(library(meffil))
+suppressPackageStartupMessages(library(viridis))
+
 
 message("Reading in data and matching up samples across files")#######################################
 load(updated_pheno_file)
@@ -40,6 +42,12 @@ if (cellcount_panel == "unilife") {
   celltypes <- grep("^salas", colnames(cell_counts), value = TRUE)
 } else {
   message("Error: cell count panel not detected")
+}
+
+if(mean(pheno$Age_numeric)<1){
+  message("Using nRBC as mean age is less than 1")
+} else{
+  celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
 }
 
 cellcounts_temp <- cell_counts[,c("IID",celltypes)]
