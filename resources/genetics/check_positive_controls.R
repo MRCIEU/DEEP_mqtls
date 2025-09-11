@@ -25,4 +25,4 @@ print("Remove NAs from positive control data")
 filt_pos_ctr_dt_nona = na.omit(filt_pos_ctr_dt)
 print(paste0("Number of positive control SNP-CpG pairs after filtering: ", nrow(filt_pos_ctr_dt_nona)))
 
-write.table(filt_pos_ctr_dt_nona, file=filt_pos_ctr_file, sep="\t", quote=F, row.names=F, col.names=T)
+write.table(filt_pos_ctr_dt_nona[,c("positive_control_cpg", "positive_control_snp_chr", "positive_control_snp_pos", "rsid", "positive_control_snp_window", "positive_control_threshold")], file=filt_pos_ctr_file, sep="\t", quote=F, row.names=F, col.names=T)

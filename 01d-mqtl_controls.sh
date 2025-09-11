@@ -71,9 +71,9 @@ fi
 ############################################################################################################
 base_methylation_no_outliers="${methylation_no_outliers_gwas%.Robj}"
 
-tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
 do
-    echo "Processing positive control: $positive_control_cpg"
+    echo "Processing positive control: $positive_control_cpg, SNP chr: $positive_control_snp_chr, pos: $positive_control_snp_pos, rsid: $rsid, window: $positive_control_snp_window, threshold: $positive_control_threshold"
 
     # Get the control CpG
     echo "Extracting methylation values for positive control CpG ${positive_control_cpg}"
