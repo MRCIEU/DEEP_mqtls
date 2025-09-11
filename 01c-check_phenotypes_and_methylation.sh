@@ -231,7 +231,7 @@ then
 		"${covariates_intersect_gwas}" \
 		"${pcs_all}" \
 		"${cellcounts_cov}" \
-		"${smoking_pred}.txt" \
+		"${predicted_smoking}" \
 		"${bfile}.fam" \
 		"${covariates_combined}"
 
