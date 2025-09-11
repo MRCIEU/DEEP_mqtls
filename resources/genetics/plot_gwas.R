@@ -174,9 +174,9 @@ main = function(){
       man_data = GWAS_result[order(GWAS_result[,pos_column], decreasing = F),]
       ncolumns = ncol(man_data)
       man_data$correlation_abs <- abs(man_data[, beta_column])
-      threshold_80 <- quantile(man_data$correlation_abs, probs = 0.8, na.rm = TRUE)
-      man_data <- subset(man_data, correlation_abs > threshold_80)
-      pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=50, height=10)
+      threshold_90 <- quantile(man_data$correlation_abs, probs = 0.9, na.rm = TRUE)
+      man_data <- subset(man_data, correlation_abs > threshold_90)
+      pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=5, height=5)
       manhattan(man_data, bp=names(man_data)[pos_column], 
                 chr=names(man_data)[chr_column],
                 snp=names(man_data)[snp_column],
