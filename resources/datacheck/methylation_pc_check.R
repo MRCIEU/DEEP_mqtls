@@ -147,7 +147,7 @@ for(i in test_pc_vars){
   
 }
 
-n_plot_rows <- ceiling(test_pc_vars/4)
+n_plot_rows <- ceiling(length(test_pc_vars)/4)
 row_dimensions <- n_plot_rows*4
 
 jpeg(filename = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
