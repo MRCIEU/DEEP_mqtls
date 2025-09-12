@@ -57,6 +57,7 @@ The scripts in this repository were developed by the core DEEP team, building on
 ## Acknowledgements
 
 The developer group of these scripts are listed in alphabetical order below:
+
 Hannah Elliott
 Josine Min 
 Haotian Tang
