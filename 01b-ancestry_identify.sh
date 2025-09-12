@@ -282,7 +282,10 @@ n_outliers=`wc -l ${genetic_outlier_ids} | awk '{ print $1 }'`
 if [ "${n_outliers}" -eq "0" ]
 then
 	echo "No genetic outliers detected"
-# else
+else
+	echo "There are ${n_outliers} genetic outliers detected"
+	echo "They are not going to be removed from the data"
+fi
 # 	# Remove genetic outliers from data
 # 	echo "Removing ${n_outliers} genetic outliers from data"
 # 	${plink2} \
@@ -307,8 +310,6 @@ then
 # mv ${grmfile_all}1.grm.N.bin ${grmfile_all}.grm.N.bin
 # mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
 # mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
-
-fi
 
 # calculate maf from bfile with chr:pos format
 echo "Calculating MAF from formatted bfile with chr:pos format"
