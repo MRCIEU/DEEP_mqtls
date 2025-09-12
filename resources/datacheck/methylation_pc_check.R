@@ -114,27 +114,27 @@ names(plot_pc3pc4_list) <- test_pc_vars
 
 for(i in test_pc_vars){
   if(is.numeric(pcs[,i])){
-    pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=pcs[,i])) +
+    pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=i)) +
       geom_point(size=1) + 
       scale_colour_viridis() +
       labs(title=paste0("PC1 vs PC2, ",i))+
       theme_bw() +
       theme(legend.position="none") 
-    pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=pcs[,i])) +
+    pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=i)) +
       geom_point(size=1) + 
       scale_colour_viridis() +
-      labs(title=paste0("PC1 vs PC2, ",i))+
+      labs(title=paste0("PC3 vs PC4, ",i))+
       theme_bw() +
       theme(legend.position="none") 
     
   } else {
-    pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=pcs[,i])) +
+    pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=i)) +
       geom_point(size=1) + 
       scale_colour_viridis(discrete = T) +
       labs(title=paste0("PC3 vs PC4, ",i))+
       theme_bw() #+
       #theme(legend.position="none")
-    pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=pcs[,i])) +
+    pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=i)) +
       geom_point(size=1) + 
       scale_colour_viridis(discrete = T) +
       labs(title=paste0("PC3 vs PC4, ",i))+
