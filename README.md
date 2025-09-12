@@ -10,7 +10,7 @@ This repository contains the scripts to run the DEEP pipeline which includes:
 * EWAS of genetic phenotypes
 * Epigenetic prediction of human phenotypes
 
-Please note the scripts in this repository are copyright of the Genetics of DNA Methylation Consortium and released with a [GPL v3 license](LICENSE).
+Please note the scripts in this repository are copyright of the Diverse Epigenetic Epidemiology Partnership and released with a [GPL v3 license](LICENSE).
 
 ### What is DEEP?
 
@@ -57,17 +57,9 @@ The scripts in this repository were developed by the core DEEP team, building on
 ## Acknowledgements
 
 The developer group of these scripts are listed in alphabetical order below:
-
-Carlos Ruiz Arenas  
-Eilis Hannon  
-Gibran Hemani  
-Haotian Tang  
-Josine Min  
-Maria Soler Artigas  
-Natalia Llonga  
-Olalekan Awoniran  
-Olivia Castellini  
-Siyi Wang  
-Sonja Rajic  
-Thomas Jonkman  
-Xiaopu Zhang  
+Hannah Elliott
+Josine Min 
+Haotian Tang
+Sarah Watkins
+  
+Scripts were cloned from the GoDMC2 pipeline (https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2) and adopted for DEEP purposes. 
