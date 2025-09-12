@@ -132,7 +132,8 @@ treg_cols <- grep("Treg", colnames(quant_cov), value = TRUE)
 if (length(treg_cols) > 0) {
   message("Removing columns containing 'Treg': ", paste(treg_cols, collapse = ", "))
   quant_cov <- quant_cov[, !(colnames(quant_cov) %in% treg_cols), drop = FALSE]
-} 
+}
+
 
 # Check that at least one covariate column remains (besides FID and IID)
 if (ncol(quant_cov) < 3) {
