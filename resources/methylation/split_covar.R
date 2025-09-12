@@ -127,6 +127,13 @@ if (length(cell_cols) >= 2) {
   message("Not enough cell columns for correlation filtering (found ", length(cell_cols), ")")
 }
 
+# If any cell-type columns include 'Treg' in their name, remove them to avoid using that column
+treg_cols <- grep("Treg", colnames(quant_cov), value = TRUE)
+if (length(treg_cols) > 0) {
+  message("Removing columns containing 'Treg': ", paste(treg_cols, collapse = ", "))
+  quant_cov <- quant_cov[, !(colnames(quant_cov) %in% treg_cols), drop = FALSE]
+} 
+
 # Check that at least one covariate column remains (besides FID and IID)
 if (ncol(quant_cov) < 3) {
   stop("After removing constant columns, quant_cov only contains FID and IID. Please check your input data.")
