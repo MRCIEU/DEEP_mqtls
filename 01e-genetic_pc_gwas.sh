@@ -32,6 +32,7 @@ for pc in {1..5}; do
             --bfile "${bfile}" \
             --grm-sparse "${grmfile_fast}_rel" \
             --fastGWA-mlm \
+            --h2-limit 100 \
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
             ${covar_option} \
@@ -43,6 +44,7 @@ for pc in {1..5}; do
             --bfile "${bfile}" \
             --grm-sparse "${grmfile_fast}_unrel" \
             --fastGWA-mlm \
+            --h2-limit 100 \
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
             ${covar_option} \

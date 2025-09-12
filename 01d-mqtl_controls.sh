@@ -104,6 +104,7 @@ do
                 --bfile "${bfile}" \
                 --grm-sparse "${grmfile_fast}_rel" \
                 --fastGWA-mlm \
+                --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
@@ -119,6 +120,7 @@ do
                 --bfile "${bfile}" \
                 --grm-sparse "${grmfile_fast}_unrel" \
                 --fastGWA-mlm \
+                --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
@@ -186,6 +188,7 @@ do
                 --bfile "${bfile}" \
                 --grm-sparse "${grmfile_fast}_rel" \
                 --fastGWA-mlm \
+                --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
@@ -197,6 +200,7 @@ do
                 --bfile "${bfile}" \
                 --grm-sparse "${grmfile_fast}_unrel" \
                 --fastGWA-mlm \
+                --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
