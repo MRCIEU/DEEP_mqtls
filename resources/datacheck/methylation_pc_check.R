@@ -19,7 +19,7 @@ pc_var_association_plot <- arguments[11]
 
 suppressPackageStartupMessages(library(meffil))
 suppressPackageStartupMessages(library(viridis))
-
+suppressPackageStartupMessages(library(ggpubr))
 
 message("Reading in data and matching up samples across files")#######################################
 load(updated_pheno_file)
