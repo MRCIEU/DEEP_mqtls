@@ -168,7 +168,8 @@ dev.off()
 pc_analysis <- list()
 for(i in 1:10){
   print(i)
-  batch_vars <- paste(batch)
+ # batch_vars <- paste(batch)
+  batch_vars <- paste(study_specific_vars)
   model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars,sep = "+"))
   temp <- lm(formula=model_formula, 
              data = pcs)
