@@ -127,7 +127,7 @@ tabfile="${home_directory}/processed_data/genetic_data/tabfile/data"
 bfile_hm3="${home_directory}/processed_data/genetic_data/data_hm3"
 tabfile_hm3="${home_directory}/processed_data/genetic_data/tabfile_hm3/data"
 allele_ref_hm3="${home_directory}/processed_data/genetic_data/data_hm3.allele_codes"
-exclude_highld_snpslist="${scripts_directory}/resources/genetics/exclude_b38.txt"
+exclude_highld_region="${scripts_directory}/resources/genetics/exclude_b38.txt"
 
 pcaplot="${section_01_dir}/pcaplot.pdf"
 allele_ref="${section_02_dir}/data.allele_codes.gz"
