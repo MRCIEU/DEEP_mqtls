@@ -383,7 +383,8 @@ ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_inf
     "${study_name}" \
     "${home_directory}" \
     "${scripts_directory}" \
-	"${nthreads}" 
+	"${nthreads}" \
+	"${mem}"
 
 # From here on, we have clean data
 # if [ ! "${n_outliers}" -eq "0" ]
