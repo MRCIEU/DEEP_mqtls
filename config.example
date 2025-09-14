@@ -87,7 +87,7 @@ phenotypes="${home_directory}/input_data/phenotypes.txt"
 quality_scores="${home_directory}/input_data/data.info"
 
 # Cellcounts
-#Set this to the file name if you have directly measured cellcounts. These will be used for comparison with predicted celltypes.
+# Set this to the file name if you have directly measured cellcounts. These will be used for comparison with predicted celltypes. If you don't have them, set to NULL
 measured_cellcounts="NULL"
 
 # Computing resources
