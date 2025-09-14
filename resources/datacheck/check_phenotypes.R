@@ -37,7 +37,7 @@ winsorized_phenotype_file <- as.character(arguments[9])
 ################
 
 message("Checking covariates file: ", phenotypes_file)
-pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F)
+pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character"))
 
 # We don't require all DNAm samples to have genetic data
 # we'll print out what the differential is here
@@ -88,7 +88,7 @@ for(i in phenotypes){
   
   # Warning if there is more than 10% missingness in a variable
   if(sum(is.na(pheno[,i]))>nrow(pheno)/10){
-    message("Warning: there is over 10% missingness in",i)
+    message("Warning: there is over 10% missingness in ",i)
   }
   # remove missing cases to avoid missingness on plot
   pheno.temp <- pheno[!is.na(pheno[,i]),]
