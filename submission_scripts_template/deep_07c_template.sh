@@ -1,6 +1,6 @@
 #!/bin/bash -l
-#SBATCH --job-name=GoDMC_07c
-#SBATCH --output=../job_reports/GoDMC_07c_%A_%a
+#SBATCH --job-name=deep_07c
+#SBATCH --output=../job_reports/deep_07c_%A_%a
 #SBATCH --partition gpu,cpu
 #SBATCH --mem=16GB
 #SBATCH --ntasks=1
