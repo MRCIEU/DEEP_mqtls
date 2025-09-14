@@ -268,7 +268,7 @@ else
 fi
 
 # Get genetic outliers
-echo "Detecting genetic outliers"
+echo "Generating PCA plot"
 
 ${R_directory}Rscript resources/genetics/genetic_outliers.R \
 	${pcs_all} \
@@ -383,44 +383,43 @@ ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_inf
     "${study_name}" \
     "${home_directory}" \
     "${scripts_directory}" \
-	"${nthreads}" \
-	"${mem}"
+	"${nthreads}" 
 
 # From here on, we have clean data
-if [ ! "${n_outliers}" -eq "0" ]
-then
+# if [ ! "${n_outliers}" -eq "0" ]
+# then
 
-	echo "Recalculating PCs with outliers removed"
+# 	echo "Recalculating PCs with outliers removed"
 
-	if [ "${related}" = "no" ]
-	then
-		${plink2} \
-			--bfile ${bfile} \
-			--new-id-max-allele-len 70 \
-			--extract ${pca}.prune.in \
-			--pca 20 \
-			--out ${pca} \
-			--autosome \
-			--threads ${nthreads}
-	else
+# 	if [ "${related}" = "no" ]
+# 	then
+# 		${plink2} \
+# 			--bfile ${bfile} \
+# 			--new-id-max-allele-len 70 \
+# 			--extract ${pca}.prune.in \
+# 			--pca 20 \
+# 			--out ${pca} \
+# 			--autosome \
+# 			--threads ${nthreads}
+# 	else
 
-		${plink2} \
-			--bfile ${bfile} \
-			--new-id-max-allele-len 70 \
-			--extract ${pca}.prune.in \
-			--make-bed \
-			--out ${bfile}_ldpruned \
-			--autosome \
-			--threads ${nthreads}
+# 		${plink2} \
+# 			--bfile ${bfile} \
+# 			--new-id-max-allele-len 70 \
+# 			--extract ${pca}.prune.in \
+# 			--make-bed \
+# 			--out ${bfile}_ldpruned \
+# 			--autosome \
+# 			--threads ${nthreads}
 
-		${R_directory}Rscript resources/genetics/pcs_relateds.R \
-			${bfile}_ldpruned \
-			${pca} \
-			${n_pcs} \
-			${nthreads}
-	fi
+# 		${R_directory}Rscript resources/genetics/pcs_relateds.R \
+# 			${bfile}_ldpruned \
+# 			${pca} \
+# 			${n_pcs} \
+# 			${nthreads}
+# 	fi
 
-fi
+# fi
 
 # Get frequencies, missingness, hwe, info scores
 plink_files=${section_01_dir}/data*.gz
