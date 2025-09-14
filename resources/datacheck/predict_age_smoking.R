@@ -29,6 +29,7 @@ load(pheno_file)
 load(beta_file)
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
+print(head(pheno))
 norm.beta <- norm.beta[,participants]
 message("Number of samples with covariate and methylation data: ", length(participants))
 
@@ -79,7 +80,7 @@ pheno$p_smoking_mcigarette <- ret$score
 # add in if statement; plot if they have smoking variable
 # if they don't have a smoking variable, plot the distribution of predicted smoking
 
-if ("Smoking_factor" %in% colnames(df)) {
+if ("Smoking_factor" %in% colnames(pheno)) {
   message("Smoking_factor found in phenotype dataframe: running mcigarette plot of reported smoking vs DNAm-estimated smoking")
   mcigarette_plot <- ggplot(data=pheno, aes(x=Smoking_factor,y=p_smoking_mcigarette,color=Smoking_factor)) +
     geom_boxplot()+
@@ -110,16 +111,15 @@ pheno$p_smoking_elliott <- ret$score
 # add in if statement; plot if they have smoking variable
 # if they don't have a smoking variable, plot the distribution of predicted smoking
 
-if ("Smoking_factor" %in% colnames(df)) {
+if ("Smoking_factor" %in% colnames(pheno)) {
   message("Smoking_factor found in phenotype dataframe: running plot of reported smoking vs Elliott DNAm-estimated smoking")
-  elliott_plot <- ggplot(data=pheno, aes(x=Smoking_factor,y=p_smoking_elliott,color=Smoking_factor)) +
+  Elliott_plot <- ggplot(data=pheno, aes(x=Smoking_factor,y=p_smoking_elliott,color=Smoking_factor)) +
     geom_boxplot()+
     scale_colour_viridis(discrete=T,begin=0,end=0.65)+
     labs(title=paste0(study_name," reported vs predicted smoking (Elliott), p=",signif(wilcox.test(p_smoking_elliott ~ Smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
     theme_minimal()+
     theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
     theme(legend.position = "none")
-  
 } else {
   # Run this command if 'Smoking_factor' column does not exist
   print("Smoking_factor not found in phenotype dataframe (if this is a measure you should have, please check the name of the smoking variable)

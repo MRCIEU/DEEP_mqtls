@@ -21,6 +21,7 @@ for i in {1..14}; do
    mkdir -p "${home_directory}/results/${idx}"
 done
 
+# QC phase1 folders
 mkdir -p "${section_01_dir}/logs/"
 mkdir -p "${section_01_dir}/logs_a/"
 mkdir -p "${section_01_dir}/logs_b/"
@@ -29,6 +30,8 @@ mkdir -p "${section_01_dir}/cellcounts_comp"
 mkdir -p "${section_01_dir}/logs_d/"
 mkdir -p "${section_01_dir}/logs_e/"
 mkdir -p "${section_01_dir}/logs_f/"
+
+# QC phase2 and analysis phase folders
 mkdir -p "${section_02_dir}/logs_a/"
 mkdir -p "${section_02_dir}/logs_b/"
 mkdir -p "${section_03_dir}/logs_a/"
@@ -57,13 +60,6 @@ mkdir -p "${section_08_dir}/logs_b/"
 mkdir -p "${section_09_dir}/logs/"
 mkdir -p "${section_10_dir}/logs_a/"
 mkdir -p "${section_10_dir}/logs_b/"
-mkdir -p "${section_11_dir}/logs_a/"
-mkdir -p "${section_11_dir}/logs_b/"
-mkdir -p "${section_11_dir}/logs_c/"
-mkdir -p "${section_12_dir}/logs/"
-mkdir -p "${section_13_dir}/logs_a/"
-mkdir -p "${section_13_dir}/logs/"
-mkdir -p "${section_14_dir}/logs/"
 
 chmod +x *.sh
 chmod +x ./resources/bin/*
