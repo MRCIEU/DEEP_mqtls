@@ -69,7 +69,7 @@ then
 	echo "Check phenotypes"
 	# smoking from cohorts
 	${R_directory}Rscript resources/datacheck/check_phenotypes.R \
-		${covariates} \
+		${phenotypes} \
 		${bfile}.fam \
 		${meth_ids} \
 		${raw_phenotype_distribution_plot} \
