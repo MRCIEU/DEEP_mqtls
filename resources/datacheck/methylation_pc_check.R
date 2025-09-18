@@ -19,7 +19,7 @@ pc_var_association_plot <- arguments[11]
 
 suppressPackageStartupMessages(library(meffil))
 suppressPackageStartupMessages(library(viridis))
-suppressPackageStartupMessages(library(ggpubr))
+
 
 message("Reading in data and matching up samples across files")#######################################
 load(updated_pheno_file)
@@ -168,8 +168,7 @@ dev.off()
 pc_analysis <- list()
 for(i in 1:10){
   print(i)
- # batch_vars <- paste(batch)
-  batch_vars <- paste(study_specific_vars)
+  batch_vars <- paste(batch)
   model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars,sep = "+"))
   temp <- lm(formula=model_formula, 
              data = pcs)
@@ -182,7 +181,7 @@ names(pc_analysis) <- c(1:10)
 
 pc_plotlist <- list()
 for(i in 1:10){
-  temp <- as.data.frame(pc_analysis[[i]]$coefficients)
+  temp <- as.data.frame(pc_analysis[i]$coefficients)
   names(temp) <- c("estimate","se","t","p")
   temp <- temp[temp$p < 0.05,]
   temp <- temp[order(temp$p),]
