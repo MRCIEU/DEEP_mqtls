@@ -8,17 +8,17 @@ arguments <- commandArgs(T)
 beta_file <- arguments[1]
 updated_pheno_file <- arguments[2] # [phenotype file with predicted smoking added in]
 meth_array <- arguments[3]
-cellcounts_cov <- arguments[4] 
-cellcount_panel <- arguments[5] 
-study_name <- arguments[6]
-study_specific_vars <- strsplit(arguments[7], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
-ewas_stats <- arguments[8]
-ewas_report <- arguments[9]
-
+cellcounts_cov <- arguments[4]
+study_name <- arguments[5]
+ewas_stats <- arguments[6]
+ewas_report <- arguments[7]
+scripts_directory <- arguments[8]
+study_specific_vars <- strsplit(arguments[9], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
 
 suppressPackageStartupMessages(library(meffil))
+source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 
-message("Reading in data and matching up samples across files")#######################################
+message("Reading in data and matching up samples across files") #######################################
 load(updated_pheno_file)
 load(beta_file)
 cell_counts <- read.table(cellcounts_cov, header=T)
@@ -27,199 +27,210 @@ participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 
-if (cellcount_panel == "unilife") {
-  celltypes <- grep("^unilife", colnames(cell_counts), value = TRUE)
-} else if (cellcount_panel == "salas") {
-  celltypes <- grep("^salas", colnames(cell_counts), value = TRUE)
-} else {
-  message("Error: cell count panel not detected")
-}
+# detect cell count panel prefixes
+cell_count_cols <- setdiff(colnames(cell_counts), c("FID","IID"))
+cellcount_panel_prefixes <- unique(sub("\\..*", "", cell_count_cols))
+message("Detected cell count panel prefixes: ", paste(cellcount_panel_prefixes, collapse = ", "))
 
+# del treg cell types if present
+celltypes <- grep(paste0("^(", paste0(cellcount_panel_prefixes, collapse="|"), ")"), colnames(cell_counts), value = TRUE)
 celltypes <- celltypes[!grepl("treg", celltypes, ignore.case = TRUE)]
+cell_counts <- cell_counts[,c("IID",celltypes)]
 
-if(mean(pheno$Age_numeric)<1){
-  message("Using nRBC as mean age is less than 1")
-} else{
-  celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
-}
+# del columns with no variation
+cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
+
+for (cellcount_panel in cellcount_panel_prefixes) {
+  message("Running EWAS for cell count panel: ", cellcount_panel)
   
-# add cell counts to pheno
+  # del nRBC if mean age > 1
+  if(mean(pheno$Age_numeric) < 1){
+    message("Keeping nRBC as mean age is less than 1")
+  } else{
+    message("Removing nRBC as mean age is greater than 1")
+    celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
+  }
 
-cellcounts_temp <- cell_counts[,c("IID",celltypes)]
-pheno <- merge(pheno,cellcounts_temp,by="IID")
+  # add cell counts to pheno
+  cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
+  cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
+  print(colnames(cellcounts_temp))
+  pheno <- merge(pheno,cellcounts_temp,by="IID")
 
-message("Setting up EWAS")#######################################
+  message("Setting up EWAS") #######################################
 
-# 1. smoking ewas
+  # 1. smoking ewas
 
-# in case some cohorts only have smoking quantity,
-# recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
+  # in case some cohorts only have smoking quantity,
+  # recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
   # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
   # rather than pack-years or something
 
-if ("Smoking_factor" %in% colnames(pheno)) {
-  message("Smoking_factor variable already exists.")
-} else if ("Smoking_numeric" %in% colnames(pheno)) {
-  # Create Smoking_factor based on Smoking_numeric
-  pheno$Smoking_factor <- ifelse(pheno$Smoking_numeric == 0, "No", "Yes")
-  message("Smoking_factor variable created based on Smoking_numeric.")
-} else {
-  message("Smoking_numeric column not found. Cannot create Smoking_factor. 
+  if ("Smoking_factor" %in% colnames(pheno)) {
+    message("Smoking_factor variable already exists.")
+  } else if ("Smoking_numeric" %in% colnames(pheno)) {
+    # Create Smoking_factor based on Smoking_numeric
+    pheno$Smoking_factor <- ifelse(pheno$Smoking_numeric == 0, "No", "Yes")
+    message("Smoking_factor variable created based on Smoking_numeric.")
+  } else {
+    message("Smoking_numeric column not found. Cannot create Smoking_factor. 
           This is expected if this is a child dataset; maternal smoking EWAS will run below.
           If this is an adult dataset, please check your phenotype data")
-}
+  }
 
-# QUESTION - is there a config file option that says what array the methylation data is on?
-featureset <- meffil:::guess.featureset(rownames(norm.beta))
-ewas_threshold <- ifelse(meth_array == '450k', 2.4e-7,
-                ifelse(meth_array %in% c('epic', 'epic2'), 9e-8, NA))
-if(is.na(ewas_threshold)){
-  message("ERROR: No EWAS threshold has been selected as the methylation array type does
-          not match the expected values of 450k or EPIC. Please check your config file")
-  # QUESTION - now we can either stop the script, or we can do a bonferroni correction based on the n of probes
-}
+  # QUESTION - is there a config file option that says what array the methylation data is on?
+  featureset <- meffil:::guess.featureset(rownames(norm.beta))
+  ewas_threshold <- ifelse(meth_array == '450k', 2.4e-7,
+    ifelse(meth_array %in% c('epic', 'epic2'), 9e-8, NA))
+  if(is.na(ewas_threshold)){
+    message("ERROR: No EWAS threshold has been selected as the methylation array type does
+            not match the expected values of 450k or EPIC. Please check your config file")
+    # QUESTION - now we can either stop the script, or we can do a bonferroni correction based on the n of probes
+  }
 
-ewas.parameters <- meffil.ewas.parameters(sig.threshold=ewas_threshold,  ## EWAS p-value threshold
+  ewas.parameters <- meffil.ewas.parameters(sig.threshold=ewas_threshold,  ## EWAS p-value threshold
                                           max.plots=10, ## plot at most 10 CpG sites
                                           qq.inflation.method="median",  ## measure inflation using median
                                           model="all") ## select default EWAS model; 
 
-ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
-# QUESTION : might we need to stratify smoking EWAS by sex in some cohorts? - 
+  if (is.na(study_specific_vars)){
+    ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes) # need to update these var names?
+  } else{
+    ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
+  }
+
+  # QUESTION : might we need to stratify smoking EWAS by sex in some cohorts? - 
   # answer:No not at the moment
 
-message("Starting smoking EWAS")#######################################
+  message("Starting smoking EWAS")#######################################
 
-if ("Smoking_factor" %in% colnames(pheno)) {
-  # make sure meth and pheno are in same order
+  if ("Smoking_factor" %in% colnames(pheno)) {
+    # make sure meth and pheno are in same order
+    participants <- as.character(pheno$IID)
+    meth.temp <- norm.beta[,participants]
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$Smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23)
+    # save out the ewas summary stats:
+    ewas.out <- ewas.smoking$analyses
+    save(ewas.out, file=paste0(ewas_stats,"_smoking_",study_name,"_",cellcount_panel,".Robj"))
+    # generate and save html report of EWAS:
+    ewas.summary<-meffil.ewas.summary(ewas.smoking,meth.temp,parameters=ewas.parameters)                              
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_smoking_",study_name,"_",cellcount_panel,".html"))
+    # let's have a quick glance at how many hits we get:
+    hits <- ewas.smoking$analyses$none$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the unadjusted model")
+    hits <- ewas.smoking$analyses$all$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the adjusted model")
+  
+  } else {
+    # Run this command if 'Smoking_factor' column does not exist
+    print("Smoking_factor not found in phenotype dataframe. If you study has smoking data,
+    please ensure your phenotype dataframe has either Smoking_factor or Smoking_numeric")
+  }
+
+  # 2. Age EWAS
+
+  message("Starting age EWAS") #######################################
+
+  if (is.na(study_specific_vars)){
+      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+  } else {
+      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+  }
+
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
-  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$Smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23) 
-  # save out the ewas summary stats:
-  ewas.out <- ewas.smoking$analyses
-  save(ewas.out, file=paste0(ewas_stats,"_smoking_",study_name,"_",cellcount_panel,".Robj"))
-  # generate and save html report of EWAS:
-  ewas.summary<-meffil.ewas.summary(ewas.smoking,meth.temp,parameters=ewas.parameters)                              
-  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_smoking_",study_name,"_",cellcount_panel,".html"))
-  # let's have a quick glance at how many hits we get:
-  hits <- ewas.smoking$analyses$none$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the unadjusted model")
-  hits <- ewas.smoking$analyses$all$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the adjusted model")
-  
-} else {
-  # Run this command if 'Smoking_factor' column does not exist
-  print("Smoking_factor not found in phenotype dataframe. If you study has smoking data,
-  please ensure your phenotype dataframe has either Smoking_factor or Smoking_numeric")
 
-}
+  ewas.age <- meffil.ewas(meth.temp, variable=pheno$Age_numeric, covariates=pheno[,colnames(pheno)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
+  ewas.out <- ewas.age$analyses
+  save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
+  ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
+  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_age_",study_name,"_",cellcount_panel,".html"))
 
+  hits <- ewas.age$analyses$none$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
+  hits <- ewas.age$analyses$all$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
 
-# 2. Age EWAS
+  # 3. maternal smoking ewas
 
-message("Starting age EWAS")#######################################
+  # in case some cohorts only have smoking quantity,
+  # recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
+  # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
+  # rather than pack-years or something
 
-ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-participants <- as.character(pheno$IID)
-meth.temp <- norm.beta[,participants]
+  if ("maternal_smoking_factor" %in% colnames(pheno)) {
+    message("maternal_smoking_factor variable already exists.")
+  } else if ("maternal_smoking_numeric" %in% colnames(pheno)) {
+    # Create maternal_smoking_factor based on Smoking_numeric
+    pheno$maternal_smoking_factor <- ifelse(pheno$maternal_smoking_numeric == 0, "No", "Yes")
+    message("maternal_smoking_factor variable created based on maternal_smoking_numeric")
+  } else {
+    message(paste0("maternal_smoking_numeric column not found. Cannot create maternal_smoking_factor.",
+    "This is expected if this is an adult dataset. If this is a child dataset, Please check your phenotype data",
+    sep = "\n"))
+  }
 
-ewas.age <- meffil.ewas(meth.temp, variable=pheno$Age_numeric, covariates=pheno[,colnames(pheno)%in%ewas_covars_age], sva=T, isva=F, random.seed=23) 
-ewas.out <- ewas.age$analyses
-save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
-ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
-meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_age_",study_name,"_",cellcount_panel,".html"))
+  ewas_covars_mat_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
 
-hits <- ewas.age$analyses$none$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
-hits <- ewas.age$analyses$all$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+  message("Starting maternal smoking EWAS") #######################################
 
+  if ("maternal_smoking_factor" %in% colnames(pheno)) {
+    # make sure meth and pheno are in same order
+    participants <- as.character(pheno$IID)
+    meth.temp <- norm.beta[,participants]
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$maternal_smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
+    # save out the ewas summary stats:
+    ewas.out <- ewas.smoking$analyses
+    save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
+    # generate and save html report of EWAS:
+    ewas.summary<-meffil.ewas.summary(ewas.smoking,meth.temp,parameters=ewas.parameters)                              
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_maternal_smoking_",study_name,"_",cellcount_panel,".html"))
+    # let's have a quick glance at how many hits we get:
+    hits <- ewas.smoking$analyses$none$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the unadjusted model")
+    hits <- ewas.smoking$analyses$all$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the adjusted model")
+    } else {
+    # Run this command if 'maternal_smoking_factor' column does not exist
+    message(paste0("maternal_smoking_factor not found in phenotype dataframe. This is expected if this is an adult dataset.", "If this is a child dataset and your study has smoking data, please ensure your phenotype dataframe has either maternal_smoking_factor or maternal_smoking_numeric", sep = "\n"))
+  }
 
-# 3. maternal smoking ewas
+  # 4. Sex EWAS
 
-# in case some cohorts only have smoking quantity,
-# recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
-# QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
-# rather than pack-years or something
+  message("Starting sex EWAS")#######################################
 
-if ("maternal_smoking_factor" %in% colnames(pheno)) {
-  message("maternal_smoking_factor variable already exists.")
-} else if ("maternal_smoking_numeric" %in% colnames(pheno)) {
-  # Create maternal_smoking_factor based on Smoking_numeric
-  pheno$maternal_smoking_factor <- ifelse(pheno$maternal_smoking_numeric == 0, "No", "Yes")
-  message("maternal_smoking_factor variable created based on maternal_smoking_numeric")
-} else {
-  message("maternal_smoking_numeric column not found. Cannot create maternal_smoking_factor.
-          This is expected if this is an adult dataset.
-          If this is a child dataset, Please check your phenotype data")
-}
-
-ewas_covars_mat_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
-
-message("Starting maternal smoking EWAS")#######################################
-
-if ("maternal_smoking_factor" %in% colnames(pheno)) {
-  # make sure meth and pheno are in same order
+  ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   participants <- as.character(pheno$IID)
   meth.temp <- norm.beta[,participants]
-  ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$maternal_smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
-  # save out the ewas summary stats:
-  ewas.out <- ewas.smoking$analyses
-  save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
-  # generate and save html report of EWAS:
-  ewas.summary<-meffil.ewas.summary(ewas.smoking,meth.temp,parameters=ewas.parameters)                              
-  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_maternal_smoking_",study_name,"_",cellcount_panel,".html"))
-  # let's have a quick glance at how many hits we get:
-  hits <- ewas.smoking$analyses$none$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the unadjusted model")
-  hits <- ewas.smoking$analyses$all$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the adjusted model")
-  
-} else {
-  # Run this command if 'maternal_smoking_factor' column does not exist
-  print("maternal_smoking_factor not found in phenotype dataframe. 
-  This is expected if this is an adult dataset.
-  If this is a child dataset and your study has smoking data,
-  please ensure your phenotype dataframe has either maternal_smoking_factor or maternal_smoking_factor")
-  
+
+  ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+  ewas.out <- ewas.sex$analyses
+  save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
+  ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
+  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_",study_name,"_",cellcount_panel,".html"))
+
+  hits <- ewas.sex$analyses$none$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
+  hits <- ewas.sex$analyses$all$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+
+  # 5. Scrambled Sex EWAS (negative control)
+
+  message("Starting scrambled sex (negative control) EWAS")#######################################
+
+  ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+  participants <- as.character(pheno$IID)
+  meth.temp <- norm.beta[,participants]
+  pheno$Sex_factor <- sample(pheno$Sex_factor)
+
+  ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+  ewas.out <- ewas.sex$analyses
+  save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
+  ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
+  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_negative_control_",study_name,"_",cellcount_panel,".html"))
+
+  hits <- ewas.sex$analyses$none$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
+  hits <- ewas.sex$analyses$all$table
+  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
 }
-
-# 4. Sex EWAS
-
-message("Starting sex EWAS")#######################################
-
-ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-participants <- as.character(pheno$IID)
-meth.temp <- norm.beta[,participants]
-
-ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
-ewas.out <- ewas.sex$analyses
-save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
-ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
-meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_",study_name,"_",cellcount_panel,".html"))
-
-hits <- ewas.sex$analyses$none$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
-hits <- ewas.sex$analyses$all$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
-
-
-# 5. Scrambled Sex EWAS (negative control)
-
-message("Starting scrambled sex (negative control) EWAS")#######################################
-
-ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-participants <- as.character(pheno$IID)
-meth.temp <- norm.beta[,participants]
-pheno$Sex_factor <- sample(pheno$Sex_factor)
-
-ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
-ewas.out <- ewas.sex$analyses
-save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
-ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
-meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_negative_control_",study_name,"_",cellcount_panel,".html"))
-
-hits <- ewas.sex$analyses$none$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
-hits <- ewas.sex$analyses$all$table
-message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
