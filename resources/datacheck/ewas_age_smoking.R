@@ -27,15 +27,6 @@ participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 
-# del columns with no variation
-if ("Sex_factor" %in% colnames(pheno)) {
-  nlev <- length(unique(na.omit(pheno$Sex_factor)))
-  if (nlev < 2) {
-    message("Sex_factor has no variation (only one level). Removing Sex_factor from pheno")
-    pheno$Sex_factor <- NULL
-  }
-}
-
 # detect cell count panel prefixes
 cell_count_cols <- setdiff(colnames(cell_counts), c("FID","IID"))
 cellcount_panel_prefixes <- unique(sub("\\..*", "", cell_count_cols))
@@ -46,16 +37,18 @@ celltypes <- grep(paste0("^(", paste0(cellcount_panel_prefixes, collapse="|"), "
 celltypes <- celltypes[!grepl("treg", celltypes, ignore.case = TRUE)]
 cell_counts <- cell_counts[,c("IID",celltypes)]
 
-# del columns with no variation
-cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
-
 # del nRBC if mean age > 1
 if(mean(pheno$Age_numeric) < 1){
   message("Keeping nRBC as mean age is less than 1")
-} else{
+} else {
   message("Removing nRBC as mean age is greater than 1")
   celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
 }
+cell_counts <- cell_counts[,c("IID",celltypes)]
+
+# del columns with no variation
+cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
+print(head(cell_counts))
 
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
@@ -64,8 +57,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # add cell counts to pheno_panel
   cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
   cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
-  print(colnames(cellcounts_temp))
-  pheno_panel <- merge(pheno_panel,cellcounts_temp,by="IID")
+  pheno_panel <- merge(pheno_panel, cellcounts_temp, by="IID")
 
   message("Setting up EWAS") #######################################
 
@@ -147,20 +139,24 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
-  participants <- as.character(pheno_panel$IID)
-  meth.temp <- norm.beta[,participants]
+  age_levels <- length(unique(na.omit(pheno_panel$Age_numeric)))
+  if (age_levels < 2) {
+    message("Age_numeric has no variation (only one value). Skipping age EWAS for this panel.")
+  } else {
+    participants <- as.character(pheno_panel$IID)
+    meth.temp <- norm.beta[,participants]
 
-  ewas.age <- meffil.ewas(meth.temp, variable=pheno_panel$Age_numeric, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
-  ewas.out <- ewas.age$analyses
-  save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
-  ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
-  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_age_",study_name,"_",cellcount_panel,".html"))
+    ewas.age <- meffil.ewas(meth.temp, variable=pheno_panel$Age_numeric, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
+    ewas.out <- ewas.age$analyses
+    save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
+    ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_age_",study_name,"_",cellcount_panel,".html"))
 
-  hits <- ewas.age$analyses$none$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
-  hits <- ewas.age$analyses$all$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
-
+    hits <- ewas.age$analyses$none$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
+    hits <- ewas.age$analyses$all$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+  }
   # 3. maternal smoking ewas
 
   # in case some cohorts only have smoking quantity,
@@ -218,19 +214,26 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   } else {
     ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
-  participants <- as.character(pheno_panel$IID)
-  meth.temp <- norm.beta[,participants]
 
-  ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
-  ewas.out <- ewas.sex$analyses
-  save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
-  ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
-  meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_",study_name,"_",cellcount_panel,".html"))
+  sex_levels <- length(unique(na.omit(pheno_panel$Sex_factor)))
+  if (sex_levels < 2) {
+    message("Sex_factor has no variation (only one value). Skipping sex EWAS for this panel.")
 
-  hits <- ewas.sex$analyses$none$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
-  hits <- ewas.sex$analyses$all$table
-  message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+  } else {
+    participants <- as.character(pheno_panel$IID)
+    meth.temp <- norm.beta[,participants]
+
+    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+    ewas.out <- ewas.sex$analyses
+    save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
+    ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_",study_name,"_",cellcount_panel,".html"))
+
+    hits <- ewas.sex$analyses$none$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
+    hits <- ewas.sex$analyses$all$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+  }
 
   # 5. Scrambled Sex EWAS (negative control)
 
@@ -241,6 +244,32 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   } else {
     ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
+
+  # randomly generate sex factor for data if there is no variation
+  if (sex_levels < 2) {
+    message("Sex_factor has no variation (only one value). For scrambled sex EWAS for this panel. We will randomly split the samples into two sex groups.")
+
+    participants <- as.character(pheno_panel$IID)
+    meth.temp <- norm.beta[,participants]
+    
+    n <- length(participants)
+    nF <- floor(n/2)
+    nM <- n - nF
+    scrambled_sex <- sample(c(rep("F", nF), rep("M", nM)))
+    pheno_panel$Sex_factor <- scrambled_sex
+
+    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+    ewas.out <- ewas.sex$analyses
+    save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
+    ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_sex_negative_control_",study_name,"_",cellcount_panel,".html"))
+
+    hits <- ewas.sex$analyses$none$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with sex (scrambled) in the unadjusted model")
+    hits <- ewas.sex$analyses$all$table
+    message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with sex (scrambled) in the adjusted model")
+  } else {
+
   participants <- as.character(pheno_panel$IID)
   meth.temp <- norm.beta[,participants]
   pheno_panel$Sex_factor <- sample(pheno_panel$Sex_factor)
@@ -255,4 +284,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the unadjusted model")
   hits <- ewas.sex$analyses$all$table
   message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with age in the adjusted model")
+  }
+
 }
