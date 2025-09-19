@@ -19,7 +19,7 @@ pc_var_association_plot <- arguments[11]
 
 suppressPackageStartupMessages(library(meffil))
 suppressPackageStartupMessages(library(viridis))
-
+suppressPackageStartupMessages(library(ggpubr))
 
 message("Reading in data and matching up samples across files")#######################################
 load(updated_pheno_file)
@@ -107,6 +107,7 @@ pcs <- merge(x=pcs,y=pheno, by.x="row.names", by.y="IID")
 # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
 test_pc_vars <- c("Age_numeric","Sex_factor","population_group_factor",study_specific_vars, celltypes,colnames(genetic_pcs)[2:11]) 
 test_pc_vars <- test_pc_vars[test_pc_vars%in%colnames(pcs)]
+message(paste("Test PC vars are:",test_pc_vars))
 plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
 names(plot_pc1pc2_list) <- test_pc_vars
 plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
@@ -168,7 +169,6 @@ dev.off()
 pc_analysis <- list()
 for(i in 1:10){
   print(i)
-  batch_vars <- paste(batch)
   model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars,sep = "+"))
   temp <- lm(formula=model_formula, 
              data = pcs)
