@@ -42,20 +42,29 @@ cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
 
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
-  
+  pheno_panel <- pheno
   # del nRBC if mean age > 1
-  if(mean(pheno$Age_numeric) < 1){
+  if(mean(pheno_panel$Age_numeric) < 1){
     message("Keeping nRBC as mean age is less than 1")
   } else{
     message("Removing nRBC as mean age is greater than 1")
     celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
   }
 
-  # add cell counts to pheno
+  # add cell counts to pheno_panel
   cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
   cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
   print(colnames(cellcounts_temp))
-  pheno <- merge(pheno,cellcounts_temp,by="IID")
+  pheno_panel <- merge(pheno_panel,cellcounts_temp,by="IID")
+
+  # del columns with no variation
+  if ("Sex_factor" %in% colnames(pheno_panel)) {
+  nlev <- length(unique(na.omit(pheno_panel$Sex_factor)))
+  if (nlev < 2) {
+    message("Sex_factor has no variation (only one level). Removing Sex_factor from pheno_panel.")
+    pheno_panel$Sex_factor <- NULL
+  }
+  }
 
   message("Setting up EWAS") #######################################
 
@@ -66,11 +75,11 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
   # rather than pack-years or something
 
-  if ("Smoking_factor" %in% colnames(pheno)) {
+  if ("Smoking_factor" %in% colnames(pheno_panel)) {
     message("Smoking_factor variable already exists.")
-  } else if ("Smoking_numeric" %in% colnames(pheno)) {
+  } else if ("Smoking_numeric" %in% colnames(pheno_panel)) {
     # Create Smoking_factor based on Smoking_numeric
-    pheno$Smoking_factor <- ifelse(pheno$Smoking_numeric == 0, "No", "Yes")
+    pheno_panel$Smoking_factor <- ifelse(pheno_panel$Smoking_numeric == 0, "No", "Yes")
     message("Smoking_factor variable created based on Smoking_numeric.")
   } else {
     message("Smoking_numeric column not found. Cannot create Smoking_factor. 
@@ -104,11 +113,11 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   message("Starting smoking EWAS")#######################################
 
-  if ("Smoking_factor" %in% colnames(pheno)) {
-    # make sure meth and pheno are in same order
-    participants <- as.character(pheno$IID)
+  if ("Smoking_factor" %in% colnames(pheno_panel)) {
+    # make sure meth and pheno_panel are in same order
+    participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$Smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23)
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$Smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23)
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
     save(ewas.out, file=paste0(ewas_stats,"_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -137,10 +146,10 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
-  participants <- as.character(pheno$IID)
+  participants <- as.character(pheno_panel$IID)
   meth.temp <- norm.beta[,participants]
 
-  ewas.age <- meffil.ewas(meth.temp, variable=pheno$Age_numeric, covariates=pheno[,colnames(pheno)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
+  ewas.age <- meffil.ewas(meth.temp, variable=pheno_panel$Age_numeric, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
   ewas.out <- ewas.age$analyses
   save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
   ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
@@ -158,11 +167,11 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
   # rather than pack-years or something
 
-  if ("maternal_smoking_factor" %in% colnames(pheno)) {
+  if ("maternal_smoking_factor" %in% colnames(pheno_panel)) {
     message("maternal_smoking_factor variable already exists.")
-  } else if ("maternal_smoking_numeric" %in% colnames(pheno)) {
+  } else if ("maternal_smoking_numeric" %in% colnames(pheno_panel)) {
     # Create maternal_smoking_factor based on Smoking_numeric
-    pheno$maternal_smoking_factor <- ifelse(pheno$maternal_smoking_numeric == 0, "No", "Yes")
+    pheno_panel$maternal_smoking_factor <- ifelse(pheno_panel$maternal_smoking_numeric == 0, "No", "Yes")
     message("maternal_smoking_factor variable created based on maternal_smoking_numeric")
   } else {
     message(paste0("maternal_smoking_numeric column not found. Cannot create maternal_smoking_factor.",
@@ -170,15 +179,19 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     sep = "\n"))
   }
 
-  ewas_covars_mat_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
+  if (is.na(study_specific_vars)){
+      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+  } else {
+      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+  }
 
   message("Starting maternal smoking EWAS") #######################################
 
-  if ("maternal_smoking_factor" %in% colnames(pheno)) {
-    # make sure meth and pheno are in same order
-    participants <- as.character(pheno$IID)
+  if ("maternal_smoking_factor" %in% colnames(pheno_panel)) {
+    # make sure meth and pheno_panel are in same order
+    participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno$maternal_smoking_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
     save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -197,13 +210,17 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   # 4. Sex EWAS
 
-  message("Starting sex EWAS")#######################################
+  message("Starting sex EWAS") #######################################
 
-  ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  participants <- as.character(pheno$IID)
+  if (is.na(study_specific_vars)){
+    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+  } else {
+    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+  }
+  participants <- as.character(pheno_panel$IID)
   meth.temp <- norm.beta[,participants]
 
-  ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+  ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
   ewas.out <- ewas.sex$analyses
   save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
   ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
@@ -216,14 +233,18 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   # 5. Scrambled Sex EWAS (negative control)
 
-  message("Starting scrambled sex (negative control) EWAS")#######################################
+  message("Starting scrambled sex (negative control) EWAS") #######################################
 
-  ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  participants <- as.character(pheno$IID)
+  if (is.na(study_specific_vars)){
+    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+  } else {
+    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+  }
+  participants <- as.character(pheno_panel$IID)
   meth.temp <- norm.beta[,participants]
-  pheno$Sex_factor <- sample(pheno$Sex_factor)
+  pheno_panel$Sex_factor <- sample(pheno_panel$Sex_factor)
 
-  ewas.sex <- meffil.ewas(meth.temp, variable=pheno$Sex_factor, covariates=pheno[,colnames(pheno)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+  ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
   ewas.out <- ewas.sex$analyses
   save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
   ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
