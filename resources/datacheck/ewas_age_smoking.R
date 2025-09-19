@@ -27,6 +27,15 @@ participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 
+# del columns with no variation
+if ("Sex_factor" %in% colnames(pheno)) {
+  nlev <- length(unique(na.omit(pheno$Sex_factor)))
+  if (nlev < 2) {
+    message("Sex_factor has no variation (only one level). Removing Sex_factor from pheno")
+    pheno$Sex_factor <- NULL
+  }
+}
+
 # detect cell count panel prefixes
 cell_count_cols <- setdiff(colnames(cell_counts), c("FID","IID"))
 cellcount_panel_prefixes <- unique(sub("\\..*", "", cell_count_cols))
@@ -40,31 +49,23 @@ cell_counts <- cell_counts[,c("IID",celltypes)]
 # del columns with no variation
 cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
 
+# del nRBC if mean age > 1
+if(mean(pheno$Age_numeric) < 1){
+  message("Keeping nRBC as mean age is less than 1")
+} else{
+  message("Removing nRBC as mean age is greater than 1")
+  celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
+}
+
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
   pheno_panel <- pheno
-  # del nRBC if mean age > 1
-  if(mean(pheno_panel$Age_numeric) < 1){
-    message("Keeping nRBC as mean age is less than 1")
-  } else{
-    message("Removing nRBC as mean age is greater than 1")
-    celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
-  }
 
   # add cell counts to pheno_panel
   cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
   cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
   print(colnames(cellcounts_temp))
   pheno_panel <- merge(pheno_panel,cellcounts_temp,by="IID")
-
-  # del columns with no variation
-  if ("Sex_factor" %in% colnames(pheno_panel)) {
-  nlev <- length(unique(na.omit(pheno_panel$Sex_factor)))
-  if (nlev < 2) {
-    message("Sex_factor has no variation (only one level). Removing Sex_factor from pheno_panel.")
-    pheno_panel$Sex_factor <- NULL
-  }
-  }
 
   message("Setting up EWAS") #######################################
 
