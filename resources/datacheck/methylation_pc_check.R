@@ -49,26 +49,41 @@ cell_counts <- cell_counts[,c("IID",celltypes)]
 # del columns with no variation
 cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
 
+# del nRBC if mean age > 1
+if(mean(pheno$Age_numeric) < 1){
+  message("Keeping nRBC as mean age is less than 1")
+  } else{
+  message("Removing nRBC as mean age is greater than 1")
+  celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
+}
+
+if ("Sex_factor" %in% colnames(pheno)) {
+  n_sex <- length(unique(na.omit(pheno$Sex_factor)))
+  if (n_sex < 2) {
+    message("Sex_factor has no variation (only one value). Removing Sex_factor from pheno.")
+    pheno$Sex_factor <- NULL
+  }
+}
+
+if ("Age_numeric" %in% colnames(pheno)) {
+  n_age <- length(unique(na.omit(pheno$Age_numeric)))
+  if (n_age < 2) {
+    message("Age_numeric has no variation (only one value). Removing Age_numeric from pheno.")
+    pheno$Age_numeric <- NULL
+  }
+}
 
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running methylation PCs for cell count panel: ", cellcount_panel)
 
-  # del nRBC if mean age > 1
-  if(mean(pheno$Age_numeric) < 1){
-    message("Keeping nRBC as mean age is less than 1")
-  } else{
-    message("Removing nRBC as mean age is greater than 1")
-    celltypes <- celltypes[!grepl("nRBC", celltypes, ignore.case = TRUE)]
-  }
-
   cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
   cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
-  print(colnames(cellcounts_temp))
-  pheno <- merge(pheno,cellcounts_temp,by="IID")
+  pheno_panel <- pheno
+  pheno_panel <- merge(pheno_panel,cellcounts_temp,by="IID")
 
   # TO DO: merge genetic PCs 1:10 with pheno file
   # need to know format of genetic PC file
-  pheno <- merge(pheno,genetic_pcs,by="IID")
+  pheno_panel <- merge(pheno_panel, genetic_pcs, by="IID")
 
   message("Generating PCs")#######################################
 
@@ -111,14 +126,14 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   # reduce to top 10 PCs because that's all we will test
   pcs <- pcs[,1:10]
-  identical(rownames(pcs),rownames(pheno))
-  pcs <- merge(x=pcs,y=pheno, by.x="row.names", by.y="IID")
+  identical(rownames(pcs),rownames(pheno_panel))
+  pcs <- merge(x=pcs,y=pheno_panel, by.x="row.names", by.y="IID")
   # rownames(pcs) <- pcs$Row.names
   # pcs <- pcs[,-1]
 
   # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
-  test_pc_vars <- c("Age_numeric","Sex_factor","population_group_factor",study_specific_vars, celltypes,colnames(genetic_pcs)[2:11]) 
-  test_pc_vars <- test_pc_vars[test_pc_vars%in%colnames(pcs)]
+  test_pc_vars <- c("Age_numeric", "Sex_factor", "population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
+  test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
   names(plot_pc1pc2_list) <- test_pc_vars
   plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
