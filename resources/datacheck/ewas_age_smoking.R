@@ -48,7 +48,6 @@ cell_counts <- cell_counts[,c("IID",celltypes)]
 
 # del columns with no variation
 cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
-print(head(cell_counts))
 
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
