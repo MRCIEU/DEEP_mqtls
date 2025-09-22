@@ -21,11 +21,11 @@ if (stage == "shrink") {
 
   qc.objects <- meffil.qc(samplesheet, verbose=TRUE)
 
-  qc_objects_shrink <- meffil.shrink.qc.object(qc.objects)
+  qc.objects.shrink = lapply(qc.objects, meffil.shrink.qc.object)
 
   # save original qc.objects to home directory
-  save(qc.objects, file=paste0(home_path, "/processed_data/methylation_data/",study_name, "qc_objects.rda"))
-  save(qc_objects_shrink, file=paste0(home_path, "/results/01/", study_name, "qc_objects_shrink.rda"))
+  save(qc.objects, file=paste0(home_path, "/processed_data/methylation_data/",study_name, ".qc_objects.rda"))
+  save(qc.objects.shrink, file=paste0(home_path, "/results/01/", study_name, ".qc_objects_shrink.rda"))
 
   message("Create shrunk QC objects")
 }
@@ -52,12 +52,13 @@ load_new_var <- function(file) {
 if (stage == "expand") {
   message("Loading original qc.objects")
   qc.object.ori <- load_new_var(paste0(home_path, "/processed_data/methylation_data/", study_name, "qc_objects.rda"))
-  
+
   message("Loading normalized shrunk objects")
   message("Please put the file from DEEP server in the input folder")
   dat.norms <- load_new_var(paste0(home_path, "/input_data/", study_name, "_objects.rda"))
+
+  norm.objects <- mapply(meffil.expand.norm.object, dat.norms, qc.object.ori, SIMPLIFY=F)
   
-  norm.objects <- meffil.expand.norm.object(dat.norms, qc.object.ori)
   save(norm.objects, file = paste0(home_path, "/processed_data/", study_name, "_harmonized_meth.rda"))
   message("Information restored")
 }
