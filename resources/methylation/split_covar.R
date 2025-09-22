@@ -128,9 +128,9 @@ if (length(cell_cols) >= 2) {
 }
 
 # If any cell-type columns include 'Treg' in their name, remove them to avoid using that column
-treg_cols <- grep("Treg", colnames(quant_cov), value = TRUE)
+treg_cols <- grep("treg", colnames(quant_cov), value = TRUE, ignore.case = TRUE)
 if (length(treg_cols) > 0) {
-  message("Removing columns containing 'Treg': ", paste(treg_cols, collapse = ", "))
+  message("Removing columns containing 'Treg' (case-insensitive): ", paste(treg_cols, collapse = ", "))
   quant_cov <- quant_cov[, !(colnames(quant_cov) %in% treg_cols), drop = FALSE]
 }
 

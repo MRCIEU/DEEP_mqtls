@@ -147,78 +147,39 @@ fi
 
 if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
 then
-	section_message "ewas unilife"
+	section_message "ewas"
 
-	echo "EWAS of age and smoking - unilife"
+	echo "EWAS of age and smoking - cell count adjusted"
 	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
 		${methylation_array} \
 		${cellcounts_cov} \
-		"unilife" \
 		${study_name} \
-		${study_specific_vars} \
 		${qc1_ewas_stats} \
 		${qc1_ewas_report} \
-		
-fi
-
-if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
-then
-	section_message "ewas salas"
-
-	echo "EWAS of age and smoking - salas"
-	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
-		${methylation_no_outliers_ewas} \
-		${updated_phenotype_file} \
-		${methylation_array} \
-		${cellcounts_cov} \
-		"salas" \
-		${study_name} \
-		${study_specific_vars} \
-		${qc1_ewas_stats} \
-		${qc1_ewas_report} \
-		
+		${scripts_directory} \
+		${study_specific_vars}
 
 fi
 
 if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
 then
-	section_message "meth pcs unilife"
+	section_message "meth_pcs"
 
-	echo "meth PCs - unilife"
+	echo "meth PCs"
 	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
 		${methylation_no_outliers_ewas} \
 		${updated_phenotype_file} \
 		${cellcounts_cov} \
-		"unilife" \
 		${study_name} \
-		${study_specific_vars} \
 		${pcs_all} \
 		${meth_pcs_scree_plot} \
 		${meth_pcs_screePC1PC2_plot} \
 		${meth_pcs_screePC3PC4_plot} \
 		${pc_var_association_plot} \
-
-fi
-
-if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
-then
-	section_message "meth pcs salas"
-
-	echo "meth PCs - salas"
-	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
-		${methylation_no_outliers_ewas} \
-		${updated_phenotype_file} \
-		${cellcounts_cov} \
-		"salas" \
-		${study_name} \
-		${study_specific_vars} \
-		${pcs_all} \
-		${meth_pcs_scree_plot} \
-		${meth_pcs_screePC1PC2_plot} \
-		${meth_pcs_screePC3PC4_plot} \
-		${pc_var_association_plot} \
+		${scripts_directory} \
+		${study_specific_vars}
 
 fi
 

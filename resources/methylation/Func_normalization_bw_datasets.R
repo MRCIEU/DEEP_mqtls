@@ -14,25 +14,20 @@ stage <- arguments[4];
 # qc stage 1 shrink ======= remove unnecessary information from qc objects
 
 if (stage == "shrink") {
+  message("idat files folder: ", paste0(idat_input_folder))
+  message("study name: ", study_name)
+  message("Create samplesheet")
+  samplesheet <- meffil.create.samplesheet(idat_input_folder, recursive=TRUE)
 
-    vars_before <- ls()
-    load(idat_input_folder)
-    vars_after <- ls()
-    new_vars <- setdiff(vars_after, vars_before)
-    message("idat files folder: ", paste(new_vars, collapse = ", "))
+  qc.objects <- meffil.qc(samplesheet, verbose=TRUE)
 
-    samplesheet <- meffil.create.samplesheet(idat_input_folder, recursive=TRUE)
+  qc_objects_shrink <- meffil.shrink.qc.object(qc.objects)
 
-    qc.objects <- meffil.qc(samplesheet, verbose=TRUE)
+  # save original qc.objects to home directory
+  save(qc.objects, file=paste0(home_path, "/processed_data/methylation_data/",study_name, "qc_objects.rda"))
+  save(qc_objects_shrink, file=paste0(home_path, "/results/01/", study_name, "qc_objects_shrink.rda"))
 
-    qc_objects_shrink <- meffil.shrink.qc.object(get(new_vars[1]))
-
-    # save original qc.objects to home directory
-    save(qc.objects, file=paste0(home_path, "/processed_data/methylation_data/",study_name, "qc_objects.rda"))
-    save(qc_objects_shrink, file=paste0(home_path, "/results/01/", study_name, "qc_objects_shrink.rda"))
-
-message("Shrunk QC objects created")
-
+  message("Create shrunk QC objects")
 }
 
 # DEEP receives shrunk data from cohorts
