@@ -58,7 +58,11 @@ if (stage == "expand") {
   dat.norms <- load_new_var(paste0(home_path, "/input_data/", study_name, "_objects.rda"))
 
   norm.objects <- mapply(meffil.expand.norm.object, dat.norms, qc.object.ori, SIMPLIFY=F)
-  
-  save(norm.objects, file = paste0(home_path, "/processed_data/", study_name, "_harmonized_meth.rda"))
   message("Information restored")
+
+  meth = meffil.normalize.samples(norm.objects)
+
+  save(meth, file = paste0(home_path, "/input_data/", study_name, "_fn_meth.RData"))
+
+  message("Across cohorts normalized methylation data saved")
 }
