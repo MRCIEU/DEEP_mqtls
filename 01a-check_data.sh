@@ -79,6 +79,8 @@ get 1000g_AMR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
 get 1000g_EAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
 get 1000g_EUR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
 get 1000g_SAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
+get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
+get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
 # get hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv
 # get hgdp_tgp_unrel_pass_filtGBMI_strictpruned_loadings.tsv
 # get release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz
@@ -88,6 +90,7 @@ EOF
 
 	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz* ${scripts_directory}/resources/genetics
 	mv 1000g_* ${scripts_directory}/resources/genetics
+	mv HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz* ${scripts_directory}/resources/genetics
 	# mv references_grch37_to_grch38.over.chain.gz ${scripts_directory}/resources/genetics
 	# mv release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz ${scripts_directory}/resources/genetics
 	# mv hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv ${scripts_directory}/resources/genetics
