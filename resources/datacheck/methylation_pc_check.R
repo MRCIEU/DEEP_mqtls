@@ -135,7 +135,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
   test_pc_vars <- c("Age_numeric", "Sex_factor", "population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
-message(paste("Test PC vars are:",test_pc_vars))
+  message(paste("Test PC vars are:",test_pc_vars))
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
   names(plot_pc1pc2_list) <- test_pc_vars
   plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
@@ -199,7 +199,7 @@ message(paste("Test PC vars are:",test_pc_vars))
     temp <- lm(formula=model_formula, 
              data = pcs)
     temp <- summary(temp)
-    pc_analysis[[i]] <- temp
+    pc_analysis[i] <- temp
   }
   summary(pc_analysis)
   names(pc_analysis) <- c(1:10)
