@@ -63,8 +63,8 @@ smoking="own"
 # If these samples are expected to be unrelated set this to "no" (even if there may be cryptic relatedness)
 related="no"
 
-# reference panel (1000g, 1000g+h3a, 1000g+hrc, topmed, 1000g+caapa)
-reference="1000g"
+# reference panel (1000g, 1000g+h3a, topmed, 1000g+caapa)
+reference="topmed"
 
 # Specify the most similar ancestry of your samples with one of the following: EUR, AFR, AMR, EAS, SAS, or None.
 # If you are not sure, or ancestry is not matching with any of these populations.
