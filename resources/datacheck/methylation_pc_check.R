@@ -97,33 +97,36 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   pca.var <- pcs$sdev^2
   pca.var.explained <- pca.var / sum(pca.var)
 
-  df <- data.frame(PC = 1:length(pca.var.explained),
-                 Variance = pca.var.explained)
+  df <- data.frame(PC = 1:length(pca.var.explained), Variance = pca.var.explained)
 
   # plot a max of 50 PCs so we can read the plot easily
-  if(length(pca.var.explained)>50){
+  if(length(pca.var.explained) > 50){
+    message("More than 50 PCs generated, scree plot will show first 50 PCs only")
     df <- df[1:50,]
-    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 4, height = 5)
-    ggplot(df, aes(x = PC, y = Variance)) +
+    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"), width = 4, height = 5)
+    p <- ggplot(df, aes(x = PC, y = Variance)) +
       geom_line() +
       geom_point() +
       labs(title = paste("Scree Plot",study_name,"; ",length(pca.var.explained),"  total PCs"), x = "Principal Component", y = "Proportion of Variance Explained") +
       theme_minimal()
+    print(p)
     dev.off()
   
   } else {
-    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 4, height = 5)
-    ggplot(df, aes(x = PC, y = Variance)) +
+    message("50 or fewer PCs generated, scree plot will show all PCs")
+    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"), width = 4, height = 5)
+    p <- ggplot(df, aes(x = PC, y = Variance)) +
       geom_line() +
       geom_point() +
       labs(title = paste("Scree Plot",study_name), x = "Principal Component", y = "Proportion of Variance Explained") +
       theme_minimal()
+    print(p)
     dev.off()
   }
 
   # pcs <- meffil.methylation.pcs(norm.beta,probe.range=50000,full.obj=F)
   pcs <- as.data.frame(pcs$x)
-  message("there are ",ncol(pcs)," PCs generated")
+  message("there are ", ncol(pcs), " PCs generated")
 
   # reduce to top 10 PCs because that's all we will test
   pcs <- pcs[,1:10]
@@ -133,7 +136,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # pcs <- pcs[,-1]
 
   # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
-  test_pc_vars <- c("Age_numeric", "Sex_factor", "population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
+  test_pc_vars <- c("Age_numeric", "Sex_factor", "Population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
   message(paste("Test PC vars are:", paste(test_pc_vars, collapse = ", ")))
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
@@ -168,7 +171,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
         scale_colour_viridis(discrete = T) +
         labs(title=paste0("PC3 vs PC4, ",i))+
         theme_bw() #+
-        #theme(legend.position="none")  
+        #theme(legend.position="none")
     }
     plot_pc1pc2_list[[i]] <- pc1pc2_plot
     plot_pc3pc4_list[[i]] <- pc3pc4_plot
@@ -191,10 +194,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   print(makeplots)
   dev.off()
 
-# now test how much each variable associates with each PC using a linear model
+  # now test how much each variable associates with each PC using a linear model
   pc_analysis <- list()
   for(i in 1:10){
-    print(i)
     model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars, collapse = "+"))
     print(paste0("Linear model formula: ", model_formula))
     fit <- lm(formula = model_formula, data = pcs)
@@ -217,36 +219,47 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     # the plot is awful if you leave them all in
     batchvars <- as.character(temp$var)
     # TO DO: edit the below batch names:
-    slidevars <- grep("^slide|^row|^plate", batchvars, value = T)
+    slidevars <- grep("^slide", batchvars, value = TRUE, ignore.case = TRUE)
+    rowvars   <- grep("^row",   batchvars, value = TRUE, ignore.case = TRUE)
+    platevars <- grep("^plate", batchvars, value = TRUE, ignore.case = TRUE)
 
-    temp_slide_row <- temp[temp$var %in% slidevars & temp$p < 0.05, ]
+    summary_list <- list()
 
-    # Calculate mean estimate for slide variables
-    slide_effects <- temp_slide_row[grep("^slide", temp_slide_row$var), "estimate"]
-    mean_slide_effect <- mean(slide_effects, na.rm = TRUE)
-    slide_p <- temp_slide_row[grep("^slide", temp_slide_row$var), "p"]
-    mean_slide_p <- mean(slide_p, na.rm = TRUE)
-    # Calculate mean estimate for row variables
-    row_effects <- temp_slide_row[grep("^row", temp_slide_row$var), "estimate"]
-    mean_row_effect <- mean(row_effects, na.rm = TRUE)
-    row_p <- temp_slide_row[grep("^row", temp_slide_row$var), "p"]
-    mean_row_p <- mean(row_subset$p, na.rm = TRUE)
-    # Calculate mean estimate for plate variables
-    plate_effects <- temp_slide_row[grep("^plate", temp_slide_row$var), "estimate"]
-    mean_plate_effect <- mean(plate_effects, na.rm = TRUE)
-    plate_p <- temp_slide_row[grep("^plate", temp_slide_row$var), "p"]
-    mean_plate_p <- mean(plate_subset$p, na.rm = TRUE)
+    if (length(slidevars) > 0) {
+      temp_slide <- temp[temp$var %in% slidevars & temp$p < 0.05, ]
+      mean_slide_effect <- mean(temp_slide$estimate, na.rm = TRUE)
+      mean_slide_p <- mean(temp_slide$p, na.rm = TRUE)
+      summary_list[["mean_slide"]] <- data.frame(estimate = mean_slide_effect, se=NA, t=NA, p = mean_slide_p, PC = paste0("PC", i), var = "mean_slide")
+    }
+
+    if (length(rowvars) > 0) {
+      temp_row <- temp[temp$var %in% rowvars & temp$p < 0.05, ]
+      mean_row_effect <- mean(temp_row$estimate, na.rm = TRUE)
+      mean_row_p <- mean(temp_row$p, na.rm = TRUE)
+      summary_list[["mean_row"]] <- data.frame(estimate = mean_row_effect, se=NA, t=NA, p = mean_row_p, PC = paste0("PC", i), var = "mean_row")
+    }
+
+    if (length(platevars) > 0) {
+      temp_plate <- temp[temp$var %in% platevars & temp$p < 0.05, ]
+      mean_plate_effect <- mean(temp_plate$estimate, na.rm = TRUE)
+      mean_plate_p <- mean(temp_plate$p, na.rm = TRUE)
+      summary_list[["mean_plate"]] <- data.frame(estimate = mean_plate_effect, se=NA, t=NA, p = mean_plate_p, PC = paste0("PC", i), var = "mean_plate")
+    }
+
+    all_batchvars <- c(slidevars, rowvars, platevars)
+    temp <- temp[!temp$var %in% all_batchvars, ]
+    temp <- temp[complete.cases(temp), ]
+
+    if (length(summary_list) > 0) {
+    summary_df <- do.call(rbind, summary_list)
+      if (nrow(temp) == 0) {
+      temp <- summary_df
+      } else {
+      summary_df <- summary_df[, names(temp), drop = FALSE]
+      temp <- rbind(temp, summary_df)
+      }
+    }
     
-
-    temp <- temp[!temp$var %in% slidevars,]
-    temp <- temp[complete.cases(temp),]
-
-    summary_slide <- data.frame(estimate = mean_slide_effect, se=NA, t=NA, p = mean_slide_p, var = "mean_slide")
-    summary_row <- data.frame(estimate = mean_row_effect, se=NA, t=NA, p = mean_row_p, var = "mean_row")
-    summary_plate <- data.frame(estimate = mean_plate_effect, se=NA, t=NA, p = mean_plate_p, var = "mean_plate")
-    # Bind summary rows back to temp
-    temp <- rbind(temp, summary_slide, summary_row, summary_plate)
-
     pc_plot <- ggplot(temp, aes(x=var, y=estimate, fill=var)) +
       #scale_fill_viridis(discrete = T) +  
       geom_bar(stat = "identity", alpha = 0.5) +
@@ -254,12 +267,12 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       geom_text(aes(label = signif(-log10(p), 3)), vjust = -0.3, size = 3) +
       labs(title=paste0("PC",i),x="Variable", y="Estimate") +
       theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
-      ggtitle(i) 
+      ggtitle(i)
     pc_plotlist[[i]] <- pc_plot
-  }
+    }
 
-  pdf(file = paste0(pc_var_association_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 15, height = 20, units = "in", res = 600)
-  makeplots <- ggarrange(plotlist=plot_list, ncol = 3, nrow = 4)
+  pdf(file = paste0(pc_var_association_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 15, height = 20)
+  makeplots <- ggarrange(plotlist=pc_plotlist, ncol = 3, nrow = 4)
   annotate_figure(makeplots, top = text_grob(paste0(study_name,"; methylation PC associations"), 
                                            color = "black", face = "bold", size = 14))
   print(makeplots)
