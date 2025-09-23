@@ -103,7 +103,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # plot a max of 50 PCs so we can read the plot easily
   if(length(pca.var.explained)>50){
     df <- df[1:50,]
-    jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
+    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 4, height = 5)
     ggplot(df, aes(x = PC, y = Variance)) +
       geom_line() +
       geom_point() +
@@ -112,7 +112,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     dev.off()
   
   } else {
-    jpeg(filename = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 4, height = 5, units = "in", res = 600)
+    pdf(file = paste0(scree_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 4, height = 5)
     ggplot(df, aes(x = PC, y = Variance)) +
       geom_line() +
       geom_point() +
@@ -135,7 +135,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
   test_pc_vars <- c("Age_numeric", "Sex_factor", "population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
-  message(paste("Test PC vars are:",test_pc_vars))
+  message(paste("Test PC vars are:", paste(test_pc_vars, collapse = ", ")))
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
   names(plot_pc1pc2_list) <- test_pc_vars
   plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
@@ -172,19 +172,19 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     }
     plot_pc1pc2_list[[i]] <- pc1pc2_plot
     plot_pc3pc4_list[[i]] <- pc3pc4_plot
-}
+  }
 
   n_plot_rows <- ceiling(length(test_pc_vars)/4)
   row_dimensions <- n_plot_rows*3
 
-  jpeg(filename = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+  pdf(file = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 12, height = row_dimensions)
   makeplots <- ggarrange(plotlist=plot_pc1pc2_list, ncol = 4, nrow = n_plot_rows)
   annotate_figure(makeplots, top = text_grob(paste0(study_name,"; PC1 vs PC2 plots"), 
                                            color = "black", face = "bold", size = 14))
   print(makeplots)
   dev.off()
 
-  jpeg(filename = paste0(PC3PC4_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+  pdf(file = paste0(PC3PC4_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 12, height = row_dimensions)
   makeplots <- ggarrange(plotlist=plot_pc3pc4_list, ncol = 4, nrow = n_plot_rows)
   annotate_figure(makeplots, top = text_grob(paste0(study_name,"; PC3 vs PC4 plots"), 
                                            color = "black", face = "bold", size = 14))
@@ -195,20 +195,17 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   pc_analysis <- list()
   for(i in 1:10){
     print(i)
-      model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars,sep = "+"))
-    temp <- lm(formula=model_formula, 
-             data = pcs)
-    temp <- summary(temp)
-    pc_analysis[i] <- temp
+    model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars, collapse = "+"))
+    print(paste0("Linear model formula: ", model_formula))
+    fit <- lm(formula = model_formula, data = pcs)
+    pc_analysis[[i]] <- summary(fit)
   }
-  summary(pc_analysis)
-  names(pc_analysis) <- c(1:10)
   #save(pc_analysis, file=paste0(""))
-
+  
   pc_plotlist <- list()
   for(i in 1:10){
-    temp <- as.data.frame(pc_analysis[i]$coefficients)
-    names(temp) <- c("estimate","se","t","p")
+    temp <- as.data.frame(pc_analysis[[i]]$coefficients)
+    names(temp) <- c("estimate", "se", "t", "p")
     temp <- temp[temp$p < 0.05,]
     temp <- temp[order(temp$p),]
     row.names.remove <- c("(Intercept)")
@@ -216,14 +213,14 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     temp$PC <- paste0("PC",i)
     # make barplot of p values
     temp$var <- as.character(rownames(temp))
-  
     # remove slides and rows and replace with a single value
     # the plot is awful if you leave them all in
     batchvars <- as.character(temp$var)
     # TO DO: edit the below batch names:
-    slidevars <- grep("^slide|^row|^plate",batchvars, value = T)
-  
+    slidevars <- grep("^slide|^row|^plate", batchvars, value = T)
+
     temp_slide_row <- temp[temp$var %in% slidevars & temp$p < 0.05, ]
+
     # Calculate mean estimate for slide variables
     slide_effects <- temp_slide_row[grep("^slide", temp_slide_row$var), "estimate"]
     mean_slide_effect <- mean(slide_effects, na.rm = TRUE)
@@ -239,17 +236,17 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     mean_plate_effect <- mean(plate_effects, na.rm = TRUE)
     plate_p <- temp_slide_row[grep("^plate", temp_slide_row$var), "p"]
     mean_plate_p <- mean(plate_subset$p, na.rm = TRUE)
-  
-  
+    
+
     temp <- temp[!temp$var %in% slidevars,]
     temp <- temp[complete.cases(temp),]
-  
+
     summary_slide <- data.frame(estimate = mean_slide_effect, se=NA, t=NA, p = mean_slide_p, var = "mean_slide")
     summary_row <- data.frame(estimate = mean_row_effect, se=NA, t=NA, p = mean_row_p, var = "mean_row")
     summary_plate <- data.frame(estimate = mean_plate_effect, se=NA, t=NA, p = mean_plate_p, var = "mean_plate")
     # Bind summary rows back to temp
     temp <- rbind(temp, summary_slide, summary_row, summary_plate)
-  
+
     pc_plot <- ggplot(temp, aes(x=var, y=estimate, fill=var)) +
       #scale_fill_viridis(discrete = T) +  
       geom_bar(stat = "identity", alpha = 0.5) +
@@ -261,7 +258,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     pc_plotlist[[i]] <- pc_plot
   }
 
-  jpeg(filename = paste0(pc_var_association_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 15, height = 20, units = "in", res = 600)
+  pdf(file = paste0(pc_var_association_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 15, height = 20, units = "in", res = 600)
   makeplots <- ggarrange(plotlist=plot_list, ncol = 3, nrow = 4)
   annotate_figure(makeplots, top = text_grob(paste0(study_name,"; methylation PC associations"), 
                                            color = "black", face = "bold", size = 14))
