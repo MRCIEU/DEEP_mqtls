@@ -49,6 +49,16 @@ cell_counts <- cell_counts[,c("IID",celltypes)]
 # del columns with no variation
 cell_counts <- remove_constant_cols(cell_counts, "cell_counts")
 
+# rm Age_numeric and Sex_factor if no variation
+if (length(unique(na.omit(pheno$Age_numeric))) < 2) {
+  message("Age_numeric has no variation (only one value). Removing Age_numeric column from pheno.")
+  pheno$Age_numeric <- NULL
+}
+if (length(unique(na.omit(pheno$Sex_factor))) < 2) {
+  message("Sex_factor has no variation (only one value). Removing Sex_factor column from pheno.")
+  pheno$Sex_factor <- NULL
+}
+
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
   pheno_panel <- pheno
@@ -187,7 +197,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     # make sure meth and pheno_panel are in same order
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23) 
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23)
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
     save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
