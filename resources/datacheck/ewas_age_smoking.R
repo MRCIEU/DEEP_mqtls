@@ -148,7 +148,12 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
-  age_levels <- length(unique(na.omit(pheno_panel$Age_numeric)))
+  if ("Age_numeric" %in% colnames(pheno_panel)) {
+    age_levels <- length(unique(na.omit(pheno_panel$Age_numeric)))
+  } else {
+    age_levels <- 0
+  }
+
   if (age_levels < 2) {
     message("Age_numeric has no variation (only one value). Skipping age EWAS for this panel.")
   } else {
@@ -219,12 +224,17 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   message("Starting sex EWAS") #######################################
 
   if (is.na(study_specific_vars)){
-    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+    ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes) # need to update these var names
   } else {
-    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+    ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
-  sex_levels <- length(unique(na.omit(pheno_panel$Sex_factor)))
+  if ("Sex_factor" %in% colnames(pheno_panel)) {
+    sex_levels <- length(unique(na.omit(pheno_panel$Sex_factor)))
+  } else {
+    sex_levels <- 0
+  }
+
   if (sex_levels < 2) {
     message("Sex_factor has no variation (only one value). Skipping sex EWAS for this panel.")
 
@@ -247,12 +257,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # 5. Scrambled Sex EWAS (negative control)
 
   message("Starting scrambled sex (negative control) EWAS") #######################################
-
-  if (is.na(study_specific_vars)){
-    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
-  } else {
-    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  }
 
   # randomly generate sex factor for data if there is no variation
   if (sex_levels < 2) {
