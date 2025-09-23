@@ -153,8 +153,8 @@ for (cellcount_panel in cellcount_panel_prefixes) {
         geom_point(size=1) + 
         scale_colour_viridis() +
         labs(title=paste0("PC3 vs PC4, ",i))+
-        theme_bw() +
-        theme(legend.position="none") 
+        theme_bw() #+
+        #theme(legend.position="none") 
     
     } else {
       pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=i)) +
@@ -175,7 +175,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 }
 
   n_plot_rows <- ceiling(length(test_pc_vars)/4)
-  row_dimensions <- n_plot_rows*4
+  row_dimensions <- n_plot_rows*3
 
   jpeg(filename = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
   makeplots <- ggarrange(plotlist=plot_pc1pc2_list, ncol = 4, nrow = n_plot_rows)
