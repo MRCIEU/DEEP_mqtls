@@ -176,9 +176,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   }
 
   if (is.na(study_specific_vars)){
-      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+      ewas_covars_mat_smoking <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
   } else {
-      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+      ewas_covars_mat_smoking <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
   message("Starting maternal smoking EWAS") #######################################
@@ -209,9 +209,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   message("Starting sex EWAS") #######################################
 
   if (is.na(study_specific_vars)){
-    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
   } else {
-    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
   sex_levels <- length(unique(na.omit(pheno_panel$Sex_factor)))
@@ -239,9 +239,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   message("Starting scrambled sex (negative control) EWAS") #######################################
 
   if (is.na(study_specific_vars)){
-    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
+    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
   } else {
-    ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
+    ewas_covars_sex <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
   }
 
   # randomly generate sex factor for data if there is no variation
