@@ -60,6 +60,7 @@ then
 		${covariates_intersect_gwas} \
 		${covariates_intersect_ewas} \
 
+	echo "Successfully completed script 01c methy_outlier chunk"
 fi
 
 if [ "$arg" = "check_phenotype" ] || [ "$arg" = "all" ]
@@ -79,6 +80,7 @@ then
 		${edited_phenotype_summary_file} \
 		${winsorized_phenotype_file} 
 
+	echo "Successfully completed script 01c check_phenotype chunk"
 fi
 
 if [ "$arg" = "predict_age_smoking" ] || [ "$arg" = "all" ]
@@ -95,6 +97,7 @@ then
 		${updated_phenotype_file} \
 		${predicted_smoking}
 
+	echo "Successfully completed script 01c predict_age_smoking chunk"
 fi
 
 if [ "$arg" = "cell_counts" ] || [ "$arg" = "all" ]
@@ -143,6 +146,7 @@ then
 		exit 1
 	fi
 
+	echo "Successfully completed script 01c cell_counts chunk"
 fi
 
 if [ "$arg" = "ewas" ] || [ "$arg" = "all" ]
@@ -161,6 +165,7 @@ then
 		${scripts_directory} \
 		${study_specific_vars}
 
+	echo "Successfully completed script 01c ewas chunk"
 fi
 
 if [ "$arg" = "meth_pcs" ] || [ "$arg" = "all" ]
@@ -181,6 +186,8 @@ then
 		${scripts_directory} \
 		${study_specific_vars}
 
+	echo "Successfully completed script 01c meth_pcs chunk"
+
 fi
 
 if [ "$arg" = "combine_covariates" ] || [ "$arg" = "all" ]
@@ -195,6 +202,8 @@ then
 		"${predicted_smoking}" \
 		"${bfile}.fam" \
 		"${covariates_combined}"
+
+	echo "Successfully completed script 01c combine_covariates chunk"
 
 fi
 
