@@ -29,6 +29,13 @@ check_results_01a () {
 		echo "Quality scores plot file is absent."
 		exit 1
 	fi
+
+	if [ -f "${sex_pred_plot}" ]; then
+		echo "Sex prediction plot file present"
+	else
+		echo "Sex prediction plot file is absent."
+		exit 1
+	fi
 }
 
 check_results_01b () {
@@ -99,10 +106,10 @@ check_results_01b () {
 
 check_results_01c () {
 
-	if [ -f "${section_01_dir}/methylation_summary.RData" ]; then
-		echo "Methylation_summary.RData is present"
+	if [ -f "${section_01_dir}/methylation_summary.RData" ] && [ -f "${section_01_dir}/methylation_summary_gwas.RData" ] && [ -f "${section_01_dir}/methylation_summary_ewas.RData" ]; then
+		echo "Three methylation_summary RData files are present"
 	else
-		echo "Problem: methylation_summary.RData is absent"
+		echo "Problem: one or more methylation_summary RData files are absent"
 		exit 1
 	fi
 
@@ -113,7 +120,6 @@ check_results_01c () {
 		exit 1
 	fi
 
-	
 	if [ -f "${section_01_dir}/cellcounts_summary.txt" ]; then
 		echo "Summary statistics of cell counts are present"
 	else
@@ -128,23 +134,31 @@ check_results_01c () {
 		exit 1
 	fi
 
-	if [ "${measured_cellcounts}" != "NULL" ];then
-		if [  -f "${section_01_dir}/cor_plot.pdf" ]; then
-			echo "Correlation plot of observed vs predicted cell counts is present"
-		else
-			echo "Problem: correlation plot of observed vs predicted cell counts is absent"
-			exit 1
-        fi        
+	if [ ! -f "${section_01_dir}/cor_plot_ori.pdf" ]; then
+    	echo "Problem: ori correlation plot is absent"
+    	exit 1
+	fi
 
-		if [  -f "${section_01_dir}/cor_matrix.txt" ]; then
-			echo "Correlation matrix of observed vs predicted cell counts is present"
-		else
-			echo "Problem: correlation matrix of observed vs predicted cell counts is absent"
-			exit 1
-		fi
+	if [ ! -f "${section_01_dir}/cor_plot_comb.pdf" ]; then
+    	echo "Problem: combined correlation plot is absent"
+    	exit 1
+	fi
+	echo "Ori and combined correlation plots of cell counts are present"
+
+	if [  -f "${section_01_dir}/cor_matrix.txt" ]; then
+		echo "Correlation matrix of observed vs predicted cell counts is present"
 	else
-		echo "Message: since measured_cellcounts are not provided, there is no output for cor_plot.pdf and cor_matrix.txt for observed vs predicted cell counts."
+		echo "Problem: correlation matrix of observed vs predicted cell counts is absent"
+		exit 1
+	fi
 
+	if [ -d "${section_01_dir}/cellcounts_comp" ]; then
+    pdf_count=$(find "${section_01_dir}/cellcounts_comp" -name "*.pdf" | wc -l)
+    	if [ $pdf_count -gt 0 ]; then
+        	echo "cellcounts_comp folder contains $pdf_count PDF files"
+    	else
+        	echo "cellcounts_comp folder contains no PDF files"
+   		fi
 	fi
 
 	if [ -f "${smoking_pred_plot}" ]; then
@@ -161,13 +175,26 @@ check_results_01c () {
 		exit 1
 	fi
 
-	if [ -f "${section_01_dir}/meth_pcs_screen_plot" ]; then
-		echo " is present"
+	if ls "${section_01_dir}/pc_var_association_plot_${study_name}"*.pdf >/dev/null 2>&1; then
+    	echo "The pc_var_association plot is present"
 	else
-		echo "Problem: The scatter plot of predicted age vs chronological age is absent"
-		exit 1
+    	echo "Problem: The pc_var_association plot is absent"
+    	exit 1
 	fi
 
+	if ls "${section_01_dir}/pc_var_association_plot_${study_name}"*.pdf >/dev/null 2>&1; then
+    	echo "The pc_var_association plot is present"
+	else
+    	echo "Problem: The pc_var_association plot is absent"
+    	exit 1
+	fi
+
+	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.pdf" ]; then
+		echo "Edited phenotypes summary Rdata file is present"
+	else
+		echo "Problem: Edited phenotypes summary Rdata file is absent"
+		exit 1
+	fi
 }
 
 check_results_01d () {
@@ -178,7 +205,6 @@ check_results_01d () {
 		echo "Problem: filtered positive control file is absent"
 		exit 1
     fi
-
 	
 	echo "Filtered positive control file is present: ${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv"
     while IFS=$'\t' read -r positive_control_cpg _; do
@@ -218,7 +244,7 @@ check_results_01d () {
             echo "positive control ${positive_control_cpg} no cis chromosome QQ plot present"
         else
             echo "Problem: positive control ${positive_control_cpg} no cis chromosome QQ plot file not present"
-	exit 1
+			exit 1
         fi
 
         # negative control corresponding name: NEG_${positive_control_cpg}
