@@ -3,7 +3,6 @@
 source resources/setup.sh "$@"
 set -- $concatenated
 
-exec &> >(tee ${section_01_logfiles})
 exec &> >(tee ${section_01a_logfiles})
 print_version
 
