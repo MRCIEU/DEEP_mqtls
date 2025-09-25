@@ -15,6 +15,13 @@ check_results_01a () {
 		echo "Age distribution plot file is absent."
 		exit 1
 	fi
+
+	if [ -f "${snpchrtxt}" ] && [ -f "${snpchrpdf}" ]; then
+		echo "SNP chromosome distribution files present"
+	else
+		echo "SNP chromosome distribution files are absent."
+		exit 1
+	fi
 }
 
 check_results_01b () {
@@ -33,11 +40,18 @@ check_results_01b () {
 		exit 1
 	fi
 
-	if [ -f "${section_01_dir}/easyQC_topmed.multi.AFCHECK.png" ]; then
-		echo "easyQC plot present"
+	if [ -f "${section_01_dir}/${study_name}_globalPCA.png" ]; then
+		echo "Global PCA plot present"
 	else
-		echo "Problem: easyQC plot is absent"
+		echo "Problem: Global PCA plot is absent"
 		exit 1
+	fi
+
+	if [ -f "${section_01_dir}/easyQC_topmed.multi.AFCHECK.png" ] && [ -f "${section_01_dir}/easyQC_topmed.rep" ]; then
+    	echo "easyQC plot and results present"
+	else
+    	echo "Problem: easyQC plot or results are absent"
+    	exit 1
 	fi
 
 	if [ -f "${section_01_dir}/data.afreq.gz" ]; then
@@ -59,6 +73,19 @@ check_results_01b () {
 	else
 		echo "Problem: Imputation quality file is absent"
 		exit 1
+	fi
+
+	if [ -f "${home_directory}/processed_data/genetic_data/data.smiss.gz" ]; then
+		echo "Sample missingness file present in processed_data folder"
+	else
+		echo "Problem: Sample missingness file is absent"
+		exit 1
+	fi
+	
+	# confirm that sample missingness file is not in section_01_dir
+	if [ -f "${section_01_dir}/data.smiss.gz" ]; then
+    echo "Problem: Sample missingness file is still in section_01_dir (${section_01_dir}), please delete it manually"
+    exit 1
 	fi
 
 }
@@ -128,8 +155,6 @@ check_results_01c () {
 	fi
 
 }
-
-# ...existing code...
 
 check_results_01d () {
 
