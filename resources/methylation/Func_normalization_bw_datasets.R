@@ -51,11 +51,11 @@ load_new_var <- function(file) {
 
 if (stage == "expand") {
   message("Loading original qc.objects")
-  qc.object.ori <- load_new_var(paste0(home_path, "/processed_data/methylation_data/", study_name, "qc_objects.rda"))
+  qc.object.ori <- load_new_var(paste0(home_path, "/processed_data/methylation_data/", study_name, ".qc_objects.rda"))
 
   message("Loading normalized shrunk objects")
   message("Please put the file from DEEP server in the input folder")
-  dat.norms <- load_new_var(paste0(home_path, "/input_data/", study_name, "_objects.rda"))
+  dat.norms <- load_new_var(paste0(home_path, "/input_data/", study_name, ".norms.rda"))
 
   norm.objects <- mapply(meffil.expand.norm.object, dat.norms, qc.object.ori, SIMPLIFY=F)
   message("Information restored")
