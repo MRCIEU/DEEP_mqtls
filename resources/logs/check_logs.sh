@@ -63,6 +63,33 @@ compare_version () {
 
 }
 
+check_logs_01c () {
+    local log_dir="${section_01_dir}/01/logs_c"
+    local log_files=(${log_dir}/log*.txt)
+
+    # define 7 chunks
+    local chunks=("methy_outlier" "check_phenotype" "predict_age_smoking" "cell_counts" "ewas" "meth_pcs" "combine_covariates")
+    local success_count=0
+    
+    for chunk in "${chunks[@]}"; do
+        local pattern="Successfully completed script 01c $chunk chunk"
+        if grep -q "$pattern" "${log_files[@]}"; then
+            ((success_count++))
+        else
+            echo "Missing success for $chunk"
+        fi
+    done
+    
+    echo "Successful chunks: $success_count/${#chunks[@]}"
+    
+    if [ $success_count -eq ${#chunks[@]} ]; then
+        echo "01c-check_phenotypes_and_methylation.sh completed successfully."
+    else
+        echo "Problem: 01c-check_phenotypes_and_methylation.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
+        exit 1
+    fi
+}
+
 check_logs_01 () {
 
 	compare_version "01a"
@@ -82,13 +109,8 @@ check_logs_01 () {
 	fi
 
 	compare_version "01c"
-	if grep -i -q "success" ${section_01c_logfile}; then
-		echo "01c-check_phenotypes_and_methylation.sh completed successfully."
-	else
-		echo "Problem: 01c-check_phenotypes_and_methylation.sh did not complete successfully"
-		exit 1
-	fi
-
+	check_logs_01c
+	
 	compare_version "01d"
 	if grep -i -q "success" ${section_01d_logfile}; then
 		echo "01d-mqtl_controls.sh completed successfully."
