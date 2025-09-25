@@ -7,7 +7,7 @@ checkFirstArg () {
 	local e
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo $"Error: $1 is not a valid section identifier"
-	echo $"Need to specify a value from 01,02,03"
+	echo $"Need to specify a value from 01"
 	echo $"Usage: $0 <pipeline section> {check|upload}"
 	exit 1
 }
@@ -24,7 +24,7 @@ checkSecondArg () {
 source resources/logs/check_logs.sh
 source resources/logs/check_results.sh
 
-sections=("01" "02" "03")
+sections=("01")
 checkFirstArg "$1" "${sections[@]}"
 
 actions=("check" "upload")
@@ -41,7 +41,7 @@ eval "check_results_$1"
 echo ""
 echo "Section $1 has been successfully completed!"
 
-if [[ "$2" = "upload" && ( $1 = "01" || $1 = "02" || $1 = "03" ) ]]
+if [[ "$2" = "upload" && ( $1 = "01" ) ]]
 then
 
 	echo ""
@@ -162,90 +162,5 @@ sftp $port -oIdentityFile=$key ${sftp_username}@${sftp_address}:${sftp_path} <<E
 EOF
 
 fi
-
-fi
-
-
-if [[ "$2" = "upload" && $1 = "09" ]]
-then
-
-  vect_PRS=$(grep "PRS" ${scripts_directory}/resources/parameters | grep "weights" | awk -F"_" '{print $2}' |tr "\n" " ")
-	
-  cd ${section_09_dir}
-
-  for PRS in $vect_PRS
-  do
-
-    pheno_for_PRS=phenotypes_${PRS}
-    pheno_desc_PRS=phenotype_${PRS}_PRS_descriptives
-
-	  echo ""
-	  echo "Tarring results and log files for ${PRS} PRS"
-	  echo ""
- 
-    if [[ ${!pheno_for_PRS} != "NULL" ]]
-    then
-
-      tar -zcf PRS_${PRS}_${study_name}.tgz ./${PRS}/* ${!pheno_desc_PRS}
-  
-    else
-
-      tar -zcf PRS_${PRS}_${study_name}.tgz ./${PRS}/*
-
-    fi
-
-    echo ""
-    echo "Generating md5 checksum for ${PRS} PRS"
-    echo ""
-
-	  md5sum PRS_${PRS}_${study_name}.tgz > PRS_${PRS}_${study_name}.tgz.md5sum
-
-    echo ""
-	  echo "Encrypting files for ${PRS} PRS"
-    echo ""
-
-	  gpg --output PRS_${PRS}_${study_name}.tgz.gpg --symmetric --cipher-algo AES256 PRS_${PRS}_${study_name}.tgz
-
-  done
-
-  rm PRS*.tgz
-  
-  echo ""
-  echo "Your results are now ready for upload in ${section_09_dir}"
-  echo "Please upload .gpg and .md5sum files to google drive following the instructions in the wiki"
-  echo "You have successfully run the pipeline, thank you so much! :)"
-  echo ""
-
-fi
-
-
-if [[ "$2" = "upload" && $1 = "14" ]]
-then
-	sftp_username=${sftp_username_nc866}
-	sftp_address=${sftp_address_nc866}
-	sftp_path=${sftp_path_nc866}
-	suff="tgz"
-	flags="czf"
-	
-	echo ""
-	echo "Tarring results and log files"
-
-	tar ${flags} ${home_directory}/results/${study_name}_${1}.${suff} ${home_directory}/results/${1}
-	echo "Successfully created results archives"
-	echo "Generating md5 checksum"
-	md5sum ${home_directory}/results/${study_name}_${1}.${suff} > ${home_directory}/results/${study_name}_${1}.md5sum
-	echo "Encrypting files"
-	gpg --output ${home_directory}/results/${study_name}_${1}.${suff}.aes --symmetric --cipher-algo AES256 ${home_directory}/results/${study_name}_${1}.${suff}
-
-read -s -p "Ready to upload? Press enter to continue: " anykey
-echo ""
-read -s -p "Enter SFTP password: " mypassword
-
-curl -k -u ${sftp_username}:${mypassword} -T ${home_directory}/results/config/${study_name}_config.tar.aes "${sftp_address}/${sftp_path}/${study_name}_${1}._config.tar.aes" 
-curl -k -u ${sftp_username}:${mypassword} -T ${home_directory}/results/config/${study_name}_config.md5sum "${sftp_address}/${sftp_path}/${study_name}_${1}._config.md5sum"
-curl -k -u ${sftp_username}:${mypassword} -T ${home_directory}/results/${study_name}_${1}.${suff}.aes "${sftp_address}/${sftp_path}/${study_name}_${1}.${suff}.aes" 
-curl -k -u ${sftp_username}:${mypassword} -T ${home_directory}/results/${study_name}_${1}.md5sum "${sftp_address}/${sftp_path}/${study_name}_${1}.md5sum" <<EOF
-
-EOF
 
 fi
