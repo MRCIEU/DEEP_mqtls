@@ -446,6 +446,7 @@ ${plink2} \
 
 gzip -f -c ${quality_scores} > ${section_01_dir}/data.info.gz
 gzip ${section_01_dir}/data.hardy
+echo "Moving smiss file to processed_data/genetic_data"
 mv ${section_01_dir}/data.smiss ${home_directory}/processed_data/genetic_data/data.smiss
 gzip ${home_directory}/processed_data/genetic_data/data.smiss
 gzip ${section_01_dir}/data.vmiss
