@@ -259,15 +259,19 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       temp <- rbind(temp, summary_df)
       }
     }
+
+    temp$ci_lower <- ifelse(is.na(temp$se), NA, temp$estimate - 1.96 * temp$se)
+    temp$ci_upper <- ifelse(is.na(temp$se), NA, temp$estimate + 1.96 * temp$se)
     
-    pc_plot <- ggplot(temp, aes(x=var, y=estimate, fill=var)) +
-      #scale_fill_viridis(discrete = T) +  
-      geom_bar(stat = "identity", alpha = 0.5) +
-      scale_fill_manual(values = c("p < 0.05" = "#238A8DFF", "p ≥ 0.05" = "#FDE725FF")) +
-      geom_text(aes(label = signif(-log10(p), 3)), vjust = -0.3, size = 3) +
-      labs(title=paste0("PC",i),x="Variable", y="Estimate") +
-      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
-      ggtitle(i)
+    pc_plot <- ggplot(temp, aes(x = estimate, y = var)) +
+      geom_point(size = 3) +
+      geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+      geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+      labs(title = paste0("PC", i), x = "Estimate (95% CI)", y = "Variable") +
+      theme_minimal() +
+      theme(axis.text.y = element_text(size = 10),
+        plot.title = element_text(hjust = 0.5))
+
     pc_plotlist[[i]] <- pc_plot
     }
 
