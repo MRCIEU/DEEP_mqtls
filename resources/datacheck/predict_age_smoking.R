@@ -29,7 +29,6 @@ load(pheno_file)
 load(beta_file)
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
-print(head(pheno))
 norm.beta <- norm.beta[,participants]
 message("Number of samples with covariate and methylation data: ", length(participants))
 
