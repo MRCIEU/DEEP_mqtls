@@ -206,8 +206,3 @@ then
 	echo "Successfully completed script 01c combine_covariates chunk"
 
 fi
-
-if [ "$arg" = "all" ]
-then
-	echo "Successfully completed script 01c"
-fi
