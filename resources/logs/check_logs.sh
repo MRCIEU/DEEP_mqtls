@@ -93,7 +93,8 @@ check_logs_01c () {
 check_logs_01 () {
 
 	compare_version "01a"
-	if grep -i -q "success" ${section_01_logfile}; then
+	log_files=("${section_01_dir}/logs_a/log"*)
+    if [ ${#log_files[@]} -gt 0 ] && grep -i -q "success" "${log_files[@]}"; then
 		echo "01a-check_data.sh completed successfully."
 	else
 		echo "Problem: 01a-check_data.sh did not complete successfully"
