@@ -22,6 +22,13 @@ check_results_01a () {
 		echo "SNP chromosome distribution files are absent."
 		exit 1
 	fi
+
+	if [ -f "${quality_scores_plot}" ]; then
+		echo "Quality scores plot file present"
+	else
+		echo "Quality scores plot file is absent."
+		exit 1
+	fi
 }
 
 check_results_01b () {
@@ -154,15 +161,25 @@ check_results_01c () {
 		exit 1
 	fi
 
+	if [ -f "${section_01_dir}/meth_pcs_screen_plot" ]; then
+		echo " is present"
+	else
+		echo "Problem: The scatter plot of predicted age vs chronological age is absent"
+		exit 1
+	fi
+
 }
 
 check_results_01d () {
 
-    if [ ! -f "${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv" ]; then
-        echo "Problem: filtered positive control file is absent: ${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv"
-        exit 1
+    if [ -f "${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv" ]; then
+        echo "filtered positive control file is present"
+	else
+		echo "Problem: filtered positive control file is absent"
+		exit 1
     fi
 
+	
 	echo "Filtered positive control file is present: ${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv"
     while IFS=$'\t' read -r positive_control_cpg _; do
         [ -z "${positive_control_cpg}" ] && continue
