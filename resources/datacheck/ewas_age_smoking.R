@@ -134,7 +134,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   
   } else {
     # Run this command if 'Smoking_factor' column does not exist
-    print("Smoking_factor not found in phenotype dataframe. If you study has smoking data,
+    message("Smoking_factor not found in phenotype dataframe. If your study has smoking data,
     please ensure your phenotype dataframe has either Smoking_factor or Smoking_numeric")
   }
 
