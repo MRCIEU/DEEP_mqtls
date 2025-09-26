@@ -16,7 +16,7 @@ check_results_01a () {
 		exit 1
 	fi
 
-	if [ -f "${snpchrtxt}" ] && [ -f "${snpchrpdf}" ]; then
+	if [ -f "${snpchrtxt}" ] && [ -f "${snpchrplot}" ]; then
 		echo "SNP chromosome distribution files present"
 	else
 		echo "SNP chromosome distribution files are absent."
@@ -33,8 +33,7 @@ check_results_01a () {
 	if [ -f "${sex_pred_plot}" ]; then
 		echo "Sex prediction plot file present"
 	else
-		echo "Sex prediction plot file is absent."
-		exit 1
+		echo "Sex prediction plot file is absent. Please check that the samples are of a single sex (e.g., all male or all female)."
 	fi
 }
 
@@ -113,10 +112,10 @@ check_results_01c () {
 		exit 1
 	fi
 
-    if [ -f "${section_01_dir}/cohort_descriptives_commonids.RData" ]; then
-		echo "cohort_descriptives_commonids.RData is present"
+    if [ -f "${section_01_dir}/cohort_descriptives_was.RData" ]; then
+		echo "cohort_descriptives_was.RData is present"
 	else
-		echo "Problem: cohort_descriptives_commonids.RData is absent"
+		echo "Problem: cohort_descriptives_was.RData is absent"
 		exit 1
 	fi
 
@@ -138,7 +137,6 @@ check_results_01c () {
     	echo "Problem: ori correlation plot is absent"
     	exit 1
 	fi
-
 	if [ ! -f "${section_01_dir}/cor_plot_comb.pdf" ]; then
     	echo "Problem: combined correlation plot is absent"
     	exit 1
@@ -161,24 +159,17 @@ check_results_01c () {
    		fi
 	fi
 
-	if [ -f "${smoking_pred_plot}" ]; then
-		echo "Smoking prediction plot is present"
+	if [ -f "${age_smoking_prediction_plot}"*.jpg ]; then
+		echo "Smoking and age prediction plot is present"
 	else
-		echo "Problem: Smoking prediction plot file not present"
+		echo "Problem: Smoking and age prediction plot file not present"
 		exit 1
 	fi
 
-	if [ -f "${section_01_dir}/age_prediction_correlation.png" ]; then
-		echo "The matrix correlation plot among predicted age, age acceleration residuals, and chronological age is present"
+	if ls "${meth_pcs_scree_plot}"*.pdf >/dev/null 2>&1 && ls "${meth_pcs_PC1PC2_plot}"*.pdf >/dev/null 2>&1 && ls "${meth_pcs_PC3PC4_plot}"*.pdf >/dev/null 2>&1; then
+    	echo "The meth PCs plots are present"
 	else
-		echo "Problem: The matrix correlation plot of predicted age is absent"
-		exit 1
-	fi
-
-	if ls "${section_01_dir}/pc_var_association_plot_${study_name}"*.pdf >/dev/null 2>&1; then
-    	echo "The pc_var_association plot is present"
-	else
-    	echo "Problem: The pc_var_association plot is absent"
+    	echo "Problem: One or more of the meth PCs plots are absent"
     	exit 1
 	fi
 
@@ -189,24 +180,37 @@ check_results_01c () {
     	exit 1
 	fi
 
-	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.pdf" ]; then
-		echo "Edited phenotypes summary Rdata file is present"
+	if ls "${qc1_ewas_stats}"* >/dev/null 2>&1; then
+    	echo "EWAS stats file present"
 	else
-		echo "Problem: Edited phenotypes summary Rdata file is absent"
-		exit 1
+    	echo "Problem: EWAS stats file is absent"
+    	exit 1
+	fi
+
+	if ls "${qc1_ewas_report}"* >/dev/null 2>&1; then
+    	echo "EWAS report file present"
+	else
+    	echo "Problem: EWAS report file is absent"
+    	exit 1
+	fi
+
+	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
+    	echo "Raw and edited phenotypes summary files are present"
+	else
+    	echo "Problem: One or more raw and edited phenotypes summary files are absent"
+    	exit 1
 	fi
 }
 
 check_results_01d () {
 
     if [ -f "${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv" ]; then
-        echo "filtered positive control file is present"
+        echo "Filtered positive control file is present in processed_data folder"
 	else
-		echo "Problem: filtered positive control file is absent"
+		echo "Problem: filtered positive control file is absent in processed_data folder"
 		exit 1
     fi
 	
-	echo "Filtered positive control file is present: ${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv"
     while IFS=$'\t' read -r positive_control_cpg _; do
         [ -z "${positive_control_cpg}" ] && continue
 
@@ -308,4 +312,12 @@ check_results_01e () {
             exit 1
         fi
     done
+}
+
+check_results_01 () {
+	check_results_01a
+	check_results_01b
+	check_results_01c
+	check_results_01d
+	check_results_01e
 }
