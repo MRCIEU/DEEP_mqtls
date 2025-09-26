@@ -180,8 +180,8 @@ then
 		${study_name} \
 		${pcs_all} \
 		${meth_pcs_scree_plot} \
-		${meth_pcs_screePC1PC2_plot} \
-		${meth_pcs_screePC3PC4_plot} \
+		${meth_pcs_PC1PC2_plot} \
+		${meth_pcs_PC3PC4_plot} \
 		${pc_var_association_plot} \
 		${scripts_directory} \
 		${study_specific_vars}
