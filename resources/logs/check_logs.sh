@@ -42,39 +42,52 @@ vercomp () {
 
 compare_version () {
 
-    logfile="section_${1}_logfile"
-    version_used=$(grep "DEEP version" ${!logfile}* | head -n 1 | cut -d " " -f 3)
-	if [ "${version_used}" = "" ]
-	then
-		echo ""
-		echo "WARNING"
-		echo "No version number found. You are probably running an old version of git."
-		echo "The scripts you used could be out of date."
-		echo "Please run 'git pull' and check that no updates were made to the ${1} script you are checking."
-		echo "If updates were made then please re-run this ${1} script."
-		echo ""
-		return 0
-	fi
+    section=$1
+    suffix=${section: -1}
+    log_dir="${section_01_dir}/logs_${suffix}"
+    log_file=$(ls -1t "${log_dir}/log"* 2>/dev/null | head -n 1)
 
-	version_required=$(grep "section_${1}" resources/logs/versions.txt | cut -d " " -f 2)
-	echo "Version required: ${version_required}"
-	echo "Version used: ${version_used}"
-	vercomp ${version_used} ${version_required}
+    if [ -z "$log_file" ]; then
+        echo ""
+        echo "WARNING"
+        echo "No logfile found in ${log_dir}"
+        echo "Please run 'git pull' and check that no updates were made to the ${section} script you are checking."
+        echo "If updates were made then please re-run this ${section} script."
+        echo ""
+        return 0
+    fi
 
+    version_used=$(grep "DEEP version" "$log_file" | head -n 1 | cut -d " " -f 3)
+    if [ -z "$version_used" ]; then
+        echo ""
+        echo "WARNING"
+        echo "No version number found in logfile: $log_file"
+        echo "The scripts you used could be out of date."
+        echo "Please run 'git pull' and check that no updates were made to the ${section} script you are checking."
+        echo "If updates were made then please re-run this ${section} script."
+        echo ""
+        return 0
+    fi
+
+    version_required=$(grep "section_${section}" resources/logs/versions.txt | cut -d " " -f 2)
+    echo "Version required: ${version_required}"
+    echo "Version used:    ${version_used}"
+    vercomp ${version_used} ${version_required}
 }
 
 check_logs_01c () {
-    local log_dir="${section_01_dir}/01/logs_c"
+    local log_dir="${section_01_dir}/logs_c"
     local log_files=(${log_dir}/log*.txt)
 
     # define 7 chunks
     local chunks=("methy_outlier" "check_phenotype" "predict_age_smoking" "cell_counts" "ewas" "meth_pcs" "combine_covariates")
     local success_count=0
-    
+
     for chunk in "${chunks[@]}"; do
         local pattern="Successfully completed script 01c $chunk chunk"
+		echo "Checking for pattern: $pattern"
         if grep -q "$pattern" "${log_files[@]}"; then
-            ((success_count++))
+        	success_count=$((success_count + 1))
         else
             echo "Missing success for $chunk"
         fi
