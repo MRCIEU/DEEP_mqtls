@@ -57,7 +57,7 @@ compare_version () {
         return 0
     fi
 
-    version_used=$(grep "DEEP version" "$log_file" | head -n 1 | cut -d " " -f 3)
+    version_used=$(grep "DEEP version" "$log_file" | head -n 1 | sed 's/.*DEEP version \([0-9.]*\).*/\1/')
     if [ -z "$version_used" ]; then
         echo ""
         echo "WARNING"
