@@ -445,12 +445,13 @@ ${plink2} \
 	--out ${section_01_dir}/data
 
 gzip -f -c ${quality_scores} > ${section_01_dir}/data.info.gz
-gzip ${section_01_dir}/data.hardy
+gzip -f ${section_01_dir}/data.hardy
+gzip -f ${section_01_dir}/data.smiss
+gzip -f ${section_01_dir}/data.vmiss
+gzip -f ${section_01_dir}/data.afreq
+
 echo "Moving smiss file to processed_data/genetic_data"
-mv ${section_01_dir}/data.smiss ${home_directory}/processed_data/genetic_data/data.smiss
-gzip ${home_directory}/processed_data/genetic_data/data.smiss
-gzip ${section_01_dir}/data.vmiss
-gzip ${section_01_dir}/data.afreq
+mv ${section_01_dir}/data.smiss.gz ${home_directory}/processed_data/genetic_data/data.smiss.gz
 
 # Check missingness
 missingness=`zcat ${home_directory}/processed_data/genetic_data/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
