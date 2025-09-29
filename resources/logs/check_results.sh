@@ -97,8 +97,9 @@ check_results_01b () {
 	
 	# confirm that sample missingness file is not in section_01_dir
 	if [ -f "${section_01_dir}/data.smiss.gz" ]; then
-    echo "Problem: Sample missingness file is still in section_01_dir (${section_01_dir}), please delete it manually"
-    exit 1
+    	echo "ERROR: Sample missingness file 'data.smiss.gz' is still in ${section_01_dir}."
+    	echo "Please move it to 'processed_data/genetic_data' and delete it from the results folder manually."
+    	exit 1
 	fi
 
 }
