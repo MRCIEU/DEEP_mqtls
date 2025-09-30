@@ -54,8 +54,12 @@ if (stage == "expand") {
   qc.object.ori <- load_new_var(paste0(home_path, "/processed_data/methylation_data/", study_name, ".qc_objects.rda"))
 
   message("Loading normalized shrunk objects")
-  message("Please put the file from DEEP server in the input folder")
-  dat.norms <- load_new_var(paste0(home_path, "/input_data/", study_name, ".norms.rda"))
+  file_path <- paste0(home_path, "/input_data/", study_name, ".norms.rda")
+  if (!file.exists(file_path)) {
+    message("File not found: ", file_path, ". Please place your norms.rda file in the input folder.")
+    stop("Do not proceed Module 01f Step 2 until you have received the cross-cohort normalized quantiles from Bristol.")
+  }
+  dat.norms <- load_new_var(file_path)
 
   norm.objects <- mapply(meffil.expand.norm.object, dat.norms, qc.object.ori, SIMPLIFY=F)
   message("Information restored")
