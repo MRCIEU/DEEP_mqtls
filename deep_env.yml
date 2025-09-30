@@ -57,6 +57,9 @@ dependencies:
   - cxx-compiler
   - openjdk=11.*
   - git
+  - sshpass
+  - pinentry
+  - gnupg
   - pip
   - pip:
       - hail==0.2.135
