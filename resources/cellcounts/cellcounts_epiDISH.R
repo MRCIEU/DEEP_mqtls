@@ -50,7 +50,7 @@ for(ref in names(refs)) {
   } else if (ref == "zheng") {
     print(paste0("Using reference: ", ref))
     out.e <- hepidish(beta.m = norm.beta, ref1.m = centEpiFibIC.m, ref2.m = centBloodSub.m, h.CT.idx = 3, method = 'RPC')
-    cellcounts <- as.data.frame(out.e$estF)
+    cellcounts <- as.data.frame(out.e)
     # rownames of IID become the first column
     cellcounts <- as.data.frame(setDT(cellcounts, keep.rownames = "IID"))
     colnames(cellcounts) <- ifelse(
