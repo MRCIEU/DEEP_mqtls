@@ -181,19 +181,44 @@ check_results_01c () {
     	exit 1
 	fi
 
-	if ls "${qc1_ewas_stats}"* >/dev/null 2>&1; then
-    	echo "EWAS stats file present"
-	else
-    	echo "Problem: EWAS stats file is absent"
-    	exit 1
-	fi
+	shopt -s nullglob
+    ewas_stats_files=( "${qc1_ewas_stats}"* )
+    shopt -u nullglob
+    if [ ${#ewas_stats_files[@]} -gt 0 ]; then
+        echo "EWAS stats files present (${#ewas_stats_files[@]}):"
+        for f in "${ewas_stats_files[@]}"; do
+            printf '  %s\n' "${f##*/}"
+        done
+    else
+        echo "Problem: EWAS stats file is absent"
+        exit 1
+    fi
 
-	if ls "${qc1_ewas_report}"* >/dev/null 2>&1; then
-    	echo "EWAS report file present"
-	else
-    	echo "Problem: EWAS report file is absent"
-    	exit 1
-	fi
+    shopt -s nullglob
+    ewas_report_files=( "${qc1_ewas_report}"* )
+    shopt -u nullglob
+    if [ ${#ewas_report_files[@]} -gt 0 ]; then
+        echo "EWAS report files present (${#ewas_report_files[@]}):"
+        for f in "${ewas_report_files[@]}"; do
+            printf '  %s\n' "${f##*/}"
+        done
+    else
+        echo "Problem: EWAS report file is absent"
+        exit 1
+    fi
+
+	shopt -s nullglob
+    cell_count_scree_files=( "${cell_count_scree_plot}"* )
+    shopt -u nullglob
+    if [ ${#cell_count_scree_files[@]} -gt 0 ]; then
+        echo "Cell count scree files present (${#cell_count_scree_files[@]}):"
+        for f in "${cell_count_scree_files[@]}"; do
+            printf '  %s\n' "${f##*/}"
+        done
+    else
+        echo "Problem: Cell count scree file is absent"
+        exit 1
+    fi
 
 	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
     	echo "Raw and edited phenotypes summary files are present"
