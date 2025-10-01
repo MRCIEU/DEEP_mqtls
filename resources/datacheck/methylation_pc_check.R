@@ -138,43 +138,54 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
   test_pc_vars <- c("Age_numeric", "Sex_factor", "Population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
+  if ("Slide_factor" %in% names(pcs)) {
+  pcs$Slide_factor <- as.factor(pcs$Slide_factor)
+  }
   message(paste("Test PC vars are:", paste(test_pc_vars, collapse = ", ")))
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
   names(plot_pc1pc2_list) <- test_pc_vars
   plot_pc3pc4_list <- vector("list", length = length(test_pc_vars))
   names(plot_pc3pc4_list) <- test_pc_vars
-
+  
   for(i in test_pc_vars){
     if(is.numeric(pcs[,i])){
-      pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=i)) +
+      message(paste0("Plotting PC1 vs PC2 and PC3 vs PC4 coloured by continuous variable: ",i))
+      pc1pc2_plot <- ggplot(pcs, aes(x=PC1, y=PC2, color=.data[[i]])) +
         geom_point(size=1) + 
         scale_colour_viridis() +
         labs(title=paste0("PC1 vs PC2, ",i))+
         theme_bw() +
         theme(legend.position="none") 
-      pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=i)) +
+      pc3pc4_plot <- ggplot(pcs, aes(x=PC3, y=PC4, color=.data[[i]])) +
         geom_point(size=1) + 
         scale_colour_viridis() +
         labs(title=paste0("PC3 vs PC4, ",i))+
-        theme_bw() #+
-        #theme(legend.position="none") 
+        theme_bw() +
+        theme(legend.position="none") 
     
     } else {
-      pc1pc2_plot <- ggplot(pcs, aes_string(x="PC1", y="PC2", color=i)) +
-        geom_point(size=1) + 
-        scale_colour_viridis(discrete = T) +
-        labs(title=paste0("PC3 vs PC4, ",i))+
-        theme_bw() #+
-        #theme(legend.position="none")
-      pc3pc4_plot <- ggplot(pcs, aes_string(x="PC3", y="PC4", color=i)) +
-        geom_point(size=1) + 
-        scale_colour_viridis(discrete = T) +
-        labs(title=paste0("PC3 vs PC4, ",i))+
-        theme_bw() #+
-        #theme(legend.position="none")
-    }
-    plot_pc1pc2_list[[i]] <- pc1pc2_plot
-    plot_pc3pc4_list[[i]] <- pc3pc4_plot
+        message(paste0("Plotting PC1 vs PC2 and PC3 vs PC4 coloured by categorical variable: ", i))
+        n_levels <- length(unique(na.omit(pcs[[i]])))
+
+        pc1pc2_plot <- ggplot(pcs, aes(PC1, PC2, color = .data[[i]])) +
+          geom_point(size = 1) +
+          scale_colour_viridis(discrete = TRUE) +
+          labs(title = paste0("PC1 vs PC2, ", i)) +
+          theme_bw()
+        if (n_levels > 10) {
+          pc1pc2_plot <- pc1pc2_plot + theme(legend.position = "none")
+        }
+
+        pc3pc4_plot <- ggplot(pcs, aes(PC3, PC4, color = .data[[i]])) +
+          geom_point(size = 1) +
+          scale_colour_viridis(discrete = TRUE) +
+          labs(title = paste0("PC3 vs PC4, ", i)) +
+          theme_bw()
+        if (n_levels > 10) {
+          pc3pc4_plot <- pc3pc4_plot + theme(legend.position = "none")
+        }}
+      plot_pc1pc2_list[[i]] <- pc1pc2_plot
+      plot_pc3pc4_list[[i]] <- pc3pc4_plot
   }
 
   n_plot_rows <- ceiling(length(test_pc_vars)/4)
@@ -260,16 +271,20 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       }
     }
 
-    temp$ci_lower <- ifelse(is.na(temp$se), NA, temp$estimate - 1.96 * temp$se)
-    temp$ci_upper <- ifelse(is.na(temp$se), NA, temp$estimate + 1.96 * temp$se)
-    
-    pc_plot <- ggplot(temp, aes(x = estimate, y = var)) +
-      geom_point(size = 3) +
-      geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
-      geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
-      labs(title = paste0("PC", i), x = "Estimate (95% CI)", y = "Variable") +
-      theme_minimal() +
-      theme(axis.text.y = element_text(size = 10),
+    temp$ci_lower <- ifelse(is.na(temp$se), temp$estimate, temp$estimate - 1.96 * temp$se)
+    temp$ci_upper <- ifelse(is.na(temp$se), temp$estimate, temp$estimate + 1.96 * temp$se)
+
+pc_plot <- ggplot(temp, aes(x = estimate, y = var)) +
+  geom_point(size = 3) +
+  geom_errorbarh(
+    data = subset(temp, !is.na(ci_lower) & !is.na(ci_upper) & ci_lower != ci_upper),
+    aes(xmin = ci_lower, xmax = ci_upper),
+    height = 0.2
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = paste0("PC", i), x = "Estimate (95% CI)", y = "Variable") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 10),
         plot.title = element_text(hjust = 0.5))
 
     pc_plotlist[[i]] <- pc_plot
