@@ -34,6 +34,18 @@ print(paste0("Using reference matrices: ",paste(names(refs), collapse=", ")," fo
 
 cellcounts_total <- data.frame()
 
+# standardize predicted column names
+standardize_predicted_colnames <- function(data) {
+  new_names <- colnames(data)
+  # zheng: Neutro -> Neu, Eosino -> Eos
+  new_names <- sub("^zheng\\.Neutro$", "zheng.Neu", new_names)
+  new_names <- sub("^zheng\\.Eosino$", "zheng.Eos", new_names)
+  # middleton: large -> Epi
+  new_names <- sub("^middleton\\.large$", "middleton.Epi", new_names)
+  colnames(data) <- new_names
+  return(data)
+}
+
 for(ref in names(refs)) {
   if (ref %in% c("salas", "unilife")) {
     print(paste0("Using reference: ", ref))
@@ -58,7 +70,8 @@ for(ref in names(refs)) {
        paste0(ref, ".", colnames(cellcounts)),
       colnames(cellcounts)
     )
-    # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neutro] with prefix "zheng."
+    cellcounts <- standardize_predicted_colnames(cellcounts)
+    # colnames will be [Epi, Fib, B, NK, CD4T, CD8T, Mono, Neu, Eos] with prefix "zheng."
   } else if (ref == "meffil") {
     print(paste0("Using reference: ", ref))
     out.e <- meffil.estimate.cell.counts.from.betas(norm.beta, cell.type.reference = "saliva gse147318")
@@ -70,6 +83,7 @@ for(ref in names(refs)) {
        paste0("middleton.", colnames(cellcounts)),
       colnames(cellcounts)
     )
+    cellcounts <- standardize_predicted_colnames(cellcounts)
     # colnames will be [CD45pos, large] with prefix "middleton."
   }
 
@@ -80,6 +94,7 @@ for(ref in names(refs)) {
     cellcounts_total <- merge(cellcounts_total, cellcounts, by = "IID", all = TRUE)
   }
 }
+
 print(dim(cellcounts_total))
 #Check if the cellcounts could be calculated for every sample.
 cc_na <- table(apply(cellcounts_total, 1, anyNA))

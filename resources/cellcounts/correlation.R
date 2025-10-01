@@ -29,19 +29,6 @@ predicted<-read.table(cellcounts_cov, header=T)
 
 prefix <- c(unique(sub("\\..*", "", colnames(predicted)[grepl("\\.", colnames(predicted))])))
 
-# standardize predicted column names
-standardize_predicted_colnames <- function(data) {
-  new_names <- colnames(data)
-  # zheng: Neutro -> Neu, Eosino -> Eos
-  new_names <- sub("^zheng\\.Neutro$", "zheng.Neu", new_names)
-  new_names <- sub("^zheng\\.Eosino$", "zheng.Eos", new_names)
-  # middleton: large -> Epi
-  new_names <- sub("^middleton\\.large$", "middleton.Epi", new_names)
-  colnames(data) <- new_names
-  return(data)
-}
-predicted <- standardize_predicted_colnames(predicted)
-
 print(paste("Found prefixes in predicted cell counts:", paste(prefix, collapse = ", ")))
 
 # there are several situations:
