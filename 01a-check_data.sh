@@ -193,7 +193,7 @@ then
 
 
 	${R_directory}Rscript resources/datacheck/phenotypes_filecheck.R \
-		${covariates} \
+		${phenotypes} \
 		${meth_ids} \
 		${sorted_methylation} \
 		${study_specific_vars}
