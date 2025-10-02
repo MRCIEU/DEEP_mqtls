@@ -196,7 +196,8 @@ then
 		${phenotypes} \
 		${meth_ids} \
 		${sorted_methylation} \
-		${study_specific_vars}
+		${study_specific_vars} \
+		${phenotype_names}
 
 fi
 
