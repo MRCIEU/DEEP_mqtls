@@ -105,6 +105,8 @@ check_logs_01c () {
 
 check_logs_01 () {
 
+	exec &> >(tee ${section_01a_uploadlog})
+
 	compare_version "01a"
 	log_files=("${section_01_dir}/logs_a/log"*)
     if [ ${#log_files[@]} -gt 0 ] && grep -i -q "success" "${log_files[@]}"; then

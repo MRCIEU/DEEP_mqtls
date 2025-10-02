@@ -23,6 +23,7 @@ section_15_dir="${home_directory}/results/15"
 section_16_dir="${home_directory}/results/16"
 section_17_dir="${home_directory}/results/17"
 
+section_01a_uploadlog="${section_01_dir}/logs/log.txt"
 section_01a_logfile="${section_01_dir}/logs_a/log${timetemp}.txt"
 section_01b_logfile="${section_01_dir}/logs_b/log.txt"
 section_01c_logfile="${section_01_dir}/logs_c/log${timetemp}.txt"
