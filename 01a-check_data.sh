@@ -19,7 +19,7 @@ containsElement () {
 }
 
 arg="all"
-declare -a sections=('all' 'config' 'download' 'requirements' 'genetic' 'methylation' 'covariates' 'phenotypes' 'summary')
+declare -a sections=('all' 'config' 'download' 'requirements' 'genetic' 'methylation' 'covariates' 'phenotypes_for_ewas' 'phenotypes_for_PRS' 'summary')
 
 if [ -n "${1}" ]; then
 	arg="${1}"
@@ -185,6 +185,21 @@ then
 		${ageplot} \
 		${covariate_descriptives}
 fi
+
+if [ "$arg" = "phenotypes_for_ewas" ] || [ "$arg" = "all" ]
+then
+
+	section_message "phenotypes_for_ewas"
+
+
+	${R_directory}Rscript resources/datacheck/phenotypes_filecheck.R \
+		${covariates} \
+		${meth_ids} \
+		${sorted_methylation} \
+		${study_specific_vars}
+
+fi
+
 
 # if [ "$arg" = "covariates_for_PRS" ] || [ "$arg" = "all" ]
 # then
