@@ -115,7 +115,9 @@ then
 		"${cellcounts_cov}" \
 		"${cellcounts_plot}" \
 		"${cellcounts_summary}" \
-		"${scripts_directory}"
+		"${scripts_directory}" \
+		"${cell_count_scree_plot}" \
+		"${study_name}"
 
 	if [ "${measured_cellcounts}" != "NULL" ] && [ -f "${measured_cellcounts}" ]; then
 		echo "Comparing measured cellcounts with predicted ones"

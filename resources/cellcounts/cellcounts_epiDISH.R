@@ -3,6 +3,7 @@ suppressMessages(library(remotes))
 suppressMessages(library(EpiDISH))
 suppressMessages(library(meffil))
 suppressMessages(library(data.table))
+suppressMessages(library(stats))
 
 arguments <- commandArgs(T);
 
@@ -14,6 +15,8 @@ cellcounts_cov<-arguments[5];
 cellcounts_plot<-arguments[6];
 cellcounts_summary<-arguments[7];
 scripts_directory<-arguments[8];
+cell_count_scree_plot<-arguments[9];
+study_name<-arguments[10];
 
 # Predict cell counts.
 data(cent12CT.m);
@@ -86,6 +89,25 @@ for(ref in names(refs)) {
     cellcounts <- standardize_predicted_colnames(cellcounts)
     # colnames will be [CD45pos, large] with prefix "middleton."
   }
+  
+  pcs_input <- cellcounts[, setdiff(names(cellcounts), "IID"), drop = FALSE]
+  pcs_input[] <- lapply(pcs_input, as.numeric)
+  pcs <- prcomp(pcs_input, center = TRUE, scale. = TRUE)
+
+  pca.var <- pcs$sdev^2
+  pca.var.explained <- pca.var / sum(pca.var)
+  df <- data.frame(PC = 1:length(pca.var.explained),
+                   Variance = pca.var.explained)
+                   
+  p <- ggplot(df, aes(x = PC, y = Variance)) +
+    geom_line() +
+    geom_point() +
+    labs(title = paste("Cell count scree plot ",study_name,"; ",ref), x = "Principal Component", y = "Proportion of Variance Explained") +
+    theme_minimal()+
+    scale_x_continuous(breaks = seq(1, length(pca.var.explained), by = max(1, floor(length(pca.var.explained) / 5))))
+  pdf(file = paste0(cell_count_scree_plot,"_",study_name,"_",ref,".pdf"),width = 4, height = 5)
+  print(p)
+  dev.off()
 
   # Combine results
   if (nrow(cellcounts_total) == 0) {
