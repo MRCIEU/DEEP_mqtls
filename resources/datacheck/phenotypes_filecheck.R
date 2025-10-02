@@ -9,7 +9,7 @@ phenotype_file <- as.character(args[1]);
 meth_ids_file <- as.character(args[2]);
 sorted_methylation <- as.character(args[3]);
 study_specific_vars <- strsplit(args[4], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
-
+phenotype_names <- as.character(args[5])
 
 message("Checking phenotypes file: ", phenotype_file)
 pheno <- read.table(phenotype_file,header=T)
@@ -17,6 +17,9 @@ cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
 meth_ids <- scan(meth_ids_file, what="character")
+phenotypes <- read.csv(phenotype_names,header = F)
+phenotypes <- as.character(phenotypes[,1])
+
 #fam <- read.table(fam_file, header=FALSE, stringsAsFactors=FALSE)
 
 #commonids_mgc <- Reduce(intersect, list(meth_ids, pheno$IID, fam[,2]))
@@ -138,10 +141,28 @@ if(mean(pheno$Age_numeric, na.rm=T) > 100)
 
 n_overlap <- study_specific_vars%in%colnames(pheno)
 no_overlap <- setdiff(study_specific_vars, colnames(pheno))
-msg <- paste0("There were ",n_overlap," of ",length(study_specific_vars)," found in the phenotype file.
-              Missing were: ",no_overlap,"\n If you think you have included these variables, please check the spelling matches column names.")
+msg <- paste0("There were ",length(n_overlap)," of ",length(study_specific_vars)," study specific variables that were specified in the config file found in the phenotype file.
+              \nIf any were missing, these were: ",no_overlap,"\n please go back and add these to the config file.\n
+              If you think you have included these variables in the config file, please check the spelling matches column names.")
 errorlist <- c(errorlist, msg)
+warning("ERROR: ", msg)
 
+# check naming of phenotypes
+ # check infection and pollution separately as they will have unknown prefixes
+prefix_vars <- c("_infection_categorical","_pollution_numeric")
+any_prefix_vars <- grep("(_infection_categorical|_pollution_numeric)$", 
+                        colnames(pheno), 
+                      value = TRUE)
+phenotypes <- phenotypes[!phenotypes%in%prefix_vars]
+phenotypes <- c(phenotypes,"IID")
+no_overlap <- setdiff(colnames(pheno), phenotypes)
+no_overlap <- no_overlap[!no_overlap%in%any_prefix_vars]
+no_overlap <- no_overlap[!no_overlap%in%study_specific_vars]
+
+msg <- paste0("There were ",no_overlap," variables found in the phenotype file that do not match the specified names.
+              \nThese were: ",no_overlap,"\n Please check the spelling matches column names specified in the wiki (phenotype data section).")
+errorlist <- c(errorlist, msg)
+warning("ERROR: ", msg)
 
 
 message("\n\nCompleted checks\n")
