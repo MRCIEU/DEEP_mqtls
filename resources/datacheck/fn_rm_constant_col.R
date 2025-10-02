@@ -4,10 +4,10 @@ remove_constant_cols <- function(df, label, threshold = 0.0003) {
   col_sds <- sapply(df[cols_to_check], function(x) {
     if (is.numeric(x)) {
       sd(x, na.rm = TRUE)
-    } else if (is.factor(x)) {
-      if (nlevels(x) <= 1) {
+    } else if (is.factor(x)|| is.character(x)) {
+      if (length(unique(na.omit(x))) <= 1) {
         0
-      } else { # leave for T or F
+      } else {
         NA_real_
       }
     } else {
@@ -17,7 +17,7 @@ remove_constant_cols <- function(df, label, threshold = 0.0003) {
   
   low_sd_cols <- names(col_sds)[!is.na(col_sds) & col_sds <= threshold]
   
-  message("Detected low-variance columns in ", label, ": ",
+  message("Detected low-variance or single-value columns in ", label, ": ",
           ifelse(length(low_sd_cols) > 0, paste(low_sd_cols, collapse = ", "), "none"))
   
   if (length(low_sd_cols) > 0) {
