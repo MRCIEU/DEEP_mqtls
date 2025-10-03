@@ -49,7 +49,8 @@ echo "Checking positive control file"
 ${R_directory}Rscript resources/genetics/check_positive_controls.R \
     "${positive_control_file}" \
     "${filt_positive_control_file}" \
-    "${com_id}"
+    "${com_id}" \
+    "${methylation_no_outliers_gwas}"
 
 # Step 4: Loop through each positive control locus
 echo "Running positive controls"
