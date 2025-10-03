@@ -176,7 +176,7 @@ main = function(){
       man_data$correlation_abs <- abs(man_data[, beta_column])
       threshold_90 <- quantile(man_data$correlation_abs, probs = 0.9, na.rm = TRUE)
       man_data <- subset(man_data, correlation_abs > threshold_90)
-      pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=5, height=5)
+      pdf(file=paste0(outname, '_manhattan_beta.pdf'), width=25, height=5)
       manhattan(man_data, bp=names(man_data)[pos_column], 
                 chr=names(man_data)[chr_column],
                 snp=names(man_data)[snp_column],
