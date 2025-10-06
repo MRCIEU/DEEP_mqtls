@@ -20,19 +20,9 @@ meth_ids <- scan(meth_ids_file, what="character")
 phenotypes <- read.csv(phenotype_names,header = F)
 phenotypes <- as.character(phenotypes[,1])
 
-#fam <- read.table(fam_file, header=FALSE, stringsAsFactors=FALSE)
+participants <- as.character(intersect(meth_ids,pheno$IID))
+pheno <- pheno[pheno$IID%in%participants,]
 
-#commonids_mgc <- Reduce(intersect, list(meth_ids, pheno$IID, fam[,2]))
-#message("Number of samples with phenotype, methylation and genetic data: ", length(commonids_mgc))
-
-#if(sorted_methylation == "no"){
-#  if(length(commonids_mgc) < 100)
-#  {
-#    msg <- paste0("must have at least 100 individuals with phenotype, methylation and genetic data.")
-#    errorlist <- c(errorlist, msg)
-#    warning("ERROR: ", msg)
-#  }
-#}
 
 w <- which(names(pheno)[1] %in% c("IID"))
 if(w!=1)
@@ -41,13 +31,6 @@ if(w!=1)
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
 }
-
-#if(cov2<3)
-#{
-#  msg <- paste0("are there any phenotypes missing in the phenotypes file? Sex and Age are required")
-#  errorlist <- c(errorlist, msg)
-#  warning("ERROR: ", msg)
-#}
 
 g1<-grep("_factor",names(pheno))
 g2<-grep("_numeric",names(pheno))
@@ -110,11 +93,6 @@ if(! "Age_numeric" %in% names(pheno))
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
 }
-
-# pdf(age_distribution_plot, height=6, width=6)
-# hist(pheno$Age_numeric, breaks=50, xlab="Age", main=paste("age distribution (N=", length(which(!is.na(pheno$Age_numeric))),")",sep=""),cex.main=0.7)
-# null <- dev.off()
-
 
 if(any(is.na(pheno$Age_numeric)))
 {
@@ -179,15 +157,6 @@ if (length(no_overlap) > 0) {
 }
 
 message("\n\nCompleted checks\n")
-
-# message("Summary of data:\n")
-# for(i in 1:length(cohort_summary))
-# {
-#   a <- cohort_summary[[i]]
-#   if(is.numeric(a)) a <- round(a, 2)
-#   message(names(cohort_summary)[i], ": ", paste(a, collapse=", "))
-# }
-
 
 if(length(warninglist) > 0)
 {
