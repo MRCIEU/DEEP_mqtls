@@ -63,56 +63,44 @@ if(length(which(a>0.1*length(meth_ids))))
   warning("ERROR: ", msg)
 }
 
-if(! "Sex_factor" %in% names(pheno))
-{
-  msg <- paste0("There is no Sex_factor variable in the phenotype file. Please provide M/F values, even if they are all the same sex.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}else{
-  pheno <- read.table(phenotype_file,header=T,colClasses=c('Sex_factor'='factor'))
+# Sex_factor: coerce existing column, report unexpected values / missing
+if(! "Sex_factor" %in% names(pheno)) {
+  msg <- "There is no Sex_factor variable in the phenotype file. Please provide M/F values."
+  errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+} else {
+  pheno$Sex_factor <- as.character(pheno$Sex_factor)
+  bad_sex_vals <- setdiff(unique(na.omit(pheno$Sex_factor)), c("M","F"))
+  if (length(bad_sex_vals) > 0) {
+    msg <- paste0("There are values in Sex_factor that are neither M nor F: ", paste(bad_sex_vals, collapse=", "))
+    errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+  }
+  pheno$Sex_factor <- factor(pheno$Sex_factor, levels = c("M","F"))
+  if (any(is.na(pheno$Sex_factor))) {
+    msg <- "There are missing values in Sex_factor. Please ensure all individuals have M or F."
+    errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+  }
 }
 
-if(any(is.na(pheno$Sex_factor)))
-{
-  msg <- paste0("There are some missing values in the Sex_factor column. Please make sure all individuals have data for this column.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}
-
-index <- pheno$Sex_factor %in% c("M", "F")
-if(any(!index))
-{
-  msg <- paste0("There are some values in the Sex_factor column that are neither M nor F. Please make sure all individuals have data for this column.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}
-
-if(! "Age_numeric" %in% names(pheno))
-{
-  msg <- paste0("There is no Age_numeric variable in the phenotype file. Please provide age in years, even if they are all the same age.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}
-
-if(any(is.na(pheno$Age_numeric)))
-{
-  msg <- paste0("Some individuals don't have ages. Please make sure there are no missing values.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}
-
-if(any(pheno$Age_numeric < 0))
-{
-  msg <- paste0("Some negative values in the age column.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
-}
-
-if(mean(pheno$Age_numeric, na.rm=T) > 100)
-{
-  msg <- paste0("Average age is above 100, please make sure age is provided in years.")
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
+# Age_numeric: coerce to numeric safely and then check missing/negative/implausible
+if(! "Age_numeric" %in% names(pheno)) {
+  msg <- "There is no Age_numeric variable in the phenotype file."
+  errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+} else {
+  # coerce factor/character to numeric safely
+  pheno$Age_numeric <- as.numeric(as.character(pheno$Age_numeric))
+  # debug helpers (optional): message("NA in Age_numeric: ", sum(is.na(pheno$Age_numeric)))
+  if (any(is.na(pheno$Age_numeric))) {
+    msg <- "Some individuals don't have valid numeric ages. Please check Age_numeric values."
+    errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+  }
+  if (any(pheno$Age_numeric < 0, na.rm = TRUE)) {
+    msg <- "Some negative values in the age column."
+    errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+  }
+  if (mean(pheno$Age_numeric, na.rm = TRUE) > 100) {
+    msg <- "Average age is above 100, please make sure age is provided in years."
+    errorlist <- c(errorlist, msg); warning("ERROR: ", msg)
+  }
 }
 
 # check study specific vars
