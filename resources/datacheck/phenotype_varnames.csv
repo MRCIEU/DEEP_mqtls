@@ -9,7 +9,7 @@ Height_numeric
 Weight_numeric
 BMI_numeric
 SBP_numeric
-DPB_numeric
+DBP_numeric
 BWT_numeric
 Gestage_numeric
 Preterm_factor
