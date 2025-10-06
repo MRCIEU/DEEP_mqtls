@@ -111,9 +111,9 @@ if(! "Age_numeric" %in% names(pheno))
   warning("ERROR: ", msg)
 }
 
-pdf(age_distribution_plot, height=6, width=6)
-hist(pheno$Age_numeric, breaks=50, xlab="Age", main=paste("age distribution (N=", length(which(!is.na(pheno$Age_numeric))),")",sep=""),cex.main=0.7)
-null <- dev.off()
+# pdf(age_distribution_plot, height=6, width=6)
+# hist(pheno$Age_numeric, breaks=50, xlab="Age", main=paste("age distribution (N=", length(which(!is.na(pheno$Age_numeric))),")",sep=""),cex.main=0.7)
+# null <- dev.off()
 
 
 if(any(is.na(pheno$Age_numeric)))
@@ -141,11 +141,21 @@ if(mean(pheno$Age_numeric, na.rm=T) > 100)
 
 n_overlap <- study_specific_vars%in%colnames(pheno)
 no_overlap <- setdiff(study_specific_vars, colnames(pheno))
-msg <- paste0("There were ",length(n_overlap)," of ",length(study_specific_vars)," study specific variables that were specified in the config file found in the phenotype file.
-              \nIf any were missing, these were: ",no_overlap,"\n please go back and add these to the config file.\n
-              If you think you have included these variables in the config file, please check the spelling matches column names.")
-errorlist <- c(errorlist, msg)
-warning("ERROR: ", msg)
+
+msg_summary <- paste0("There were ", sum(n_overlap), " of ", length(study_specific_vars),
+                      " study specific variables that were specified in the config file found in the phenotype file.")
+errorlist <- c(errorlist, msg_summary)
+warning("ERROR: ", msg_summary)
+
+if (length(no_overlap) > 0) {
+  msg_missing <- paste0("The following study-specific variables were missing from the phenotype file: ",
+                        paste(no_overlap, collapse = ", "),
+                        ". Please add these to the config file or check spelling.")
+  errorlist <- c(errorlist, msg_missing)
+  warning("ERROR: ", msg_missing)
+} else {
+   message("All study-specific variables were found in the phenotype file.")
+}
 
 # check naming of phenotypes
  # check infection and pollution separately as they will have unknown prefixes
@@ -159,21 +169,24 @@ no_overlap <- setdiff(colnames(pheno), phenotypes)
 no_overlap <- no_overlap[!no_overlap%in%any_prefix_vars]
 no_overlap <- no_overlap[!no_overlap%in%study_specific_vars]
 
-msg <- paste0("There were ",no_overlap," variables found in the phenotype file that do not match the specified names.
+if (length(no_overlap) > 0) {
+  msg <- paste0("There were ",length(no_overlap)," variables found in the phenotype file that do not match the specified names.
               \nThese were: ",no_overlap,"\n Please check the spelling matches column names specified in the wiki (phenotype data section).")
-errorlist <- c(errorlist, msg)
-warning("ERROR: ", msg)
-
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+} else {
+  message("All phenotype names match those specified in the wiki (phenotype data section).")
+}
 
 message("\n\nCompleted checks\n")
 
-message("Summary of data:\n")
-for(i in 1:length(cohort_summary))
-{
-  a <- cohort_summary[[i]]
-  if(is.numeric(a)) a <- round(a, 2)
-  message(names(cohort_summary)[i], ": ", paste(a, collapse=", "))
-}
+# message("Summary of data:\n")
+# for(i in 1:length(cohort_summary))
+# {
+#   a <- cohort_summary[[i]]
+#   if(is.numeric(a)) a <- round(a, 2)
+#   message(names(cohort_summary)[i], ": ", paste(a, collapse=", "))
+# }
 
 
 if(length(warninglist) > 0)
