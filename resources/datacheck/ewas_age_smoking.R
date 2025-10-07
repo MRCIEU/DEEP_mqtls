@@ -17,6 +17,7 @@ study_specific_vars <- strsplit(arguments[9], " ")[[1]] # these will be added in
 
 suppressPackageStartupMessages(library(meffil))
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
+source(paste0(scripts_directory,"/resources/datacheck/fn_rm_highlycor.R"))
 
 message("Reading in data and matching up samples across files") #######################################
 load(updated_pheno_file)
@@ -59,6 +60,15 @@ if (length(unique(na.omit(pheno$Sex_factor))) < 2) {
   pheno$Sex_factor <- NULL
 }
 
+has_study_vars <- !(length(study_specific_vars) == 1 && is.na(study_specific_vars))
+make_covs <- function(base) {
+  if (has_study_vars) {
+    unique(c(base, celltypes, study_specific_vars))
+  } else {
+    unique(c(base, celltypes))
+  }
+}
+
 for (cellcount_panel in cellcount_panel_prefixes) {
   message("Running EWAS for cell count panel: ", cellcount_panel)
   pheno_panel <- pheno
@@ -66,8 +76,13 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # add cell counts to pheno_panel
   cell_counts_colnames <- grep(paste0("^", cellcount_panel, "\\."), colnames(cell_counts), value = TRUE)
   cellcounts_temp <- cell_counts[,c("IID",cell_counts_colnames)]
+
+  cellcounts_temp <- filter_correlated_cols(cellcounts_temp, setdiff(colnames(cellcounts_temp), "IID"), thresh = 0.9, method ="pearson")
+
   pheno_panel <- merge(pheno_panel, cellcounts_temp, by="IID")
 
+  message("Final phenotype dataframe columns: ", paste(colnames(pheno_panel), collapse = ", "))
+  
   message("Setting up EWAS") #######################################
 
   # 1. smoking ewas
@@ -76,7 +91,18 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # recode quantity into a factor if they don't have categories (0 = never, 1+= yes)
   # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
   # rather than pack-years or something
+  # smoking covariates
+  ewas_covars_smoking <- make_covs(c("Age_numeric", "Sex_factor"))
 
+  # age covariates
+  ewas_covars_age <- make_covs(c("Sex_factor", "p_smoking_mcigarette"))
+
+  # maternal smoking covariates
+  ewas_covars_mat_smoking <- make_covs(c("Age_numeric", "Sex_factor"))
+
+  # sex covariates
+  ewas_covars_sex <- make_covs(c("Age_numeric", "p_smoking_mcigarette"))
+  
   if ("Smoking_factor" %in% colnames(pheno_panel)) {
     message("Smoking_factor variable already exists.")
   } else if ("Smoking_numeric" %in% colnames(pheno_panel)) {
@@ -103,12 +129,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
                                           max.plots=10, ## plot at most 10 CpG sites
                                           qq.inflation.method="median",  ## measure inflation using median
                                           model="all") ## select default EWAS model; 
-
-  if (is.na(study_specific_vars)){
-    ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes) # need to update these var names?
-  } else{
-    ewas_covars_smoking <- c("Age_numeric","Sex_factor",celltypes,study_specific_vars) # need to update these var names?
-  }
 
   # QUESTION : might we need to stratify smoking EWAS by sex in some cohorts? - 
   # answer:No not at the moment
@@ -141,12 +161,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # 2. Age EWAS
 
   message("Starting age EWAS") #######################################
-
-  if (is.na(study_specific_vars)){
-      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
-  } else {
-      ewas_covars_age <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  }
 
   if ("Age_numeric" %in% colnames(pheno_panel)) {
     age_levels <- length(unique(na.omit(pheno_panel$Age_numeric)))
@@ -190,12 +204,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     sep = "\n"))
   }
 
-  if (is.na(study_specific_vars)){
-      ewas_covars_mat_smoking <- c("Sex_factor","p_smoking_mcigarette",celltypes) # need to update these var names
-  } else {
-      ewas_covars_mat_smoking <- c("Sex_factor","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  }
-
   message("Starting maternal smoking EWAS") #######################################
 
   if ("maternal_smoking_factor" %in% colnames(pheno_panel)) {
@@ -222,12 +230,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # 4. Sex EWAS
 
   message("Starting sex EWAS") #######################################
-
-  if (is.na(study_specific_vars)){
-    ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes) # need to update these var names
-  } else {
-    ewas_covars_sex <- c("Age_numeric","p_smoking_mcigarette",celltypes,study_specific_vars) # need to update these var names
-  }
 
   if ("Sex_factor" %in% colnames(pheno_panel)) {
     sex_levels <- length(unique(na.omit(pheno_panel$Sex_factor)))
