@@ -37,7 +37,7 @@ winsorized_phenotype_file <- as.character(arguments[9])
 ################
 
 message("Checking covariates file: ", phenotypes_file)
-pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character"))
+pheno <- read.table(phenotypes_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character", Slide_factor = "character", Row_factor = "character", Plate_factor = "character"))
 
 # We don't require all DNAm samples to have genetic data
 # we'll print out what the differential is here
