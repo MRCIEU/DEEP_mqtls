@@ -12,7 +12,7 @@ study_specific_vars <- strsplit(args[4], " ")[[1]] # these will be added in the 
 phenotype_names <- as.character(args[5])
 
 message("Checking phenotypes file: ", phenotype_file)
-pheno <- read.table(phenotype_file,header=T)
+pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F)
 cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
@@ -23,6 +23,32 @@ phenotypes <- as.character(phenotypes[,1])
 participants <- as.character(intersect(meth_ids,pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 
+# set all the numeric columns to numeric variables, and all the factors to factors
+# we've set stringsAsFactors = F so all the cols should currently be characters
+
+for (col_name in colnames(pheno)[!colnames(pheno)=="IID"]) {
+  if (grepl("_factor", col_name)) {
+    if(length(table(na.omit(pheno[[col_name]])))==nrow(pheno)){
+      msg <- paste0(col_name, " is specified as a factor but has the same number of levels as individuals")
+      errorlist <- c(errorlist, msg)
+      warning("ERROR: ", msg)
+    } else {
+      pheno[[col_name]] <- as.factor(pheno[[col_name]])
+    }
+  } else if (grepl("_numeric", col_name)) {
+    if(length(table(na.omit(pheno[[col_name]])))<nrow(pheno)){
+      msg <- paste0(col_name, " is specified as numeric but does not have differing values across all individuals. 
+                    \nThis may be expected because it is an integer, which is fine - but please check the variable.")
+      errorlist <- c(errorlist, msg)
+      warning("ERROR: ", msg)
+      pheno[[col_name]] <- as.numeric(pheno[[col_name]])
+      
+    } else {
+      pheno[[col_name]] <- as.numeric(pheno[[col_name]])
+    }
+    
+  }
+}
 
 w <- which(names(pheno)[1] %in% c("IID"))
 if(w!=1)
@@ -43,15 +69,15 @@ if(length(g)!=(cov2-1)){
 }
 
 
-for (i in 1:length(g1))
-{
-  if(length(table(na.omit(pheno[,g1[i]])))==(cov1))
-  {
-    msg <- paste0(g1[i], " is specified as a factor but has the same number of levels as individuals")
-    errorlist <- c(errorlist, msg)
-    warning("ERROR: ", msg)
-  }
-}
+#for (i in 1:length(g1))
+#{
+#  if(length(table(na.omit(pheno[,g1[i]])))==(cov1))
+#  {
+#    msg <- paste0(g1[i], " is specified as a factor but has the same number of levels as individuals")
+#    errorlist <- c(errorlist, msg)
+#    warning("ERROR: ", msg)
+#  }
+#}
 
 a <- apply(pheno,2,function(x) y<-length(which(is.na(x))))
 if(length(which(a>0.1*length(meth_ids))))
