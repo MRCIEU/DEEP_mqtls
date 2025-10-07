@@ -12,7 +12,7 @@ study_specific_vars <- strsplit(args[4], " ")[[1]] # these will be added in the 
 phenotype_names <- as.character(args[5])
 
 message("Checking phenotypes file: ", phenotype_file)
-pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character"))
+pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F)
 cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
@@ -32,6 +32,7 @@ for (col_name in colnames(pheno)[!colnames(pheno)=="IID"]) {
       msg <- paste0(col_name, " is specified as a factor but has the same number of levels as individuals")
       errorlist <- c(errorlist, msg)
       warning("ERROR: ", msg)
+      pheno[[col_name]] <- as.factor(pheno[[col_name]])
     } else {
       pheno[[col_name]] <- as.factor(pheno[[col_name]])
     }
