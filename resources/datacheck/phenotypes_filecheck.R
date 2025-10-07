@@ -12,7 +12,7 @@ study_specific_vars <- strsplit(args[4], " ")[[1]] # these will be added in the 
 phenotype_names <- as.character(args[5])
 
 message("Checking phenotypes file: ", phenotype_file)
-pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F)
+pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character"))
 cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
