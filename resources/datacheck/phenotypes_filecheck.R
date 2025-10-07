@@ -12,7 +12,7 @@ study_specific_vars <- strsplit(args[4], " ")[[1]] # these will be added in the 
 phenotype_names <- as.character(args[5])
 
 message("Checking phenotypes file: ", phenotype_file)
-pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F)
+pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F, colClasses = c(Sex_factor = "character", Slide_factor = "character", Row_factor = "character", Plate_factor = "character"))
 cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
@@ -135,10 +135,8 @@ if(! "Age_numeric" %in% names(pheno)) {
 n_overlap <- study_specific_vars%in%colnames(pheno)
 no_overlap <- setdiff(study_specific_vars, colnames(pheno))
 
-msg_summary <- paste0("There were ", sum(n_overlap), " of ", length(study_specific_vars),
+message("There were ", sum(n_overlap), " of ", length(study_specific_vars),
                       " study specific variables that were specified in the config file found in the phenotype file.")
-errorlist <- c(errorlist, msg_summary)
-warning("ERROR: ", msg_summary)
 
 if (length(no_overlap) > 0) {
   msg_missing <- paste0("The following study-specific variables were missing from the phenotype file: ",
