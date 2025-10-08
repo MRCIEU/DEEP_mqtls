@@ -22,8 +22,8 @@ meth_ids_file <- as.character(arguments[3]);
 raw_phenotype_distribution_plot <- as.character(arguments[4]);
 raw_phenotype_summary_file <- as.character(arguments[5])
 study_name <- arguments[6] # ${study_name} in bash
-edited_phenotype_distribution_plot <- as.character(arguments[7]);
-edited_phenotype_summary_file <- as.character(arguments[8])
+winzorised_phenotype_distribution_plot <- as.character(arguments[7]);
+winzorised_phenotype_summary_file <- as.character(arguments[8])
 # we'll save out the edited phenotype file as an Rdata file so we don't have to
 # do anything with the variables the next time we load them in
 #phenotype_outfile <- as.character(arguments[9])
@@ -200,14 +200,14 @@ for(i in numeric_phenos){
 n_plot_rows <- ceiling(length(numeric_phenos)/4)
 row_dimensions <- n_plot_rows*4
 
-jpeg(filename = paste0(edited_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+jpeg(filename = paste0(winzorised_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
 makeplots <- ggarrange(plotlist=plot_list, ncol = 4, nrow = n_plot_rows)
 annotate_figure(makeplots, top = text_grob(paste0(study_name,"; Winsorized phenotype distributions"), 
                                            color = "black", face = "bold", size = 14))
 print(makeplots)
 dev.off()
 
-save(summstats_list,file=paste0(edited_phenotype_summary_file,"_",study_name,".Rdata"))
+save(summstats_list,file=paste0(winzorised_phenotype_summary_file,"_",study_name,".Rdata"))
 
 save(pheno,file=paste0(winsorized_phenotype_file))
 
