@@ -90,7 +90,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   # Create PC matrix to test PC associations (probe.range means take that number of 
   # the most variable probes)
-  pcs <- meffil.methylation.pcs(norm.beta,probe.range=50000,full.obj=T)
+  pcs <- meffil.methylation.pcs(norm.beta,probe.range=10000,full.obj=T)
   # message("there are ",ncol(pcs)," PCs generated")
 
   # make scree plot
