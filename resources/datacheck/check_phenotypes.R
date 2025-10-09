@@ -97,7 +97,7 @@ for(i in phenotypes){
   if(is.numeric(pheno.temp[,i])){
     test <- ggplot() +
       geom_density(data=pheno.temp, aes_string(x=pheno.temp[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,", total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),"\n N of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno.temp[,i]))+
       theme_minimal()
     
@@ -106,7 +106,7 @@ for(i in phenotypes){
     test <- ggplot(data=pheno.temp, aes_string(x=pheno.temp[,i],fill=pheno.temp[,i])) +
       geom_bar()+
       scale_fill_viridis(discrete=T,begin=0,end=0.65)+
-      labs(title=paste0(i,", total N = ",nrow(pheno),",NAs = ",sum(is.na(pheno[,i]))),x=i)+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),"\n N of NAs = ",sum(is.na(pheno[,i]))),x=i)+
       theme_minimal()+
       theme(legend.position="none")+
       geom_text(stat='count', aes(label=..count..), color="black", vjust=-0.1)
@@ -179,7 +179,7 @@ for(i in numeric_phenos){
     # now re-plot and re-do summary stats
     test <- ggplot() +
       geom_density(data=pheno, aes_string(x=pheno[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,"\n, total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),":\n N of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno[,i]))+
       theme_minimal()
     plot_list[[i]] <- test
