@@ -14,5 +14,5 @@ merge <- merge(ids, a, by.x="IID", by.y="IID", sort=F)
 write.table(merge[, c("FID", "IID", cpg_id), with = FALSE],
             file = out_file,
             row.names = FALSE,
-            col.names = TRUE,
+            col.names = FALSE,
             quote = FALSE)
