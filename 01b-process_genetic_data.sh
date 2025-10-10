@@ -195,10 +195,13 @@ ${plink2} \
 # Create pedigree matrix if family data, otherwise remove related individuals from existing kinship and data file
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
+	# no removal of related samples
+	# value smaller than rel_cutoff will be set to 0
 	${R_directory}Rscript resources/relateds/grm_relateds.R ${grmfile_all} ${grmfile_relateds} ${rel_cutoff}
 	
 elif [ "${related}" = "no" ]; then
 	echo "Removing any cryptic relateds"
+	# removing cryptic related samples that have value higher than rel_cutoff from the GRM and the bfile
 	${gcta} \
 		--grm ${grmfile_all} \
 		--grm-cutoff ${rel_cutoff} \
