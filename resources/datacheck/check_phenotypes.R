@@ -22,8 +22,8 @@ meth_ids_file <- as.character(arguments[3]);
 raw_phenotype_distribution_plot <- as.character(arguments[4]);
 raw_phenotype_summary_file <- as.character(arguments[5])
 study_name <- arguments[6] # ${study_name} in bash
-edited_phenotype_distribution_plot <- as.character(arguments[7]);
-edited_phenotype_summary_file <- as.character(arguments[8])
+winzorised_phenotype_distribution_plot <- as.character(arguments[7]);
+winzorised_phenotype_summary_file <- as.character(arguments[8])
 # we'll save out the edited phenotype file as an Rdata file so we don't have to
 # do anything with the variables the next time we load them in
 #phenotype_outfile <- as.character(arguments[9])
@@ -97,7 +97,7 @@ for(i in phenotypes){
   if(is.numeric(pheno.temp[,i])){
     test <- ggplot() +
       geom_density(data=pheno.temp, aes_string(x=pheno.temp[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,", total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),"\n N of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno.temp[,i]))+
       theme_minimal()
     
@@ -106,7 +106,7 @@ for(i in phenotypes){
     test <- ggplot(data=pheno.temp, aes_string(x=pheno.temp[,i],fill=pheno.temp[,i])) +
       geom_bar()+
       scale_fill_viridis(discrete=T,begin=0,end=0.65)+
-      labs(title=paste0(i,", total N = ",nrow(pheno),",NAs = ",sum(is.na(pheno[,i]))),x=i)+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),"\n N of NAs = ",sum(is.na(pheno[,i]))),x=i)+
       theme_minimal()+
       theme(legend.position="none")+
       geom_text(stat='count', aes(label=..count..), color="black", vjust=-0.1)
@@ -179,7 +179,7 @@ for(i in numeric_phenos){
     # now re-plot and re-do summary stats
     test <- ggplot() +
       geom_density(data=pheno, aes_string(x=pheno[,i]), colour="#1F968BFF")+
-      labs(title=paste0(i,"\n, total N = ",nrow(pheno),":n of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
+      labs(title=paste0(i,"\n total N = ",nrow(pheno),":\n N of NAs=",sum(is.na(pheno[,i]))),x=i)+#,color="Legend")+
       geom_vline(xintercept = mean(pheno[,i]))+
       theme_minimal()
     plot_list[[i]] <- test
@@ -200,14 +200,14 @@ for(i in numeric_phenos){
 n_plot_rows <- ceiling(length(numeric_phenos)/4)
 row_dimensions <- n_plot_rows*4
 
-jpeg(filename = paste0(edited_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
+jpeg(filename = paste0(winzorised_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
 makeplots <- ggarrange(plotlist=plot_list, ncol = 4, nrow = n_plot_rows)
 annotate_figure(makeplots, top = text_grob(paste0(study_name,"; Winsorized phenotype distributions"), 
                                            color = "black", face = "bold", size = 14))
 print(makeplots)
 dev.off()
 
-save(summstats_list,file=paste0(edited_phenotype_summary_file,"_",study_name,".Rdata"))
+save(summstats_list,file=paste0(winzorised_phenotype_summary_file,"_",study_name,".Rdata"))
 
 save(pheno,file=paste0(winsorized_phenotype_file))
 

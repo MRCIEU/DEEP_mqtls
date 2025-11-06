@@ -26,28 +26,31 @@ pheno <- pheno[pheno$IID%in%participants,]
 # set all the numeric columns to numeric variables, and all the factors to factors
 # we've set stringsAsFactors = F so all the cols should currently be characters
 
-for (col_name in colnames(pheno)[!colnames(pheno)=="IID"]) {
-  if (grepl("_factor", col_name)) {
-    if(length(table(na.omit(pheno[[col_name]])))==nrow(pheno)){
+for (col_name in colnames(pheno)[colnames(pheno) != "IID"]) {
+  if (grepl("_factor$", col_name)) {
+    if (length(table(na.omit(pheno[[col_name]]))) == nrow(pheno)) {
       msg <- paste0(col_name, " is specified as a factor but has the same number of levels as individuals")
       errorlist <- c(errorlist, msg)
       warning("ERROR: ", msg)
-      pheno[[col_name]] <- as.factor(pheno[[col_name]])
-    } else {
-      pheno[[col_name]] <- as.factor(pheno[[col_name]])
     }
-  } else if (grepl("_numeric", col_name)) {
-    if(length(table(na.omit(pheno[[col_name]])))<nrow(pheno)){
-      msg <- paste0(col_name, " is specified as numeric but does not have differing values across all individuals. 
-                    \nThis may be expected because it is an integer, which is fine - but please check the variable.")
+    pheno[[col_name]] <- as.factor(pheno[[col_name]])
+  } else if (grepl("_numeric$", col_name)) {
+    unique_vals <- length(unique(na.omit(pheno[[col_name]])))
+    pct <- round(100 * unique_vals / max(1, nrow(pheno)), 1)
+    if (unique_vals < 0.01 * nrow(pheno)) {
+      msg <- paste0(col_name, " is specified as numeric but shows low variability: ",
+                    unique_vals, " unique non-missing values (", pct, "% of samples). ",
+                    "This can be expected for integer or coded categorical variables. ",
+                    "Please confirm the variable type; if it is categorical, consider renaming the header to '",
+                    sub("_numeric$", "_factor", col_name), "'")
       errorlist <- c(errorlist, msg)
-      warning("ERROR: ", msg)
-      pheno[[col_name]] <- as.numeric(pheno[[col_name]])
-      
-    } else {
-      pheno[[col_name]] <- as.numeric(pheno[[col_name]])
+      warning("WARN: ", msg)
     }
-    
+    pheno[[col_name]] <- as.numeric(pheno[[col_name]])
+  } else {
+    msg <- paste0(col_name, " does not have _factor or _numeric suffix in header")
+    warning("WARN: ", msg)
+    warninglist <- c(warninglist, msg)
   }
 }
 

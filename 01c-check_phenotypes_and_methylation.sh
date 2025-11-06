@@ -76,8 +76,8 @@ then
 		${raw_phenotype_distribution_plot} \
 		${raw_phenotype_summary_file} \
 		${study_name} \
-		${edited_phenotype_distribution_plot} \
-		${edited_phenotype_summary_file} \
+		${winzorised_phenotype_distribution_plot} \
+		${winzorised_phenotype_summary_file} \
 		${winsorized_phenotype_file} 
 
 	echo "Successfully completed script 01c check_phenotype chunk"

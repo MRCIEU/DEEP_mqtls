@@ -112,8 +112,8 @@ pc_cov <- quant_cov[, c("FID", "IID", intersect(pc_cols, colnames(quant_cov)))]
 all_pc_cols <- paste0("genetic_pc", 1:20)
 quant_cov_noPC <- quant_cov[, !(colnames(quant_cov) %in% all_pc_cols), drop = FALSE]
 
-write.table(quant_cov, file = qcovar_file, sep = "\t", row.names = FALSE,  quote = FALSE)
-write.table(category_cov, file = ccovar_file, sep = "\t", row.names = FALSE,  quote = FALSE)
+write.table(quant_cov, file = qcovar_file, sep = "\t", row.names = FALSE,  quote = FALSE, col.names = FALSE)
+write.table(category_cov, file = ccovar_file, sep = "\t", row.names = FALSE,  quote = FALSE, col.names = FALSE)
 
-write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE,  quote = FALSE)
-write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE,  quote = FALSE)
+write.table(pc_cov, file = genetic_pc_gwas, sep = "\t", row.names = FALSE,  quote = FALSE, col.names = FALSE)
+write.table(quant_cov_noPC, file = qcovar_noPC_file, sep = "\t", row.names = FALSE,  quote = FALSE, col.names = FALSE)

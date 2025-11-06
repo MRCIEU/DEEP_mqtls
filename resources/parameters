@@ -188,8 +188,8 @@ qcovar_noPC_file="${home_directory}/processed_data/covariate_data/qcovar_noPC_fi
 winsorized_pheno="${home_directory}/processed_data/phenotype_data/winsorized_pheno.Robj"
 raw_phenotype_distribution_plot="${home_directory}/results/01/raw_phenotype_distribution_plot"
 raw_phenotype_summary_file="${home_directory}/results/01/raw_phenotypes_summary"
-edited_phenotype_distribution_plot="${home_directory}/results/01/edited_phenotype_distribution_plot"
-edited_phenotype_summary_file="${home_directory}/results/01/edited_phenotypes_summary"
+winzorised_phenotype_distribution_plot="${home_directory}/results/01/edited_phenotype_distribution_plot"
+winzorised_phenotype_summary_file="${home_directory}/results/01/edited_phenotypes_summary"
 winsorized_phenotype_file="${home_directory}/processed_data/phenotype_data/winsorized_phenotypes.RData"
 phenotype_names="${scripts_directory}/resources/datacheck/phenotype_varnames.csv"
 
