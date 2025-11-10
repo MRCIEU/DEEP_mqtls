@@ -39,6 +39,7 @@ dependencies:
   - r-viridis
   - r-biocmanager
   - r-desctools
+  - r-sparsesvd
   - zlib
   - libzlib
   - openssl
