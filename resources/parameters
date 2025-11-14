@@ -30,6 +30,7 @@ section_01c_logfile="${section_01_dir}/logs_c/log${timetemp}.txt"
 section_01d_logfile="${section_01_dir}/logs_d/log.txt"
 section_01e_logfile="${section_01_dir}/logs_e/log.txt"
 section_01f_logfile="${section_01_dir}/logs_f/log${timetemp}.txt"
+section_01g_logfile="${section_01_dir}/logs_g/log.txt"
 
 section_02a_logfile="${section_02_dir}/logs_a/log.txt"
 section_02b_logfile="${section_02_dir}/logs_b/log.txt"
@@ -308,7 +309,7 @@ gemma="${scripts_directory}/resources/bin/gemma"
 hase="${scripts_directory}/resources/bin/hase"
 osca="${scripts_directory}/resources/bin/osca"
 smr="${scripts_directory}/resources/bin/smr-1.3.1"
-pbwt="${scripts_directory}/resources/bin/pbwt/pbwt"
+pbwt="${scripts_directory}/resources/bin/pbwt"
 
 # Functions
 
