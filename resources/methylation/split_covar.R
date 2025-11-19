@@ -50,11 +50,11 @@ category_cov <- remove_constant_cols(category_cov, "category_cov")
 #print(head(category_cov))
 #print(head(quant_cov))
 
-slide_cols <- grep("Slide_factor", colnames(category_cov), value = TRUE)
-if (length(slide_cols) > 0) {
-  message("Removing slide factor columns from category_cov: ", paste(slide_cols, collapse = ", "))
-  category_cov <- category_cov[, !(colnames(category_cov) %in% slide_cols), drop = FALSE]
-}
+# slide_cols <- grep("Slide_factor", colnames(category_cov), value = TRUE)
+# if (length(slide_cols) > 0) {
+#   message("Removing slide factor columns from category_cov: ", paste(slide_cols, collapse = ", "))
+#   category_cov <- category_cov[, !(colnames(category_cov) %in% slide_cols), drop = FALSE]
+# }
 
 message("Dectecting prefix in quantitative covariates file")
 cell_prefixes <- c("salas\\.", "unilife\\.", "zheng\\.", "middleton\\.")
