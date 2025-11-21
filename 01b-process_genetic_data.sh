@@ -192,6 +192,8 @@ ${plink2} \
 	--threads ${nthreads} \
 	--autosome
 
+echo "Sample size in creating kinship matrix: $(wc -l < "${grmfile_all}.grm.id")"
+
 # Create pedigree matrix if family data, otherwise remove related individuals from existing kinship and data file
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
@@ -212,6 +214,8 @@ elif [ "${related}" = "no" ]; then
 		mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
 		mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
 		
+		echo "Sample size after removal cryptic relateds: $(wc -l < "${grmfile_all}.grm.id")"
+
 		# filtering out the related samples
 		${plink2} \
 			--bfile ${bfile} \
