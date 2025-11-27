@@ -57,7 +57,6 @@ dependencies:
   - libopenblas
   - cxx-compiler
   - openjdk=11.*
-  - git
   - sshpass
   - pinentry
   - gnupg
