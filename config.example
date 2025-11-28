@@ -74,6 +74,7 @@ ancestry="SAS"
 # Input data files
 betas="${home_directory}/input_data/data.RData"
 bfile_raw="${home_directory}/input_data/data"
+vcf_dir="${home_directory}/input_data/vcf/"
 covariates="${home_directory}/input_data/covariates.txt"
 
 # Specify the directory where raw idat files are stored (if you have them)
@@ -112,7 +113,7 @@ snp_miss="0.05"
 snp_imiss="0.05"
 
 # GRM parameters (see 01b).
-rel_cutoff="0.125"
+rel_cutoff="0.05"
 grm_maf_cutoff="0.01"
 
 # PCA paramaters (see 01b).
