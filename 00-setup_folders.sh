@@ -30,6 +30,7 @@ mkdir -p "${section_01_dir}/cellcounts_comp"
 mkdir -p "${section_01_dir}/logs_d/"
 mkdir -p "${section_01_dir}/logs_e/"
 mkdir -p "${section_01_dir}/logs_f/"
+mkdir -p "${section_01_dir}/logs_g/"
 
 # QC phase2 and analysis phase folders
 mkdir -p "${section_02_dir}/logs_a/"
