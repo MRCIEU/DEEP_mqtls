@@ -19,9 +19,10 @@ ${R_directory}Rscript resources/datacheck/liftover.R \
     ${genome_build} \
     ${miss_liftover} \
 	${liftover_map} \
-	${section_01_dir}
+	${section_01_dir} \
+	"01b"
 
-inferred_build=$(cat "${section_01_dir}/inferred_build.txt")
+inferred_build=$(cat "${section_01_dir}/01b_inferred_build.txt")
 
 if [ "$inferred_build" -eq 37 ]; then
     if [ -f ${miss_liftover} ]; then
