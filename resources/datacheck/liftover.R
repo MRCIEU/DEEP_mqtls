@@ -12,6 +12,7 @@ ori_build <- as.numeric(args[2]);
 miss_liftover <- as.character(args[3])
 liftover_map <- as.character(args[4])
 section_01_dir <- as.character(args[5])
+output_prefix <- as.character(args[6])
 
 message("Loading bim file: ", bim_file)
 bim <- as.data.frame(fread(paste0(bim_file, ".bim")))
@@ -38,7 +39,7 @@ if (mean(startsWith(bim[, 2], "rs")) >= 0.8) {
   )
 }
 
-write.table(build, file = paste0(section_01_dir, "/inferred_build.txt"),
+write.table(build, file = paste0(section_01_dir, "/", output_prefix, "_inferred_build.txt"),
   sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 if (is.na(build) || !(build %in% accepted_builds)) {
@@ -52,10 +53,16 @@ if (is.na(build) || !(build %in% accepted_builds)) {
   warning("ERROR: ", msg)
 }
 
-if (build != ori_build) {
-  msg <- sprintf("Please confirm your genome build. Imputed genome build is GRCh%d, but the bim file is GRCh%d", build, ori_build)
-  errorlist <- c(errorlist, msg)
-  warning("ERROR: ", msg)
+if (output_prefix == "01b") {
+  if (build != ori_build) {
+    msg <- sprintf("Please confirm your genome build. Imputed genome build is GRCh%d, but the bim file is GRCh%d", build, ori_build)
+    errorlist <- c(errorlist, msg)
+    warning("ERROR: ", msg)
+  }
+} else if (output_prefix == "01g") {
+  if (build != ori_build) {
+    message("Please confirm your genome build of vcf file. Imputed genome build of VCF file is different from genome build in your config.")
+  }
 }
 
 if (build == 37) {
