@@ -16,7 +16,7 @@ dependencies:
   - r-matrixstats
   - r-remotes
   - r-plyr
-  - r-Cairo
+  - r-cairo
   - r-plotrix
   - r-cluster
   - r-rpmm
@@ -40,6 +40,9 @@ dependencies:
   - r-biocmanager
   - r-desctools
   - r-sparsesvd
+  - r-xml
+  - r-rcurl
+  - r-restfulr
   - zlib
   - libzlib
   - openssl
