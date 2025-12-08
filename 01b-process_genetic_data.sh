@@ -32,21 +32,24 @@ if [ "$inferred_build" -eq 37 ]; then
             --exclude ${miss_liftover} \
             --update-map ${liftover_map} \
             --make-bed \
-            --out ${bfile}
+            --out ${bfile} \
+			--threads ${nthreads}
     else
 		echo "No SNP missing for liftover found. Liftovering"
         ${plink2} --bfile "${bfile_raw}" \
             --new-id-max-allele-len 70 \
             --update-map ${liftover_map} \
             --make-bed \
-            --out ${bfile}
+            --out ${bfile} \
+			--threads ${nthreads}
     fi
 elif [ "$inferred_build" -eq 38 ]; then
 	# if build is 38, just copy the raw bfile to the new bfile
     ${plink2} --bfile "${bfile_raw}" \
         --new-id-max-allele-len 70 \
         --make-bed \
-        --out ${bfile}
+        --out ${bfile} \
+		--threads ${nthreads}
 fi
 
 # qc and format input genetic data
@@ -79,13 +82,15 @@ if [ "$n23" -gt "0" ]; then
 		--new-id-max-allele-len 70 \
 		--split-par b38 no-fail \
 		--make-bed \
-		--out ${bfile}_xpar_temp
+		--out ${bfile}_xpar_temp \
+		--threads ${nthreads}
 
 	${plink2} \
 		--bfile ${bfile}_xpar_temp \
 		--new-id-max-allele-len 70 \
 		--check-sex \
-		--out ${section_01_dir}/data
+		--out ${section_01_dir}/data \
+		--threads ${nthreads}
 	
 	nprob=`grep "PROBLEM" ${section_01_dir}/data.sexcheck |wc -l`
 
@@ -110,7 +115,8 @@ if [ "$n23" -gt "0" ]; then
 			--new-id-max-allele-len 70 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
 			--make-bed \
-			--out ${bfile}_format
+			--out ${bfile}_format \
+			--threads ${nthreads}
 
 		rm ${bfile}_xpar_temp*
 	fi
@@ -292,7 +298,7 @@ then
 	echo "No genetic outliers detected"
 else
 	echo "There are ${n_outliers} genetic outliers detected"
-	echo "They are not going to be removed from the data"
+	echo "They are not going to be removed from the sample in QC stage 1"
 fi
 # 	# Remove genetic outliers from data
 # 	echo "Removing ${n_outliers} genetic outliers from data"
@@ -325,7 +331,8 @@ ${plink2} \
 	--bfile "${bfile}" \
 	--new-id-max-allele-len 70 \
 	--freq \
-	--out "${bfile}"
+	--out "${bfile}" \
+	--threads ${nthreads}
 
 # check afreq against reference panel using EasyQC
 if [ -f "processed_data/genetic_data/easyQC_topmed_edit.ecf.out" ]
@@ -450,7 +457,8 @@ ${plink2} \
 	--freq \
 	--hardy \
 	--missing \
-	--out ${section_01_dir}/data
+	--out ${section_01_dir}/data \
+	--threads ${nthreads}
 
 gzip -f -c ${quality_scores} > ${section_01_dir}/data.info.gz
 gzip -f ${section_01_dir}/data.hardy
