@@ -15,11 +15,11 @@ l <- c(l, cohort_summary)
 load(covariate_descriptives)
 l <- c(l, cohort_summary)
 
-if(file.exists(phenotype_descriptives))
-{
-	load(phenotype_descriptives)
-	l <- c(l, cohort_summary)
-}
+# if(file.exists(phenotype_descriptives))
+# {
+# 	load(phenotype_descriptives)
+# 	l <- c(l, cohort_summary)
+# }
 
 cohort_summary <- l
 save(cohort_summary, file=cohort_descriptives)

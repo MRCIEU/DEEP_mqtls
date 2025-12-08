@@ -255,7 +255,6 @@ then
 		${genetic_descriptives} \
 		${methylation_descriptives} \
 		${covariate_descriptives} \
-		${phenotype_descriptives} \
 		${cohort_descriptives}
 fi
 
