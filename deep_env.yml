@@ -12,6 +12,7 @@ dependencies:
   - r-lattice
   - r-ggplot2
   - r-data.table
+  - r-matrix>=1.3
   - r-matrixeqtl
   - r-matrixstats
   - r-remotes
