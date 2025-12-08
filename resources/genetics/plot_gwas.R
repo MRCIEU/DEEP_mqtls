@@ -43,7 +43,7 @@ main = function(){
   beta_column <- as.numeric(arguments[3])
   chr_column <- as.numeric(arguments[4])
   pos_column <- as.numeric(arguments[5])
-  snp_column <- as.numeric(arguments[6])
+  snp_column <- as.character(arguments[6])
   header <- as.logical(arguments[7])
   control_chr <- as.numeric(arguments[8])
   control_pos <- as.numeric(arguments[9])
