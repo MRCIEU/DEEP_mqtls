@@ -201,50 +201,6 @@ then
 
 fi
 
-
-# if [ "$arg" = "covariates_for_PRS" ] || [ "$arg" = "all" ]
-# then
-
-# 	section_message "covariates_for_PRS"
-
-#   for PRS in $vect_PRS
-#   do
-
-# 	echo "processing $PRS"
-#   echo ""
-  
-#   covar_file_PRS=covariates_$PRS
-#   covar_desc_PRS=covariate_${PRS}_PRS_descriptives
-  
-#   ${R_directory}Rscript resources/datacheck/covariates_for_PRS.R \
-#     ${!covar_file_PRS} \
-#     ${bfile_raw}.fam \
-#     ${meth_ids} \
-#     ${!covar_desc_PRS}
-#   done
-# fi
-
-# if [ "$arg" = "phenotypes_for_PRS" ] || [ "$arg" = "all" ]
-# then
-
-#   section_message "phenotypes_for_PRS"
-
-#   for PRS in $vect_PRS
-#   do
-
-# 	echo "processing $PRS"
-#   echo ""
-  
-#   pheno_file_PRS=phenotypes_$PRS
-#   pheno_desc_PRS=phenotype_${PRS}_PRS_descriptives
-
-#   ${R_directory}Rscript resources/datacheck/phenotypes_for_PRS.R \
-#     ${!pheno_file_PRS} \
-#     ${bfile_raw}.fam \
-#     ${!pheno_desc_PRS}
-#   done
-# fi
-
 if [ "$arg" = "summary" ] || [ "$arg" = "all" ]
 then
 
