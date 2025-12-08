@@ -4,3 +4,4 @@ section_01c 1.0.0
 section_01d 1.0.0
 section_01e 1.0.0
 section_01f 1.0.0
+section_01g 1.0.0
