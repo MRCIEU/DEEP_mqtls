@@ -42,8 +42,7 @@ for pc in {1..5}; do
     elif [ "${related}" = "no" ]; then
         ${gcta} \
             --bfile "${bfile}" \
-            --grm-sparse "${grmfile_fast}_unrel" \
-            --fastGWA-mlm \
+            --fastGWA-lr \
             --h2-limit 100 \
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \

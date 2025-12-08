@@ -10,7 +10,7 @@ print_version
 # For family data, use all samples, correcting for the full (sparse) GRM.
 
 if [ "${related}" = "yes" ]; then
-    echo "Related is set to yes, making bK sparse"
+    echo "Related is set to yes, making grm sparse"
     # grmfile_relateds generated in 01b
 
     ${gcta} \
@@ -22,15 +22,8 @@ if [ "${related}" = "yes" ]; then
 	    --thread-num ${nthreads}
 
 elif [ "${related}" = "no" ]; then
-    echo "Related is set to no, making bK sparse"
+    echo "Related is set to no. No need grm"
     
-    ${gcta} \
-	    --grm ${grmfile_all} \
-	    --make-bK-sparse 0.05 \
-	    --autosome \
-	    --make-grm \
-	    --out ${grmfile_fast}_unrel \
-	    --thread-num ${nthreads}
 fi
 
 # Step2: make covar files for gcta input
@@ -45,10 +38,10 @@ ${R_directory}Rscript resources/methylation/split_covar.R \
     "${qcovar_noPC_file}"
 
 # Step 3: Checking positive control file
-echo "Checking positive control file"
+echo "Checking positive control file for 01d"
 ${R_directory}Rscript resources/genetics/check_positive_controls.R \
-    "${positive_control_file}" \
-    "${filt_positive_control_file}" \
+    "${positive_control_1d_file}" \
+    "${filt_positive_control_1d_file}" \
     "${com_id}" \
     "${methylation_no_outliers_gwas}"
 
@@ -72,7 +65,7 @@ fi
 ############################################################################################################
 base_methylation_no_outliers="${methylation_no_outliers_gwas%.Robj}"
 
-tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_1d_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
 do
     echo "Processing positive control: $positive_control_cpg, SNP chr: $positive_control_snp_chr, pos: $positive_control_snp_pos, rsid: $rsid, window: $positive_control_snp_window, threshold: $positive_control_threshold"
 
@@ -119,8 +112,7 @@ do
 
             ${gcta} \
                 --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_unrel" \
-                --fastGWA-mlm \
+                --fastGWA-lr \
                 --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
@@ -160,7 +152,7 @@ echo "Running negative control"
 # 4 for D, 5 for E, 16 for P
 seed=45516
 
-tail -n +2 "${filt_positive_control_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
+tail -n +2 "${filt_positive_control_1d_file}" | while IFS=$'\t' read -r positive_control_cpg positive_control_snp_chr positive_control_snp_pos rsid positive_control_snp_window positive_control_threshold
 do
     negative_control_cpg="NEG_${positive_control_cpg}"
 
@@ -199,8 +191,7 @@ do
         elif [ "${related}" = "no" ]; then
             ${gcta} \
                 --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_unrel" \
-                --fastGWA-mlm \
+                --fastGWA-lr \
                 --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
