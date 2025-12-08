@@ -28,9 +28,12 @@ mkdir -p "${section_01_dir}/logs_b/"
 mkdir -p "${section_01_dir}/logs_c/"
 mkdir -p "${section_01_dir}/cellcounts_comp"
 mkdir -p "${section_01_dir}/logs_d/"
+mkdir -p "${section_01_dir}/01d/"
 mkdir -p "${section_01_dir}/logs_e/"
+mkdir -p "${section_01_dir}/01e/"
 mkdir -p "${section_01_dir}/logs_f/"
 mkdir -p "${section_01_dir}/logs_g/"
+mkdir -p "${section_01_dir}/01g/"
 
 # QC phase2 and analysis phase folders
 mkdir -p "${section_02_dir}/logs_a/"
