@@ -1,9 +1,8 @@
+#!/bin/bash
 # generate pcs on the probes aross all the control probles
 # quantile normalize the datasets together
 
 # https://github.com/perishky/meffil/wiki/Functional-normalizing-separate-datasets
-
-#!/bin/bash
 
 source resources/setup.sh "$@"
 set -- $concatenated
