@@ -211,16 +211,16 @@ int main() {
   }
   
   hMat cl(nind,nind,0.0);
-  readdatafirst("/user/work/er20212/results/chr1_alnm.chunklengths.s.out.gz",cl,weight[0]);
+  readdatafirst("PROCESS_DIR/chr1_data.chunklengths.s.out.gz",cl,weight[0]);
   
   for (int i = 1; i <= 21; ++i) {
     cout << "Processing chromosome " << i + 1 << endl;
-    string filename = "/user/work/er20212/results/chr" + to_string(i + 1) + "_alnm.chunklengths.s.out.gz";
+    string filename = "PROCESS_DIR/chr" + to_string(i + 1) + "_data.chunklengths.s.out.gz";
     readdata(filename,cl,weight[i]);
   }
   
   // Save the merged data to a file
-  ogzstream outFile("full_chunklength_alnm.txt.gz");
+  ogzstream outFile("");
   for (int i=0; i<nind; ++i) {
     vector<int> twj=cl.m[i].k;
     for(int j=0;j<twj.size();++j){
