@@ -219,8 +219,8 @@ ${R_directory}Rscript resources/methylation/generate_qcovar_with_hcs.R \
     "${qcovar_hc_file}" \
     "${scripts_directory}" 
 
-qcovar file with PCs are from 01d
-qcovar file with no correction from  01e
+# qcovar file with PCs are from 01d
+# qcovar file with no correction from  01e
 
 echo "Checking positive control file for 01g"
 ${R_directory}Rscript resources/genetics/check_positive_controls.R \
