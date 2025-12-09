@@ -211,4 +211,4 @@ do.call("grid.arrange", c(plot_list, ncol = ncol, nrow = nrow))
 
 dev.off()
 
-message("Saved both enhanced PC and HC prediction PDFs with all statistics.")
+message("Saved both PC and HC prediction PDFs with all statistics.")
