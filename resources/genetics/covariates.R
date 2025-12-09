@@ -14,17 +14,21 @@ out_file <- arguments[6]
 
 pca <- read.table(pca_file)[,-1]
 names(pca) <- c("IID", paste("genetic_pc", 1:(ncol(pca)-1), sep=""))
+message(paste0("Number of rows in PCA file: ",nrow(pca)))
 
 if(cov_file=="NULL"){
   message("No covariate file provided")
 	covs <- data.frame(IID=pca$IID)
+  message(paste0("Number of rows in covariate file: ",nrow(covs)))
 } else {
 	covs <- read.table(cov_file, header=TRUE, stringsAsFactors=TRUE, colClass=c("Sex_factor"="character"))
+  message(paste0("Number of rows in covariate file: ",nrow(covs)))
 }
 
 # Remove FID column if it is present
 if("FID" %in% names(covs)) covs <- subset(covs, select=-c(FID))
 smok <- read.table(smoking_file, he=T)[,c('IID', 'p_smoking_mcigarette')]
+message(paste0("Number of rows in smoking file: ",nrow(smok)))
 
 if(cellcount_file=="NULL")
 {
