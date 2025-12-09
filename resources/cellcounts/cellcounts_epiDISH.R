@@ -92,7 +92,17 @@ for(ref in names(refs)) {
   
   pcs_input <- cellcounts[, setdiff(names(cellcounts), "IID"), drop = FALSE]
   pcs_input[] <- lapply(pcs_input, as.numeric)
-  pcs <- prcomp(pcs_input, center = TRUE, scale. = TRUE)
+
+# Try PCA once
+pcs <- try(prcomp(pcs_input, center = TRUE, scale. = TRUE), silent = TRUE)
+
+if (inherits(pcs, "try-error")) {
+  message("Initial PCA failed. Removing constant/near-constant columns…")
+
+ pcs_input2 = remove_constant_cols(pcs_input, "pcs_input", threshold = 0.0003)
+
+  pcs <- prcomp(pcs_input2, center = TRUE, scale. = TRUE)
+}
 
   pca.var <- pcs$sdev^2
   pca.var.explained <- pca.var / sum(pca.var)
