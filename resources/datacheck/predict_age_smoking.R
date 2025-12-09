@@ -25,8 +25,20 @@ suppressPackageStartupMessages(library(viridis))
 suppressPackageStartupMessages(library(ggpubr))
 
 message("Reading in data and matching up samples across files")#######################################
+# read in data
 load(pheno_file)
 load(beta_file)
+
+# run predicted smoking for all with methylation data
+mcigarette <- meffonym.score(norm.beta, "mcigarette")
+p_smoking_mcigarette <- mcigarette$score
+smoking_elliott <- meffonym.score(norm.beta, "elliott-smoking")
+p_smoking_elliott <- smoking_elliott$score
+IID <- colnames(norm.beta)
+smoking_prediction_vars <- rbind(IID,p_smoking_mcigarette,p_smoking_elliott)
+write.table(smoking_prediction_vars,file=paste0(smoking_prediction_output_file))
+
+# match up meth and pheno samples
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
@@ -144,7 +156,7 @@ print(plot.out)
 save(pheno,file=paste0(updated_pheno_file))
 # as separate file for IID and predicted smoking (txt file IID and two smoking scores)
 
-smoking_prediction_vars <- c("IID","p_smoking_mcigarette","p_smoking_elliott")
-smoking_prediction <- pheno[,smoking_prediction_vars]
-write.table(pheno,file=paste0(smoking_prediction_output_file))
+#smoking_prediction_vars <- c("IID","p_smoking_mcigarette","p_smoking_elliott")
+#smoking_prediction <- pheno[,smoking_prediction_vars]
+#write.table(pheno,file=paste0(smoking_prediction_output_file))
 # predicted_smoking is name of output file (txt)
