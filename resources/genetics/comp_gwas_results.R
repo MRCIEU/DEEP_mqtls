@@ -17,21 +17,6 @@ control_pos <- as.numeric(args[11])
 control_window    <- as.numeric(args[12])
 control_threshold <- as.numeric(args[13])
 
-
-filenames <- "/user/work/er20212/alspac_QC_phase1/results/01/01g/positive.control.untransformed.file.txt"
-cpg_name <- "cg07959070"
-pval_column <- 10
-beta_column <- 8
-se_column <- 9
-chr_column <- 1
-pos_column  <- 3
-snp_column  <- 2
-header <- T
-control_chr <- 22
-control_pos <- 49660223
-control_window    <- 1e5
-control_threshold <- 0.001
-
 filenames = read.table(filenames, header = F, sep = "\t")[,1]
 
 gwas_list = list()
