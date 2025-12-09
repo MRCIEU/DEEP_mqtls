@@ -28,8 +28,8 @@ smok <- read.table(smoking_file, he=T)[,c('IID', 'p_smoking_mcigarette')]
 
 if(cellcount_file=="NULL")
 {
-  allcovs <- merge(pca, covs, by="IID", all=TRUE)
-  allcovs <- merge(allcovs, smok, by="IID", all=TRUE) 
+  allcovs <- merge(pca, covs, by="IID", all=FALSE)
+  allcovs <- merge(allcovs, smok, by="IID", all=FALSE) 
   message("No cell count file provided")
   stop("Cell counts are required for mQTL analysis")
 
@@ -43,9 +43,9 @@ if(cellcount_file=="NULL")
 
   covs <- subset(covs, IID %in% cellcount$IID)
 
-  allcovs <- merge(cellcount, pca, by="IID", all=TRUE)
-  allcovs <- merge(allcovs, covs, by="IID", all=TRUE)
-  allcovs <- merge(allcovs, smok, by="IID", all=TRUE)
+  allcovs <- merge(cellcount, pca, by="IID", all=FALSE)
+  allcovs <- merge(allcovs, covs, by="IID", all=FALSE)
+  allcovs <- merge(allcovs, smok, by="IID", all=FALSE)
 }
 
 fam <- read.table(fam_file)

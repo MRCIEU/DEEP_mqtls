@@ -111,7 +111,7 @@ then
 		"${tissue}" \
 		"${age}" \
 		"${methylation_array}" \
-		"${methylation_no_outliers_gwas}" \
+		"${methylation_no_outliers_ewas}" \
 		"${cellcounts_cov}" \
 		"${cellcounts_plot}" \
 		"${cellcounts_summary}" \
