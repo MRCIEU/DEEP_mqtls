@@ -30,6 +30,7 @@ load(methylation_file)
 print(paste0("Dimensions of methylation betas for mQTLs: ", dim(norm.beta)))
 print("Sourcing reference selection function")
 source(paste0(scripts_directory,"/resources/cellcounts/fn-select_ref.R"))
+source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 
 # Validate inputs and select reference matrices
 refs <- validate_and_select_reference(tissue, methylation_array, age)
