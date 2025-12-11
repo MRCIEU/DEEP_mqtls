@@ -2,8 +2,7 @@ arguments <- commandArgs(T)
 genetic_descriptives <- arguments[1]
 methylation_descriptives <- arguments[2]
 covariate_descriptives <- arguments[3]
-phenotype_descriptives <- arguments[4]
-cohort_descriptives <- arguments[5]
+cohort_descriptives <- arguments[4]
 
 l <- list()
 load(genetic_descriptives)
