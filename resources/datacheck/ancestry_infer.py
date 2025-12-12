@@ -36,10 +36,16 @@ print("Genome build:", genome_build)
 driver_mem_gb = int(memory * 0.8)
 print(f"Using {nthreads} threads for Hail local")
 print(f"Using {driver_mem_gb:.2f} GB for Hail spark driver")
+
+section_01_dir = os.path.dirname(logfile)
+tmp_dir = os.path.join(section_01_dir, "tmp")
+os.makedirs(tmp_dir, exist_ok=True)
+
 hl.init(
     backend="spark",
     local=f"local[{nthreads}]",
     log=logfile,
+    local_tmpdir = tmp_dir,
     spark_conf={
         'spark.driver.memory': f'{driver_mem_gb}g',
     }
