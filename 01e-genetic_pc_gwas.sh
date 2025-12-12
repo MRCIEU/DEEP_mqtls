@@ -36,7 +36,8 @@ for pc in {1..5}; do
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
             ${covar_option} \
-            --out "${section_01_dir}/gwas_${pc_col}" \
+            --covar-maxlevel 300 \
+            --out "${section_01_dir}/01e/gwas_${pc_col}" \
             --thread-num "${nthreads}"
 
     elif [ "${related}" = "no" ]; then
@@ -47,18 +48,19 @@ for pc in {1..5}; do
             --pheno "${pheno_file}" \
             --qcovar "${qcovar_noPC_file}" \
             ${covar_option} \
-            --out "${section_01_dir}/gwas_${pc_col}" \
+            --covar-maxlevel 300 \
+            --out "${section_01_dir}/01e/gwas_${pc_col}" \
             --thread-num "${nthreads}"
     fi
 
-    tr -s " " < "${section_01_dir}/gwas_${pc_col}.fastGWA" | gzip -c > "${section_01_dir}/gwas_${pc_col}.fastGWAmlm.gz"
-    rm "${section_01_dir}/gwas_${pc_col}.fastGWA"
+    tr -s " " < "${section_01_dir}/01e/gwas_${pc_col}.fastGWA" | gzip -c > "${section_01_dir}/01e/gwas_${pc_col}.fastGWA.gz"
+    rm "${section_01_dir}/01e/gwas_${pc_col}.fastGWA"
 
     echo "make manhattan and qq plots for genetic ${pc_col}"
-    echo "${section_01_dir}/gwas_${pc_col}.fastGWAmlm.gz" > "${section_01_dir}/gwas_${pc_col}.file.txt"
+    echo "${section_01_dir}/01e/gwas_${pc_col}.fastGWA.gz" > "${section_01_dir}/01e/gwas_${pc_col}.file.txt"
 
     ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        "${section_01_dir}/gwas_${pc_col}.file.txt" \
+        "${section_01_dir}/01e/gwas_${pc_col}.file.txt" \
             10 \
             8 \
             1 \

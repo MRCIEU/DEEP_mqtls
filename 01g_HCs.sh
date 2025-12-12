@@ -289,6 +289,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -300,6 +301,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_hc_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -311,6 +313,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_noPC_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -326,6 +329,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -336,6 +340,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_hc_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -346,6 +351,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_noPC_file}" \
                 ${covar_option} \
+                --covar-maxlevel 300 \
                 --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
@@ -355,7 +361,7 @@ do
                       no_correction_positive_control_untransformed_${positive_control_cpg}; do
 
             in_txt="${section_01_dir}/01g/${prefix}.fastGWA"
-            out_gz="${section_01_dir}/01g/${prefix}.fastGWAmlm.gz"
+            out_gz="${section_01_dir}/01g/${prefix}.fastGWA.gz"
 
             if [ -f "${in_txt}" ]; then
                 tr -s " " < "${in_txt}" | gzip -c > "${out_gz}"
@@ -367,9 +373,9 @@ do
 
         echo "make manhattan and qq plots"
         {
-          echo "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz"
-          echo "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz"
-          echo "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz"
+          echo "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
+          echo "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
+          echo "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
         } > "${section_01_dir}/01g/positive.control.untransformed.file.txt"
 
         ${R_directory}Rscript resources/genetics/plot_gwas.R \

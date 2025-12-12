@@ -102,7 +102,8 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --out "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}" \
+                --covar-maxlevel 300 \
+                --out "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
         elif [ "${related}" = "no" ]; then
@@ -117,17 +118,18 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --out "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}" \
+                --covar-maxlevel 300 \
+                --out "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
         
-        tr -s " " < ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWA | gzip -c > ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz
-        rm ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWA
+        tr -s " " < ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA | gzip -c > ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA.gz
+        rm ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA
 
         echo "make manhattan and qq plots (untransformed)"
-        echo "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz" > "${section_01_dir}/positive.control.untransformed.file.txt"
+        echo "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA.gz" > "${section_01_dir}/01d/positive.control.untransformed.file.txt"
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
-            "${section_01_dir}/positive.control.untransformed.file.txt" \
+            "${section_01_dir}/01d/positive.control.untransformed.file.txt" \
             10 \
             8 \
             1 \
@@ -185,7 +187,8 @@ do
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --out "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}" \
+                --covar-maxlevel 300 \
+                --out "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
 
         elif [ "${related}" = "no" ]; then
@@ -196,17 +199,18 @@ do
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --out "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}" \
+                --covar-maxlevel 300 \
+                --out "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
 
-        tr -s " " < "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.fastGWA" | gzip -c > "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.fastGWAmlm.gz"
-        rm "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.fastGWA"
+        tr -s " " < "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA" | gzip -c > "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA.gz"
+        rm "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA"
 
         echo "make manhattan and qq plots (untransformed)"
-        echo "${section_01_dir}/negative_control_untransformed_${negative_control_cpg}.fastGWAmlm.gz" > "${section_01_dir}/negative.control.untransformed.file.txt"
+        echo "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA.gz" > "${section_01_dir}/01d/negative.control.untransformed.file.txt"
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
-        "${section_01_dir}/negative.control.untransformed.file.txt" \
+        "${section_01_dir}/01d/negative.control.untransformed.file.txt" \
             10 \
             8 \
             1 \
