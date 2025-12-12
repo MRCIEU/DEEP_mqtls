@@ -142,4 +142,12 @@ check_logs_01 () {
 		echo "Problem: 01e-genetic_pc_gwas.sh did not complete successfully"
 		exit 1
 	fi
+
+	compare_version "01g"
+	if grep -i -q "success" ${section_01g_logfile}; then
+		echo "01g-HCs.sh completed successfully."
+	else
+		echo "Problem: 01g-HCs.sh did not complete successfully"
+		exit 1
+	fi
 }

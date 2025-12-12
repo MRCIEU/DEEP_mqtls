@@ -230,114 +230,236 @@ check_results_01c () {
 
 check_results_01d () {
 
-    if [ -f "${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv" ]; then
+    if [ -f "${methylation_processed_dir}/mqtl_pos_ctr_1d_filt.tsv" ]; then
         echo "Filtered positive control file is present in processed_data folder"
-	else
-		echo "Problem: filtered positive control file is absent in processed_data folder"
-		exit 1
+    else
+        echo "Problem: filtered positive control file is absent in processed_data folder"
+        exit 1
     fi
-	
+
+    if [ ! -d "${section_01_dir}/01d" ]; then
+        echo "Problem: directory ${section_01_dir}/01d does not exist"
+        exit 1
+    fi
+
+    local suffixes=(
+        ".fastGWA.gz"
+        "_manhattan.pdf"
+        "_nocisChr_manhattan.pdf"
+        "_qqplot.jpeg"
+        "_nocisChr_qqplot.jpeg"
+    )
+
     while IFS=$'\t' read -r positive_control_cpg _; do
         [ -z "${positive_control_cpg}" ] && continue
 
         echo "Checking positive control: ${positive_control_cpg}"
 
-        if [ -f "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz" ]; then
-            echo "positive control ${positive_control_cpg} results present"
-        else
-            echo "Problem: positive control ${positive_control_cpg} results file not present: ${section_01_dir}/positive_control_untransformed_${positive_control_cpg}.fastGWAmlm.gz"
-			exit 1
-        fi
+        ## ---- Positive control ----
+        pos_base="${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}"
 
-        if [ -f "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}_manhattan.pdf" ]; then
-            echo "positive control ${positive_control_cpg} Manhattan plot present"
-        else
-            echo "Problem: positive control ${positive_control_cpg} Manhattan plot file not present"
-			exit 1
-        fi
+        for suffix in "${suffixes[@]}"; do
+            file="${pos_base}${suffix}"
 
-        if [ -f "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}_nocisChr_manhattan.pdf" ]; then
-            echo "positive control ${positive_control_cpg} no cis chromosome Manhattan plot present"
-        else
-            echo "Problem: positive control ${positive_control_cpg} no cis chromosome Manhattan plot file not present"
-			exit 1
-        fi
+            if [ ! -f "$file" ]; then
+                echo "Problem: positive control ${positive_control_cpg} missing file $file"
+                exit 1
+            fi
 
-        if [ -f "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}_qqplot.jpeg" ]; then
-            echo "positive control ${positive_control_cpg} QQ plot present"
-        else
-            echo "Problem: positive control ${positive_control_cpg} QQ plot file not present"
-			exit 1
-        fi
+            case "$suffix" in
+                ".fastGWA.gz")
+                    echo "positive control ${positive_control_cpg} results present"
+                    ;;
+                "_manhattan.pdf")
+                    echo "positive control ${positive_control_cpg} Manhattan plot present"
+                    ;;
+                "_nocisChr_manhattan.pdf")
+                    echo "positive control ${positive_control_cpg} no cis chromosome Manhattan plot present"
+                    ;;
+                "_qqplot.jpeg")
+                    echo "positive control ${positive_control_cpg} QQ plot present"
+                    ;;
+                "_nocisChr_qqplot.jpeg")
+                    echo "positive control ${positive_control_cpg} no cis chromosome QQ plot present"
+                    ;;
+            esac
+        done
 
-        if [ -f "${section_01_dir}/positive_control_untransformed_${positive_control_cpg}_nocisChr_qqplot.jpeg" ]; then
-            echo "positive control ${positive_control_cpg} no cis chromosome QQ plot present"
-        else
-            echo "Problem: positive control ${positive_control_cpg} no cis chromosome QQ plot file not present"
-			exit 1
-        fi
-
-        # negative control corresponding name: NEG_${positive_control_cpg}
+        ## ---- Negative control ----
         neg="NEG_${positive_control_cpg}"
         echo "Checking negative control: ${neg}"
 
-        if [ -f "${section_01_dir}/negative_control_untransformed_${neg}.fastGWAmlm.gz" ]; then
-            echo "negative control ${neg} results present"
-        else
-            echo "Problem: negative control ${neg} results file not present: ${section_01_dir}/negative_control_untransformed_${neg}.fastGWAmlm.gz"
-            exit 1
-        fi
+        neg_base="${section_01_dir}/01d/negative_control_untransformed_${neg}"
 
-        if [ -f "${section_01_dir}/negative_control_untransformed_${neg}_manhattan.pdf" ]; then
-            echo "negative control ${neg} Manhattan plot present"
-        else
-            echo "Problem: negative control ${neg} Manhattan plot file not present"
-            exit 1
-        fi
+        for suffix in "${suffixes[@]}"; do
+            file="${neg_base}${suffix}"
 
-        if [ -f "${section_01_dir}/negative_control_untransformed_${neg}_nocisChr_manhattan.pdf" ]; then
-            echo "negative control ${neg} no cis chromosome Manhattan plot present"
-        else
-            echo "Problem: negative control ${neg} no cis chromosome Manhattan plot file not present"
-            exit 1
-        fi
+            if [ ! -f "$file" ]; then
+                echo "Problem: negative control ${neg} missing file $file"
+                exit 1
+            fi
 
-        if [ -f "${section_01_dir}/negative_control_untransformed_${neg}_qqplot.jpeg" ]; then
-            echo "negative control ${neg} QQ plot present"
-        else
-            echo "Problem: negative control ${neg} QQ plot file not present"
-            exit 1
-        fi
+            case "$suffix" in
+                ".fastGWA.gz")
+                    echo "negative control ${neg} results present"
+                    ;;
+                "_manhattan.pdf")
+                    echo "negative control ${neg} Manhattan plot present"
+                    ;;
+                "_nocisChr_manhattan.pdf")
+                    echo "negative control ${neg} no cis chromosome Manhattan plot present"
+                    ;;
+                "_qqplot.jpeg")
+                    echo "negative control ${neg} QQ plot present"
+                    ;;
+                "_nocisChr_qqplot.jpeg")
+                    echo "negative control ${neg} no cis chromosome QQ plot present"
+                    ;;
+            esac
+        done
 
-        if [ -f "${section_01_dir}/negative_control_untransformed_${neg}_nocisChr_qqplot.jpeg" ]; then
-            echo "negative control ${neg} no cis chromosome QQ plot present"
-        else
-            echo "Problem: negative control ${neg} no cis chromosome QQ plot file not present"
-			exit 1
-        fi
-
-    done < <(awk -F'\t' 'NR>1 { gsub(/^[ \t]+|[ \t]+$/,"",$1); if($1!="" && $1!~ /^#/) print $1 }' "${methylation_processed_dir}/mqtl_pos_ctr_filt.tsv")
+    done < <(
+        awk -F'\t' '
+            NR > 1 {
+                gsub(/^[ \t]+|[ \t]+$/, "", $1)
+                if ($1 != "" && $1 !~ /^#/)
+                    print $1
+            }
+        ' "${methylation_processed_dir}/mqtl_pos_ctr_1d_filt.tsv"
+    )
 
 }
 
+
+
 check_results_01e () {
+
+    if [ ! -d "${section_01_dir}/01e" ]; then
+        echo "Problem: directory ${section_01_dir}/01e does not exist"
+        exit 1
+    fi
+
     for i in {1..5}; do
         pc="PC${i}"
 
-        if [ -f "${section_01_dir}/gwas_${pc}.fastGWAmlm.gz" ]; then
+        if [ -f "${section_01_dir}/01e/gwas_${pc}.fastGWA.gz" ]; then
             echo "GWAS ${pc} results present"
         else
-            echo "Problem: GWAS ${pc} results file not present: ${section_01_dir}/gwas_${pc}.fastGWAmlm.gz"
+            echo "Problem: GWAS ${pc} results file not present: ${section_01_dir}/01e/gwas_${pc}.fastGWA.gz"
             exit 1
         fi
 
-        if [ -f "${section_01_dir}/gwas_${pc}_manhattan_beta.pdf" ]; then
+        if [ -f "${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf" ]; then
             echo "GWAS ${pc} beta Manhattan plot present"
         else
-            echo "Problem: GWAS ${pc} beta Manhattan plot file not present: ${section_01_dir}/gwas_${pc}_manhattan_beta.pdf"
+            echo "Problem: GWAS ${pc} beta Manhattan plot file not present: ${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf"
             exit 1
         fi
     done
+}
+
+check_results_01f () {
+
+	if [ -f "${section_01_dir}/${study_name}.qc_objects_shrink.rda" ]; then
+		echo "qc_objects_shrink R object present"
+	else
+		echo "WARNING: qc_objects_shrink R object is absent. We won't be able to perform cross-cohort normalisation for you. Please confirm if you perform normalization by meffil or not."
+	fi
+
+}
+
+check_results_01g () {
+
+    if [ ! -f "${methylation_processed_dir}/mqtl_pos_ctr_1g_filt.tsv" ]; then
+        echo "Problem: filtered positive control file is absent in processed_data folder"
+        exit 1
+    fi
+
+    if [ ! -d "${section_01_dir}/01g" ]; then
+        echo "Problem: directory ${section_01_dir}/01g does not exist"
+        exit 1
+    fi
+
+    # Main result prefixes
+    local prefixes=(
+        "hc_positive_control_untransformed"
+        "no_correction_positive_control_untransformed"
+        "pc_positive_control_untransformed"
+    )
+
+    local suffixes=(
+        ".fastGWA.gz"
+        "_manhattan.pdf"
+        "_nocisChr_manhattan.pdf"
+        "_qqplot.jpeg"
+        "_nocisChr_qqplot.jpeg"
+    )
+
+    # Scatter plot method pairs
+    local scatter_pairs=(
+        "hc_no"
+        "pc_hc"
+        "pc_no"
+    )
+
+    while IFS=$'\t' read -r positive_control_cpg _; do
+        [ -z "${positive_control_cpg}" ] && continue
+
+        echo "Checking positive control: ${positive_control_cpg}"
+
+        ## ---- Main outputs (per prefix) ----
+        for prefix in "${prefixes[@]}"; do
+            base="${section_01_dir}/01g/${prefix}_${positive_control_cpg}"
+
+            for suffix in "${suffixes[@]}"; do
+                file="${base}${suffix}"
+
+                if [ ! -f "$file" ]; then
+                    echo "Problem: missing file $file"
+                    exit 1
+                fi
+
+                case "$suffix" in
+                    ".fastGWA.gz")
+                        echo "${prefix} ${positive_control_cpg} results present"
+                        ;;
+                    "_manhattan.pdf")
+                        echo "${prefix} ${positive_control_cpg} Manhattan plot present"
+                        ;;
+                    "_nocisChr_manhattan.pdf")
+                        echo "${prefix} ${positive_control_cpg} no cis chromosome Manhattan plot present"
+                        ;;
+                    "_qqplot.jpeg")
+                        echo "${prefix} ${positive_control_cpg} QQ plot present"
+                        ;;
+                    "_nocisChr_qqplot.jpeg")
+                        echo "${prefix} ${positive_control_cpg} no cis chromosome QQ plot present"
+                        ;;
+                esac
+            done
+        done
+
+        ## ---- Scatter plots ----
+        for pair in "${scatter_pairs[@]}"; do
+            scatter_file="${section_01_dir}/01g/${positive_control_cpg}_${pair}_scatter.pdf"
+
+            if [ ! -f "$scatter_file" ]; then
+                echo "Problem: missing scatter plot $scatter_file"
+                exit 1
+            fi
+
+            echo "scatter plot ${positive_control_cpg} ${pair} present"
+        done
+
+    done < <(
+        awk -F'\t' '
+            NR > 1 {
+                gsub(/^[ \t]+|[ \t]+$/, "", $1)
+                if ($1 != "" && $1 !~ /^#/)
+                    print $1
+            }
+        ' "${methylation_processed_dir}/mqtl_pos_ctr_1g_filt.tsv"
+    )
 }
 
 check_results_01 () {
@@ -346,4 +468,6 @@ check_results_01 () {
 	check_results_01c
 	check_results_01d
 	check_results_01e
+	check_results_01f
+	check_results_01g
 }
