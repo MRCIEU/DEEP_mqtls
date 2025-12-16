@@ -35,8 +35,8 @@ p_smoking_mcigarette <- mcigarette$score
 smoking_elliott <- meffonym.score(norm.beta, "elliott-smoking")
 p_smoking_elliott <- smoking_elliott$score
 IID <- colnames(norm.beta)
-smoking_prediction_vars <- rbind(IID,p_smoking_mcigarette,p_smoking_elliott)
-write.table(smoking_prediction_vars,file=paste0(smoking_prediction_output_file))
+smoking_prediction_vars <- cbind(IID,p_smoking_mcigarette,p_smoking_elliott)
+write.table(smoking_prediction_vars,file=paste0(smoking_prediction_output_file),row.names = F)
 
 # match up meth and pheno samples
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
