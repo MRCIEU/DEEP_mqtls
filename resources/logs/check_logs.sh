@@ -143,11 +143,29 @@ check_logs_01 () {
 		exit 1
 	fi
 
-	compare_version "01g"
-	if grep -i -q "success" ${section_01g_logfile}; then
-		echo "01g-HCs.sh completed successfully."
+	if [ -z "${idat_directory}" ]; then
+    	echo "You don't have idat dir, skip 01f log file check. Please ensure you don't have access to idat files."
 	else
-		echo "Problem: 01g-HCs.sh did not complete successfully"
-		exit 1
+		echo "IDAT directory found, checking 01f log file."
+		compare_version "01f"
+		if grep -i -q "Shrunk QC objects created" ${section_01f_logfile}; then
+			echo "01f-normalization.sh completed successfully."
+		else
+			echo "Problem: 01f-normalization.sh did not complete successfully"
+			exit 1
+		fi
+	fi
+
+	if [ -z "${vcf_dir}" ]; then
+    	echo "You don't have vcf dir, skip 01g log file check. Please ensure you don't have phased genetic data."
+	else
+		echo "VCF directory found, checking 01g log file."
+		compare_version "01g"
+    	if grep -i -q "success" "${section_01g_logfile}"; then
+        	echo "01g-HCs.sh completed successfully."
+    	else
+        	echo "Problem: 01g-HCs.sh did not complete successfully"
+        	exit 1
+    	fi
 	fi
 }
