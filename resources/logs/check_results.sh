@@ -468,6 +468,17 @@ check_results_01 () {
 	check_results_01c
 	check_results_01d
 	check_results_01e
-	check_results_01f
-	check_results_01g
+
+    if [[ ! -z "${idat_directory}" ]]; then
+        check_results_01f
+    else
+        echo "Skip check_results_01f: idat_directory not provided in config file"
+    fi
+
+    if [[ ! -z "${vcf_dir}" ]]; then
+        check_results_01g
+    else
+        echo "Skip check_results_01g: vcf_dir not provided in config file"
+    fi
+    
 }
