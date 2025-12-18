@@ -60,9 +60,6 @@ dependencies:
   - libopenblas
   - cxx-compiler
   - openjdk=11.*
-  - sshpass
-  - pinentry
-  - gnupg
   - pip
   - pip:
       - hail==0.2.135
