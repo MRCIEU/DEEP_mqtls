@@ -145,13 +145,13 @@ for i in {1..22}; do
     vcf="${genetic_processed_dir}/chr${i}_data.vcf.gz"
     out="${genetic_processed_dir}/chr${i}_temp_plink"
 
-    # "${plink2}" --vcf "$vcf" --freq --out "$out" --threads "${nthreads}" >/dev/null 2>&1
+    ${plink2} --vcf "$vcf" --freq --out "$out" --threads "${nthreads}" >/dev/null 2>&1
 
     n=$(($(wc -l < "${out}.afreq") - 1))
 
-    # rm -f "${out}.afreq"
-    # rm -f "${out}.log"
     counts+=("$n")
+    rm -f "${out}.afreq"
+    rm -f "${out}.log"
 done
 
 counts_list=$(printf "%s, " "${counts[@]}")
