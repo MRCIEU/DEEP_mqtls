@@ -19,6 +19,10 @@ suppressPackageStartupMessages(library(meffil))
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_highlycor.R"))
 
+n_cores <- parallel::detectCores()
+n_threads <- max(1, n_cores - 4)
+options(mc.cores=n_threads)
+
 message("Reading in data and matching up samples across files") #######################################
 load(updated_pheno_file)
 load(beta_file)
@@ -139,7 +143,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     # make sure meth and pheno_panel are in same order
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$Smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_smoking], sva=T, isva=F, random.seed=23)
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$Smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_smoking], sva=T, n.sv=10, isva=F, random.seed=23)
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
     save(ewas.out, file=paste0(ewas_stats,"_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -174,7 +178,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
 
-    ewas.age <- meffil.ewas(meth.temp, variable=pheno_panel$Age_numeric, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_age], sva=T, isva=F, random.seed=23)
+    ewas.age <- meffil.ewas(meth.temp, variable=pheno_panel$Age_numeric, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_age], sva=T, n.sv=10, isva=F, random.seed=23)
     ewas.out <- ewas.age$analyses
     save(ewas.out, file=paste0(ewas_stats,"_age_",study_name,"_",cellcount_panel,".Robj"))
     ewas.summary<-meffil.ewas.summary(ewas.age,meth.temp,parameters=ewas.parameters)                              
@@ -210,7 +214,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     # make sure meth and pheno_panel are in same order
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, isva=F, random.seed=23)
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, n.sv=10, isva=F, random.seed=23)
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
     save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
@@ -244,7 +248,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
 
-    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, n.sv=10, isva=F, random.seed=23) 
     ewas.out <- ewas.sex$analyses
     save(ewas.out, file=paste0(ewas_stats,"_sex_",study_name,"_",cellcount_panel,".Robj"))
     ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
@@ -273,7 +277,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     scrambled_sex <- sample(c(rep("F", nF), rep("M", nM)))
     pheno_panel$Sex_factor <- scrambled_sex
 
-    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+    ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, n.sv=10, isva=F, random.seed=23) 
     ewas.out <- ewas.sex$analyses
     save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
     ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
@@ -289,7 +293,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   meth.temp <- norm.beta[,participants]
   pheno_panel$Sex_factor <- sample(pheno_panel$Sex_factor)
 
-  ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, isva=F, random.seed=23) 
+  ewas.sex <- meffil.ewas(meth.temp, variable=pheno_panel$Sex_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_sex], sva=T, n.sv=10, isva=F, random.seed=23) 
   ewas.out <- ewas.sex$analyses
   save(ewas.out, file=paste0(ewas_stats,"_sex_negative_control_",study_name,"_",cellcount_panel,".Robj"))
   ewas.summary<-meffil.ewas.summary(ewas.sex,meth.temp,parameters=ewas.parameters)                              
