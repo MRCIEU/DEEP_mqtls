@@ -11,4 +11,4 @@
 cd ..
 module load git
 
-./01c-check_phenotypes_and_methylation.sh -c /user/work/er20212/alspac_QC_phase1/config_alspac
+./01c-check_phenotypes_and_methylation.sh -c /path/to/config/file ewas
