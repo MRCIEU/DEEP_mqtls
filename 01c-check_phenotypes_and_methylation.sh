@@ -165,7 +165,8 @@ then
 		${qc1_ewas_stats} \
 		${qc1_ewas_report} \
 		${scripts_directory} \
-		${study_specific_vars}
+		${study_specific_vars} \
+		${nthreads}
 
 	echo "Successfully completed script 01c ewas chunk"
 fi
