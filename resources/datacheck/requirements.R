@@ -19,6 +19,7 @@ pkglist <- c(
     "data.table",
     "MatrixEQTL",
     "parallel",
+    "parallelly",
     "matrixStats",
     "sparsesvd",
     "Matrix",

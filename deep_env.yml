@@ -43,6 +43,7 @@ dependencies:
   - r-sparsesvd
   - r-xml
   - r-rcurl
+  - r-parallelly
   - zlib
   - libzlib
   - openssl

@@ -14,13 +14,14 @@ ewas_stats <- arguments[6]
 ewas_report <- arguments[7]
 scripts_directory <- arguments[8]
 study_specific_vars <- strsplit(arguments[9], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
-n_threads <- as.numeric(arguments[10])
 
 suppressPackageStartupMessages(library(meffil))
+suppressPackageStartupMessages(library(parallelly))
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_constant_col.R"))
 source(paste0(scripts_directory,"/resources/datacheck/fn_rm_highlycor.R"))
 
-options(mc.cores=n_threads)
+n_cores = parallelly::availableCores()
+options(mc.cores=max(1, n_cores -4))
 
 message("Reading in data and matching up samples across files") #######################################
 load(updated_pheno_file)
