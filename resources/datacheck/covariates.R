@@ -150,6 +150,26 @@ cohort_summary$mqtl_max_age <- max(covar$Age_numeric,na.rm=T)
 cohort_summary$mqtl_min_age <- min(covar$Age_numeric,na.rm=T)
 cohort_summary$covariates <- names(covar)[-1]
 
+covar_cols  <- setdiff(names(covar), c("IID", "Sex_factor", "Age_numeric"))
+factor_cols <- grep("_factor$", covar_cols, value = TRUE)
+
+if (length(factor_cols) > 0) {
+  for (col in factor_cols) {
+    x <- covar[[col]]
+    n_lev <- length(unique(na.omit(x)))
+    cohort_summary[[paste0("n_", col)]] <- n_lev
+
+	if (col == "Slide_factor" && n_lev > 0.1 * nrow(covar)) {
+      msg <- paste0("Slide_factor has ", n_lev,
+                    " levels (>10% of sample size). You may want to use Plate_factor instead.")
+      warninglist <- c(warninglist, msg)
+      warning("WARNING: ", msg)
+    }
+  }
+
+} else {
+  message("No *_factor covariates found (apart from Sex_factor).")
+}
 
 save(cohort_summary, file=cohort_descriptives_file)
 
