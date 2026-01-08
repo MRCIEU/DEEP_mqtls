@@ -172,8 +172,8 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     age_levels <- 0
   }
 
-  if (age_levels < 2) {
-    message("Age_numeric has no variation (only one value). Skipping age EWAS for this panel.")
+  if (age_levels < 3) {
+    message("Age_numeric has too little variation. Skipping age EWAS for this panel.")
   } else {
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
