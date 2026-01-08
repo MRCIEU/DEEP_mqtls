@@ -41,22 +41,29 @@ eval "check_results_$1"
 echo ""
 echo "Section $1 has been successfully completed!"
 
+port="-P 2222"
+
 if [[ "$2" = "upload" && ( $1 = "01" ) ]]; then
 
 	echo ""
-	temp=`which sshpass 2>/dev/null | wc -l`
-	port="-P 2222"
-	if [[ ! "${temp}" = "0" &&  $1 != "08" ]]
-	then
-		echo "sshpass detected"
-		sftp $port -oIdentityFile=$key -oBatchMode=no -b - ${sftp_username}@${sftp_address}:${sftp_path} << !
+	if command -v sftp >/dev/null 2>&1; then
+    echo "sftp detected"
+
+    if ! sftp $port -oIdentityFile="$key" -oBatchMode=no -b - "${sftp_username}@${sftp_address}:${sftp_path}" <<EOF
 bye
-!
-		echo "Connection established"
-	else
-		echo "sshpass is not installed."
-		echo "The results will now be archived, once that is done they will be uploaded to the server"
-	fi
+EOF
+	then
+        echo "sftp connection failed"
+        exit 1
+    fi
+
+    echo "Connection established"
+else
+    echo "sftp is not available."
+    echo "Please ensure you can connect to the server using sftp before tarring results."
+	exit 1
+fi
+
 
 	echo ""
 	echo "Tarring results, log and config files"
@@ -91,16 +98,15 @@ bye
     gpg --output ${home_directory}/results/${study_name}_${1}.${suff}.aes --symmetric --cipher-algo AES256 ${home_directory}/results/${study_name}_${1}.${suff}
     echo ""
 
-	if [[ ! "${temp}" = "0"  ]]; then
-	echo "Detecting sshpass"
-        sftp $port -oIdentityFile=$key -oBatchMode=no -b - ${sftp_username}@${sftp_address}:${sftp_path} << !
+	if command -v sftp >/dev/null 2>&1; then
+        sftp $port -oIdentityFile=$key -oBatchMode=no -b - ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
         dir
         cd ../upload
         put ${home_directory}/results/${study_name}_${1}.md5sum
         put ${home_directory}/results/${study_name}_$1.${suff}.aes
 		put ${home_directory}/results/config/${study_name}_config.tar.aes
 		put ${home_directory}/results/config/${study_name}_config.md5sum 
-        bye
-!
-fi
+bye
+EOF
+	fi
 fi
