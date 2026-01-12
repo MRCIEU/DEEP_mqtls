@@ -38,11 +38,12 @@ methylation_array="epic"
 tissue="blood"
 
 # please specify the names of study specific variables for EWAS
-# include batch variables you usually adjust for (Slide, Plate, Row, Processing_ run, etc)(case sensitive)
-# also include study specific variables you usually adjust for such as case/control status
+# these are study specific variables you usually adjust for such as case/control status
+# include batch variables only if you know they ahve an effect even after using SVA
+# if you do include a batch variable we would suggest not using slide (as there are too many catagories) - instead we suggest using plate
 # these need to be the column names for these variables and so will need _factor or _numeric at the end
 # please leave a space between each variable
-study_specific_vars="Slide_factor Plate_factor"
+study_specific_vars="Case_status_factor Plate_factor"
 
 # please specify the genome build (one of the following: 37 or 38)
 # 37 means GRCh37, AKA hg19 
