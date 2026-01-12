@@ -385,6 +385,7 @@ echo "Moving allele freq check figure"
 
 mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.multi.AFCHECK.png ${home_directory}/results/01/easyQC_topmed.multi.AFCHECK.png
 mv ${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.rep ${home_directory}/results/01/easyQC_topmed.rep
+cp ${home_directory}/processed_data/genetic_data/data.easyqc.AFCHECK.outlier.txt ${home_directory}/results/01/data.easyqc.AFCHECK.outlier.txt
 
 # Remove mismatched SNPs and flip misaligned SNPs
 # echo "Remove mismatched SNPs and NO FLIPPING"
