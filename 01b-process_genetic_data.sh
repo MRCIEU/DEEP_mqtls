@@ -335,11 +335,11 @@ ${plink2} \
 	--threads ${nthreads}
 
 # check afreq against reference panel using EasyQC
-if [ -f "processed_data/genetic_data/easyQC_topmed_edit.ecf.out" ]
+if [ -f "${home_directory}/processed_data/genetic_data/easyQC_topmed_edit.ecf.out" ]
 then
 	echo "easyqc files present from previous run which will be removed"
-	rm processed_data/genetic_data/easy*
-	rm processed_data/genetic_data/*easy*
+	rm ${home_directory}/processed_data/genetic_data/easy*
+	rm ${home_directory}/processed_data/genetic_data/*easy*
 else
 	echo "passed easyqc file check"
 fi
