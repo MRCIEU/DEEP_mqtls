@@ -28,17 +28,25 @@ message("Reading files:")
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
 
-comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character", "Slide_factor"="character"))
+comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character"))
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 
-force_category <- c("sex", "Sex", "Sex_factor", "slide", "slide_factor", "Slide_factor")
+id_cols <- c("FID", "IID")
 
-quant_cols <- sapply(merged, is.numeric)
-category_cols <- sapply(merged, function(x) is.character(x) || is.factor(x))
+factor_cols <- grepl("_factor$", names(merged)) & !(names(merged) %in% id_cols)
 
-category_cols[names(merged) %in% force_category] <- TRUE
-quant_cols[names(merged) %in% force_category] <- FALSE
+merged[factor_cols] <- lapply(merged[factor_cols], as.factor)
+
+numeric_cols <- !(names(merged) %in% id_cols) & !factor_cols
+
+merged[numeric_cols] <- lapply(
+  merged[numeric_cols],
+  function(x) as.numeric(as.character(x))
+)
+
+category_cols <- grepl("_factor$", names(merged)) & !(names(merged) %in% c("FID", "IID"))
+quant_cols    <- !(names(merged) %in% c("FID", "IID")) & !category_cols
 
 pcs_exclude <- paste0("genetic_pc", 11:20)
 quant_cov <- merged[, c("FID", "IID", names(merged)[quant_cols & !(names(merged) %in% c("FID", "IID", pcs_exclude))])]
