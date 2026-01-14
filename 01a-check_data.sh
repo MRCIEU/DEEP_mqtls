@@ -178,12 +178,14 @@ then
 
 
 	${R_directory}Rscript resources/datacheck/covariates.R \
-		${covariates} \
-		${bfile_raw}.fam \
-		${meth_ids} \
-		${sorted_methylation} \
-		${ageplot} \
-		${covariate_descriptives}
+		"${covariates}" \
+		"${bfile_raw}.fam" \
+		"${meth_ids}" \
+		"${age}" \
+		"${sorted_methylation}" \
+		"${ageplot}" \
+		"${factor_barplot}" \
+		"${covariate_descriptives}"
 fi
 
 if [ "$arg" = "phenotypes_for_ewas" ] || [ "$arg" = "all" ]
