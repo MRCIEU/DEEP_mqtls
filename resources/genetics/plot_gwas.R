@@ -125,6 +125,7 @@ main = function(){
 	  if(min_pval > control_threshold) {
         message("WARNING!")
         message("There doesn't appear to be a QTL for this positive control")
+        message("This may due to this mQTL varying between pops.")
         message("Please upload this section and contact DEEP team before continuing.\n\n")
       	}
     
