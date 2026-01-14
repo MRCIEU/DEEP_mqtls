@@ -201,7 +201,6 @@ if (length(factor_cols) > 0) {
 
 	if (col == "Slide_factor") {
   		tab <- table(x, useNA = "no")
-		print(tab)
   		if (length(tab) > 0 && any(tab < 2)) {
     		bad_levels <- names(tab)[tab < 2]
     		msg <- paste0(
