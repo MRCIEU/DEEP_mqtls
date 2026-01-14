@@ -8,9 +8,11 @@ args <- (commandArgs(TRUE));
 covariates_file <- as.character(args[1]);
 fam_file <- as.character(args[2]);
 meth_ids_file <- as.character(args[3]);
-sorted_methylation <- as.character(args[4]);
-age_distribution_plot <- as.character(args[5]);
-cohort_descriptives_file <- as.character(args[6])
+age_option <- as.character(args[4]);
+sorted_methylation <- as.character(args[5]);
+age_distribution_plot <- as.character(args[6]);
+factor_barplot <- as.character(args[7]);
+cohort_descriptives_file <- as.character(args[8])
 
 
 message("Checking covariates file: ", covariates_file)
@@ -136,6 +138,44 @@ if(mean(covar$Age_numeric, na.rm=T) > 100)
 	warning("ERROR: ", msg)
 }
 
+# check for the age option from config file
+message("Checking age_option from config file")
+valid_age_options <- c("<18", ">18", "all")
+if (is.na(age_option) || !nzchar(age_option) || !(age_option %in% valid_age_options)) {
+  msg <- paste0(
+    "age_option must be one of: ",
+    paste(valid_age_options, collapse = ", "),
+    ". You provided: '", age_option, "'."
+  )
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+}
+
+# check age_option consistency with observed age range
+age_min <- suppressWarnings(min(covar$Age_numeric, na.rm = TRUE))
+age_max <- suppressWarnings(max(covar$Age_numeric, na.rm = TRUE))
+
+if (is.finite(age_min) && is.finite(age_max)) {
+  # NOTE: order matters so that min==max==18 -> expected ">18"
+  expected_age_option <- if (age_min >= 18) {
+    ">18"
+  } else if (age_max <= 18) {
+    "<18"
+  } else {
+    "all"
+  }
+
+  if (age_option != expected_age_option) {
+    msg <- paste0(
+      "age option from config file ('", age_option, "') is inconsistent with Age_numeric range [",
+      round(age_min, 3), ", ", round(age_max, 3),
+      "]. Expected age_option might be: '", expected_age_option, "'."
+    )
+    warninglist <- c(warninglist, msg)
+    warning("WARNING: ", msg)
+  }
+}
+
 
 covar <- subset(covar, IID %in% commonids_mgc)
 
@@ -159,6 +199,22 @@ if (length(factor_cols) > 0) {
     n_lev <- length(unique(na.omit(x)))
     cohort_summary[[paste0("n_", col)]] <- n_lev
 
+	if (col == "Slide_factor") {
+  		tab <- table(x, useNA = "no")
+		print(tab)
+  		if (length(tab) > 0 && any(tab < 2)) {
+    		bad_levels <- names(tab)[tab < 2]
+    		msg <- paste0(
+				"Slide_factor has ", length(bad_levels),
+  				" level(s) with 1 sample.",
+  				" You may want to use Plate_factor instead.",
+				" Illumina Methylation Chip should have 8 samples per slide. You may want to use Plate_factor instead."
+			)
+    		errorlist <- c(errorlist, msg)
+    		warning("ERROR: ", msg)
+  		}
+	}
+
 	if (col == "Slide_factor" && n_lev > 0.1 * nrow(covar)) {
       msg <- paste0("Slide_factor has ", n_lev,
                     " levels (>10% of sample size). You may want to use Plate_factor instead.")
@@ -168,7 +224,26 @@ if (length(factor_cols) > 0) {
   }
 
 } else {
-  message("No *_factor covariates found (apart from Sex_factor).")
+  msg <- "No *_factor covariates found (apart from Sex_factor)."
+  warninglist <- c(warninglist, msg)
+  warning("WARNING: ", msg)
+}
+
+plot_factor_cols <- grep("_factor$", names(covar), value = TRUE)
+
+if (length(plot_factor_cols) > 0) {
+  pdf(factor_barplot, width = 10, height = 6)
+  for (col in plot_factor_cols) {
+    tab <- table(covar[[col]], useNA = "ifany")
+    barplot(
+      tab,
+      las = 2,
+      main = paste0(col, " (N=", sum(tab), ")"),
+      ylab = "Count",
+      cex.names = 0.7
+    )
+  }
+  null <- dev.off()
 }
 
 save(cohort_summary, file=cohort_descriptives_file)

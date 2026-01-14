@@ -125,7 +125,7 @@ main = function(){
 	  if(min_pval > control_threshold) {
         message("WARNING!")
         message("There doesn't appear to be a QTL for this positive control")
-        message("Please upload this section and contact GoDMC analysts before continuing.\n\n")
+        message("Please upload this section and contact DEEP team before continuing.\n\n")
       	}
     
     chisq = qchisq(a_minuschr[,pval_column],1,lower.tail=FALSE)
