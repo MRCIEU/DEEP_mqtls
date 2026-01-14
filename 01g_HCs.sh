@@ -280,7 +280,7 @@ do
 
         echo "Perform fastGWA (untransformed) in positive control"
         if [ "${related}" = "yes" ]; then
-            echo "Grm from related individuals"
+            echo "Related is set to yes, using GRM from related individuals"
             ${gcta} \
                 --bfile "${bfile}" \
                 --grm-sparse "${grmfile_fast}_rel" \
@@ -318,7 +318,7 @@ do
                 --thread-num "${nthreads}"
 
         elif [ "${related}" = "no" ]; then
-            echo "grm from unrelated individuals"
+            echo "Related is set to no"
             echo "section_01_dir: ${section_01_dir}"
             echo "positive_control_cpg: ${positive_control_cpg}"
 
