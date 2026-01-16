@@ -126,6 +126,7 @@ cohort_descriptives_was="${section_01_dir}/cohort_descriptives_was.RData"
 
 # Clean genetic data
 bfile="${home_directory}/processed_data/genetic_data/data"
+bfile_sort="${home_directory}/processed_data/genetic_data/data_sorted"
 #vcf_file="${home_directory}/processed_data/genetic_data/data.vcf"
 tabfile="${home_directory}/processed_data/genetic_data/tabfile/data"
 bfile_hm3="${home_directory}/processed_data/genetic_data/data_hm3"
@@ -152,6 +153,8 @@ bfile_inv="${home_directory}/processed_data/inversions/inversions"
 
 # Kinship files
 grmfile_all="${home_directory}/processed_data/genetic_data/data"
+grmfile_all_01e="${home_directory}/processed_data/genetic_data/data_01e"
+grm_distribution="${section_01_dir}/grm_distrib"
 grmfile_fast="${home_directory}/processed_data/genetic_data/data_fast"
 grmfile_relateds="${home_directory}/processed_data/genetic_data/data_relateds"
 grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelateds"
@@ -159,6 +162,8 @@ grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelated
 # PCA files
 pca="${home_directory}/processed_data/genetic_data/pca"
 pcs_all="${pca}.eigenvec"
+snp_01e="${home_directory}/processed_data/genetic_data/snps_01e"
+high_ld="${home_directory}/processed_data/genetic_data/high_ld"
 
 # Cell count
 format_measured_cellcounts="${home_directory}/processed_data/cellcounts/measured_cellcounts.format.txt"
