@@ -46,7 +46,8 @@ cutoff <- as.numeric(arguments[2])
 outfile <- arguments[3]
 
 grm <- readGRM(infile)
-message(paste0("GRM distribution: ", summary(grm$grm$grm)))
+message("GRM distribution:")
+print(summary(grm$grm$grm))
 
 pdf(paste0(outfile, ".pdf"), width = 7, height = 5)
 hist(x = grm$grm$grm, breaks = 500,
