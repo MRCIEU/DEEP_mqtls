@@ -201,6 +201,11 @@ ${plink2} \
 
 echo "Sample size in creating kinship matrix: $(wc -l < "${grmfile_all}.grm.id")"
 
+${R_directory}Rscript resources/relateds/grm_distri.R \
+	"${grmfile_all}" \
+	"${rel_cutoff}" \
+	"${grm_distribution}_01b"
+
 # Create pedigree matrix if family data, otherwise remove related individuals from existing kinship and data file
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
