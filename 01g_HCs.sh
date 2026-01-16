@@ -77,7 +77,7 @@ for i in {1..22}; do
         --out "${output_vcf}"
     else
       ${plink2} --vcf "${chr_vcf}" \
-        --new-id-max-allele-len 70 \
+        --new-id-max-allele-len 100 \
         --set-all-var-ids @:#_\$1_\$2 \
         --update-map "${temp_liftover_map_chr}" \
         --export vcf bgz \
@@ -86,7 +86,7 @@ for i in {1..22}; do
   elif [ "${inferred_build}" -eq 38 ]; then
     echo "Build 38 detected; exporting vcf with rsid formatted"
     ${plink2} --vcf "${chr_vcf}" \
-      --new-id-max-allele-len 70 \
+      --new-id-max-allele-len 100 \
       --set-all-var-ids @:#_\$1_\$2 \
       --export vcf bgz \
       --out "${output_vcf}"
