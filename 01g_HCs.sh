@@ -44,7 +44,7 @@ for i in {1..22}; do
   echo "Converting to PLINK bed/bim/fam format for liftover check"
 
   ${plink2} --vcf "${chr_vcf}" \
-    --new-id-max-allele-len 70 \
+    --new-id-max-allele-len 100 \
     --set-all-var-ids @:#_\$1_\$2 \
     --make-bed \
     --out "${genetic_processed_dir}/chr${i}_tmp"
@@ -69,7 +69,7 @@ for i in {1..22}; do
     echo "Liftover chr${i} (build 37 -> 38)"
     if [ -f "${temp_miss_liftover_chr}" ]; then
       ${plink2} --vcf "${chr_vcf}" \
-        --new-id-max-allele-len 70 \
+        --new-id-max-allele-len 100 \
         --set-all-var-ids @:#_\$1_\$2 \
         --exclude "${temp_miss_liftover_chr}" \
         --update-map "${temp_liftover_map_chr}" \
