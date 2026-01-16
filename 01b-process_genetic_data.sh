@@ -201,11 +201,6 @@ ${plink2} \
 
 echo "Sample size in creating kinship matrix: $(wc -l < "${grmfile_all}.grm.id")"
 
-${R_directory}Rscript resources/relateds/grm_distri.R \
-	"${grmfile_all}" \
-	"${rel_cutoff}" \
-	"${grm_distribution}_01b"
-
 # Create pedigree matrix if family data, otherwise remove related individuals from existing kinship and data file
 if [ "${related}" = "yes" ]; then
 	echo "Creating pedigree GRM"
@@ -244,6 +239,11 @@ else
 	echo "Error: Set related flag in config to yes or no"
 	exit 1
 fi
+
+${R_directory}Rscript resources/relateds/grm_distri.R \
+	"${grmfile_all}" \
+	"${rel_cutoff}" \
+	"${grm_distribution}_01b"
 
 #Calculate PCs
 #gunzip -c ${hm3_snps_no_ld} > temp_hm3snpsnold.txt
