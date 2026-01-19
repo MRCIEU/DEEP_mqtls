@@ -65,9 +65,6 @@ category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(m
 quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
 category_cov <- remove_constant_cols(category_cov, "category_cov")
 
-quant_cov <- remove_constant_cols(quant_cov, "quant_cov")
-category_cov <- remove_constant_cols(category_cov, "category_cov")
-
 message("Dectecting prefix in quantitative covariates file")
 cell_prefixes <- c("salas\\.", "unilife\\.", "zheng\\.", "middleton\\.")
 cell_pattern <- paste0("^(", paste0(cell_prefixes, collapse="|"), ")")
