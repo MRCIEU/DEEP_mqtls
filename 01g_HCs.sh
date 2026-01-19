@@ -44,7 +44,7 @@ for i in {1..22}; do
   echo "Converting to PLINK bed/bim/fam format for liftover check"
 
   ${plink2} --vcf "${chr_vcf}" \
-    --new-id-max-allele-len 100 \
+    --new-id-max-allele-len 500 \
     --set-all-var-ids @:#_\$1_\$2 \
     --make-bed \
     --out "${genetic_processed_dir}/chr${i}_tmp"
@@ -69,7 +69,7 @@ for i in {1..22}; do
     echo "Liftover chr${i} (build 37 -> 38)"
     if [ -f "${temp_miss_liftover_chr}" ]; then
       ${plink2} --vcf "${chr_vcf}" \
-        --new-id-max-allele-len 100 \
+        --new-id-max-allele-len 500 \
         --set-all-var-ids @:#_\$1_\$2 \
         --exclude "${temp_miss_liftover_chr}" \
         --update-map "${temp_liftover_map_chr}" \
@@ -77,7 +77,7 @@ for i in {1..22}; do
         --out "${output_vcf}"
     else
       ${plink2} --vcf "${chr_vcf}" \
-        --new-id-max-allele-len 100 \
+        --new-id-max-allele-len 500 \
         --set-all-var-ids @:#_\$1_\$2 \
         --update-map "${temp_liftover_map_chr}" \
         --export vcf bgz \
@@ -86,7 +86,7 @@ for i in {1..22}; do
   elif [ "${inferred_build}" -eq 38 ]; then
     echo "Build 38 detected; exporting vcf with rsid formatted"
     ${plink2} --vcf "${chr_vcf}" \
-      --new-id-max-allele-len 100 \
+      --new-id-max-allele-len 500 \
       --set-all-var-ids @:#_\$1_\$2 \
       --export vcf bgz \
       --out "${output_vcf}"
@@ -156,7 +156,6 @@ done
 
 counts_list=$(printf "%s, " "${counts[@]}")
 counts_list=${counts_list%, } 
-
 echo "comma-separated list:"
 echo "$counts_list"
 
