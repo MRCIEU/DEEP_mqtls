@@ -8,7 +8,6 @@ afreq_file <- as.character(args[1]);
 out_file <- as.character(args[2]);
 
 afreq <- as.data.frame(fread(afreq_file))
-afreq <- as.data.frame(fread("/user/work/er20212/bib_QC_phase1/processed_data/genetic_data/data.afreq"))
 
 afreq[,2]<-as.character(afreq[,2])
 afreq[,3]<-as.character(afreq[,3])
@@ -66,4 +65,4 @@ recoded.afreq<-harmonize.alleles(afreq,SNPfail)
 if(length(recoded.afreq[[2]])>0){
 SNPfailures<-as.character(t(recoded.afreq[[2]]))}
 
-write.table(recoded.afreq[[1]],out_file,sep="\t",quote=F,col.names=F,row.names=F)
+write.table(recoded.afreq[[1]],out_file,sep="\t",quote=F,col.names=T,row.names=F)
