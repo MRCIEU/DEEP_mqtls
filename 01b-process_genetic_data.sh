@@ -349,13 +349,20 @@ else
 	echo "passed easyqc file check"
 fi
 
+# Replace indels with I&D for easyQC; other failed SNPs have been removed already in line 145
+echo "Replacing indels with I&D for easyQC"
+
+${R_directory}Rscript resources/genetics/harmonization_indel.R \
+	"${bfile}.afreq" \
+	"${bfile}.easyQC.afreq"
+
 # Adjust the easyQC script to use the correct path and file names
 echo "Ancestry: ${ancestry}"
 echo "Copying reference files for EasyQC"
 if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${ancestry} == "EAS" || ${ancestry} == "SAS" ]]; then
 	echo "Ancestry specified, using an imputation of ancestry-specific 1000g ref to TopMed "
-    cp ${scripts_directory}/resources/genetics/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz ${home_directory}/processed_data/genetic_data/
-	replacement_text1="1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz"
+    cp ${scripts_directory}/resources/genetics/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz ${home_directory}/processed_data/genetic_data/
+	replacement_text1="1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz"
 
 elif [[ ${ancestry} == "None" ]]; then
     echo "No ancestry specified, using all population of topmed snplist and allele frequencies"
@@ -378,10 +385,10 @@ mv ${easyQCscript%.ecf}_edit.ecf ${easyqc_edit_ecf_cp}
 
 # run easyQC
 echo "Running EasyQC"
-${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.afreq ${easyQC} ${easyQCfile} ${easyqc_edit_ecf_cp}
+${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.easyQC.afreq ${easyQC} ${easyQCfile} ${easyqc_edit_ecf_cp}
 
 if [ -n "$replacement_text1" ]; then
-	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
+	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
 else
 	rm ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 fi

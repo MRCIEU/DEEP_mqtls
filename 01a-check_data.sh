@@ -73,11 +73,11 @@ then
 # get references_grch37_to_grch38.over.chain.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
 get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
-get 1000g_AFR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
-get 1000g_AMR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
-get 1000g_EAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
-get 1000g_EUR_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
-get 1000g_SAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.hg38.txt.gz
+get 1000g_AFR_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
+get 1000g_AMR_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
+get 1000g_EAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
+get 1000g_EUR_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
+get 1000g_SAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
 get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
 get HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
 # get hgdp_tgp_unrel_pass_filtGBMI_strictpruned_scores.tsv
