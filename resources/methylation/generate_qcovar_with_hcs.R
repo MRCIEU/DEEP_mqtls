@@ -24,8 +24,8 @@ hcs <- read.table(hcs_file, header = TRUE)
 comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character", "Slide_factor"="character"))
 # FID IID cell_counts... genetic_pc1 ... genetic_pc20, Age_numeric Sex_factor Slide_factor p_smoking_mcigarette
 pcs_exclude <- paste0("genetic_pc", 1:20)
+message("Removing genetic PCs from combined covariates file")
 comb_cov <- comb_cov[, !(names(comb_cov) %in% pcs_exclude)]
-print(head(comb_cov))
 
 merged <- merge(fam[, 1:2], comb_cov, by = "IID", all.x = TRUE)
 if (anyNA(merged)) {
@@ -43,13 +43,21 @@ if (anyNA(merged)) {
                paste(names(na_cols), ":", na_cols, collapse = "\n")))
 }
 
-force_category <- c("sex", "Sex", "Sex_factor", "slide", "slide_factor", "Slide_factor")
+id_cols <- c("FID", "IID")
 
-quant_cols <- sapply(merged, is.numeric)
-category_cols <- sapply(merged, function(x) is.character(x) || is.factor(x))
+factor_cols <- grepl("_factor$", names(merged)) & !(names(merged) %in% id_cols)
 
-quant_cols[names(merged) %in% force_category] <- FALSE
-category_cols[names(merged) %in% force_category] <- TRUE
+merged[factor_cols] <- lapply(merged[factor_cols], as.factor)
+
+numeric_cols <- !(names(merged) %in% id_cols) & !factor_cols
+
+merged[numeric_cols] <- lapply(
+  merged[numeric_cols],
+  function(x) as.numeric(as.character(x))
+)
+
+category_cols <- grepl("_factor$", names(merged)) & !(names(merged) %in% c("FID", "IID"))
+quant_cols    <- !(names(merged) %in% c("FID", "IID")) & !category_cols
 
 quant_cov <- merged[, c("FID", "IID", names(merged)[quant_cols & !(names(merged) %in% c("FID", "IID"))])]
 category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(merged) %in% c("FID", "IID"))])]
