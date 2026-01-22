@@ -49,14 +49,48 @@ grm <- readGRM(infile)
 message("GRM distribution:")
 print(summary(grm$grm$grm))
 
-pdf(paste0(outfile, ".pdf"), width = 7, height = 5)
-hist(x = grm$grm$grm, breaks = 500,
-     main = "GRM distribution",
-     xlab = "GRM value")
+pdf(paste0(outfile, ".pdf"), width = 10, height = 5)
+
+xmin <- -0.3
+xmax <- 1.3
+tick <- 0.1
+ticks <- seq(xmin, xmax, by = tick)
+x <- grm$grm$grm
+
+# only keep values within plotting range
+x_plot <- x[x >= xmin & x <= xmax]
+
+hist(
+  x_plot,
+  breaks = 500,
+  xaxt = "n",
+  xlim = c(xmin, xmax),
+  main = "GRM distribution",
+  xlab = "GRM value"
+)
+
+axis(
+  1,
+  at = ticks,
+  labels = sprintf("%.2f", ticks)
+)
 
 abline(v = cutoff, col = "red", lwd = 2)
-# abline(v = 1, col = "blue", lwd = 2, lty = 2)
-legend("topright",
-       legend = c(paste0("cutoff=", cutoff)),
-       col = c("red"), lwd = 2, lty = c(1), bty = "n")
+
+# out-of-range counts
+n_lo <- sum(x < xmin, na.rm = TRUE)
+n_hi <- sum(x > xmax, na.rm = TRUE)
+
+legend(
+  "topright",
+  legend = c(
+    paste0("cutoff = ", cutoff),
+    paste0("< ", xmin, ": ", n_lo),
+    paste0("> ", xmax, ": ", n_hi)
+  ),
+  col = c("red", "black", "black"),
+  lwd = c(2, NA, NA),
+  bty = "n"
+)
+
 dev.off()
