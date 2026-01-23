@@ -379,7 +379,7 @@ else
 	mv "${easyQCscript%.ecf}_temp.ecf" "${easyQCscript%.ecf}_edit.ecf"
 fi
 
-rm ${easyQCscript%.ecf}_temp.ecf
+rm -f ${easyQCscript%.ecf}_temp.ecf
 easyqc_edit_ecf_cp="${genetic_processed_dir}/easyQC_topmed_edit.ecf"
 mv ${easyQCscript%.ecf}_edit.ecf ${easyqc_edit_ecf_cp}
 
@@ -390,7 +390,7 @@ ${R_directory}Rscript ./resources/genetics/easyQC.R ${bfile}.easyQC.afreq ${easy
 if [ -n "$replacement_text1" ]; then
 	rm ${home_directory}/processed_data/genetic_data/1000g_${ancestry}_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
 else
-	rm ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
+	rm ${home_directory}/processed_data/genetic_data/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz
 fi
 
 echo "Moving allele freq check figure"
