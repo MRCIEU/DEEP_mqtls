@@ -79,7 +79,7 @@ if (related == "yes") {
 
 # Check for required files
 files_to_check <- list(
-    list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz"),
+    list(dir = "./resources/genetics", pattern = "topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz"),
     list(dir = "./resources/genetics", pattern = "1000g_(SAS|EAS|AMR|AFR|EUR)_p3v5\\.topmed_imputed\\.maf_0\\.001\\.r2_0\\.3\\.indelrecoded\\.hg38\\.txt\\.gz"),
     list(dir = "./resources/genetics", pattern = "references_grch37_to_grch38.over.chain.gz"), # chain file for liftover from hg19 to hg38
     list(dir = "./resources/genetics", pattern = "release_3.1.2_vcf_genomes_gnomad.genomes.v3.1.2.hgdp_1kg_subset_sample_meta.tsv.bgz"),

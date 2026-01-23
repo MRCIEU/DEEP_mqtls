@@ -71,8 +71,8 @@ then
 	sftp -P 2222 -oIdentityFile=$key ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
 
 # get references_grch37_to_grch38.over.chain.gz
-get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz
-get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz.md5sum
+get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz
+get topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz.md5
 get 1000g_AFR_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
 get 1000g_AMR_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
 get 1000g_EAS_p3v5.topmed_imputed.maf_0.001.r2_0.3.indelrecoded.hg38.txt.gz
@@ -87,7 +87,7 @@ get ref-hrc.ref.gz
 get ref-hrc.ref_info.h5
 EOF
 
-	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz* ${scripts_directory}/resources/genetics
+	mv topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz* ${scripts_directory}/resources/genetics
 	mv 1000g_* ${scripts_directory}/resources/genetics
 	mv HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz* ${scripts_directory}/resources/genetics
 	# mv references_grch37_to_grch38.over.chain.gz ${scripts_directory}/resources/genetics
