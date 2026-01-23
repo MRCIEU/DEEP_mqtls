@@ -366,7 +366,7 @@ if [[ ${ancestry} == "EUR" || ${ancestry} == "AFR" || ${ancestry} == "AMR" || ${
 
 elif [[ ${ancestry} == "None" ]]; then
     echo "No ancestry specified, using all population of topmed snplist and allele frequencies"
-    cp ${scripts_directory}/resources/genetics/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.tab.snplist.gz ${home_directory}/processed_data/genetic_data/
+    cp ${scripts_directory}/resources/genetics/topmed.GRCh38.f8wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz ${home_directory}/processed_data/genetic_data/
 	replacement_text1=""
 fi
 
