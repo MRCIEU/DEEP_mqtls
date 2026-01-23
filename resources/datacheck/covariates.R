@@ -206,17 +206,17 @@ if (length(factor_cols) > 0) {
     		msg <- paste0(
 				"Slide_factor has ", length(bad_levels),
   				" level(s) with 1 sample.",
-  				" You may want to use Plate_factor instead.",
-				" Illumina Methylation Chip should have 8 samples per slide. You may want to use Plate_factor instead."
+  				" You may want to use Plate_factor instead or delete these samples.",
+				" Illumina Methylation Chip should have 8 samples per slide. You may want to use Plate_factor instead. If you think you should proceed anyway, please contact Haotian (haotian.tang@bristol.ac.uk)."
 			)
     		errorlist <- c(errorlist, msg)
     		warning("ERROR: ", msg)
   		}
 	}
 
-	if (col == "Slide_factor" && n_lev > 0.1 * nrow(covar)) {
+	if (col == "Slide_factor" && n_lev > 0.2 * nrow(covar)) {
       msg <- paste0("Slide_factor has ", n_lev,
-                    " levels (>10% of sample size). You may want to use Plate_factor instead.")
+                    " levels (>20% of sample size). You may want to use Plate_factor instead.")
       warninglist <- c(warninglist, msg)
       warning("WARNING: ", msg)
     }
