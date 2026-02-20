@@ -40,16 +40,16 @@ if [ "${related}" = "yes" ]; then
     echo "Identifying SNPs that are highly LD with original PCA SNPs"
     ${plink} \
       --bfile ${bfile_sort} \
-      --r2 \
+      --r2 gz \
       --ld-snp-list ${pca}.prune.in \
       --new-id-max-allele-len 70 \
       --ld-window-kb 1000 \
-      --ld-window-r2 0.10 \
+      --ld-window-r2 0.1 \
       --out "${high_ld}"
 
     echo "Creating a list of SNPs to exclude"
-    awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' "${high_ld}.vcor" \
-      | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
+    #awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' "${high_ld}.vcor" | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
+    zcat ${high_ld}.ld.gz |awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
 
     echo "Excluding high LD regions in genome first"
     ${plink2} \
