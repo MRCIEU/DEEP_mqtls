@@ -39,7 +39,6 @@ tissue="blood"
 
 # please specify the names of study specific variables for EWAS
 # these are study specific variables you usually adjust for such as case/control status, sample type, array type
-# include batch variable(s) only if you know they have an effect even after using SVA
 # if you do include a batch variable we would suggest not using slide (as there are too many catagories) - instead of slide we suggest using plate
 # these need to be the column names for these variables and so will need _factor or _numeric at the end
 # please leave a space between each variable
