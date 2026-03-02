@@ -77,10 +77,10 @@ ${plink2} \
 n23=`grep ^23 "${bfile}_format.bim" | wc -l`
 
 if [ "$n23" -gt "0" ]; then
-	${plink2} \
+	${plink} \
 		--bfile ${bfile}_format \
 		--new-id-max-allele-len 70 \
-		--split-par b38 \
+		--split-x b38 no-fail \
 		--make-bed \
 		--out ${bfile}_xpar_temp \
 		--threads ${nthreads}
