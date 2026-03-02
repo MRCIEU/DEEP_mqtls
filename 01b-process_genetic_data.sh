@@ -77,7 +77,7 @@ ${plink2} \
 n23=`grep ^23 "${bfile}_format.bim" | wc -l`
 
 if [ "$n23" -gt "0" ]; then
-	${plink} \
+	${plink2} \
 		--bfile ${bfile}_format \
 		--new-id-max-allele-len 70 \
 		--split-par b38 \
