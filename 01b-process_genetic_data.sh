@@ -80,7 +80,7 @@ if [ "$n23" -gt "0" ]; then
 	${plink} \
 		--bfile ${bfile}_format \
 		--new-id-max-allele-len 70 \
-		--split-par b38 no-fail \
+		--split-par b38 \
 		--make-bed \
 		--out ${bfile}_xpar_temp \
 		--threads ${nthreads}
