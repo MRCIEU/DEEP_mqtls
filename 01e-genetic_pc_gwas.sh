@@ -74,9 +74,16 @@ if [ "${related}" = "yes" ]; then
 	    --autosome \
 	    --threads ${nthreads}
 
-    if [ -f "${snp_01e}.prune.in" ]; then
-    echo "SNP count in snps_01e.prune.in: $(wc -l < "${snp_01e}.prune.in")"
+if [ -f "${snp_01e}.prune.in" ]; then
+    snp_count=$(wc -l < "${snp_01e}.prune.in")
+    
+    echo "SNP count in snps_01e.prune.in: $snp_count"
+
+    if [ "$snp_count" -lt 50000 ]; then
+        echo "WARNING: SNP count is less than 50,000! This may lead to an unstable GRM. Consider adjusting the LD pruning parameters or excluding fewer SNPs. Please contact Haotian (haotian.tang@bristol.ac.uk)."
     fi
+
+fi
 
     echo "Generating new GRM for related individuals"
     ${plink2} \
