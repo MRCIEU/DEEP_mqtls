@@ -102,7 +102,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --covar-maxlevel 300 \
+                --covar-maxlevel 500 \
                 --out "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -118,7 +118,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --covar-maxlevel 300 \
+                --covar-maxlevel 500 \
                 --out "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
@@ -187,7 +187,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --covar-maxlevel 300 \
+                --covar-maxlevel 500 \
                 --out "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
 
@@ -199,7 +199,7 @@ do
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
                 --qcovar "${qcovar_file}" \
                 ${covar_option} \
-                --covar-maxlevel 300 \
+                --covar-maxlevel 500 \
                 --out "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}" \
                 --thread-num "${nthreads}"
         fi
