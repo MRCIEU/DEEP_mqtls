@@ -210,25 +210,25 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 
   message("Starting maternal smoking EWAS") #######################################
 
-  if ("maternal_smoking_factor" %in% colnames(pheno_panel)) {
+  if ("Maternal_smoking_factor" %in% colnames(pheno_panel)) {
     # make sure meth and pheno_panel are in same order
     participants <- as.character(pheno_panel$IID)
     meth.temp <- norm.beta[,participants]
-    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, n.sv=10, isva=F, random.seed=23)
+    ewas.smoking <- meffil.ewas(meth.temp, variable=pheno_panel$Maternal_smoking_factor, covariates=pheno_panel[,colnames(pheno_panel)%in%ewas_covars_mat_smoking], sva=T, n.sv=10, isva=F, random.seed=23)
     # save out the ewas summary stats:
     ewas.out <- ewas.smoking$analyses
-    save(ewas.out, file=paste0(ewas_stats,"_maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
+    save(ewas.out, file=paste0(ewas_stats,"_Maternal_smoking_",study_name,"_",cellcount_panel,".Robj"))
     # generate and save html report of EWAS:
     ewas.summary<-meffil.ewas.summary(ewas.smoking,meth.temp,parameters=ewas.parameters)                              
-    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_maternal_smoking_",study_name,"_",cellcount_panel,".html"))
+    meffil.ewas.report(ewas.summary, output.file=paste0(ewas_report,"_Maternal_smoking_",study_name,"_",cellcount_panel,".html"))
     # let's have a quick glance at how many hits we get:
     hits <- ewas.smoking$analyses$none$table
     message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the unadjusted model")
     hits <- ewas.smoking$analyses$all$table
     message("There were",nrow(hits[hits$p.value<ewas_threshold,]),"DNAm sites associated with smoking in the adjusted model")
     } else {
-    # Run this command if 'maternal_smoking_factor' column does not exist
-    message(paste0("maternal_smoking_factor not found in phenotype dataframe. This is expected if this is an adult dataset.", "If this is a child dataset and your study has smoking data, please ensure your phenotype dataframe has either maternal_smoking_factor or maternal_smoking_numeric", sep = "\n"))
+    # Run this command if 'Maternal_smoking_factor' column does not exist
+    message(paste0("Maternal_smoking_factor not found in phenotype dataframe. This is expected if this is an adult dataset.", "If this is a child dataset and your study has smoking data, please ensure your phenotype dataframe has either maternal_smoking_factor or maternal_smoking_numeric", sep = "\n"))
   }
 
   # 4. Sex EWAS
