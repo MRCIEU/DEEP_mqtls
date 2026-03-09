@@ -32,6 +32,7 @@ if [ "$inferred_build" -eq 37 ]; then
             --exclude ${miss_liftover} \
             --update-map ${liftover_map} \
             --make-bed \
+			--output-chr 26 \
             --out ${bfile} \
 			--threads ${nthreads}
     else
@@ -40,6 +41,7 @@ if [ "$inferred_build" -eq 37 ]; then
             --new-id-max-allele-len 70 \
             --update-map ${liftover_map} \
             --make-bed \
+			--output-chr 26 \
             --out ${bfile} \
 			--threads ${nthreads}
     fi
@@ -48,6 +50,7 @@ elif [ "$inferred_build" -eq 38 ]; then
     ${plink2} --bfile "${bfile_raw}" \
         --new-id-max-allele-len 70 \
         --make-bed \
+		--output-chr 26 \
         --out ${bfile} \
 		--threads ${nthreads}
 fi
@@ -115,6 +118,7 @@ if [ "$n23" -gt "0" ]; then
 			--new-id-max-allele-len 70 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
 			--make-bed \
+			    --output-chr 26 \
 			--out ${bfile}_format \
 			--threads ${nthreads}
 
@@ -133,6 +137,7 @@ ${plink2} \
 	--set-all-var-ids @:#_\$1_\$2 \
 	--make-bed \
 	--out ${bfile}1 \
+	--output-chr 26 \
     --threads ${nthreads}
 
 cp ${bfile}_format.bim ${bfile}.bim.original1
@@ -154,6 +159,7 @@ ${plink2} \
 	--rm-dup exclude-mismatch \
 	--new-id-max-allele-len 70 \
 	--make-bed \
+	--output-chr 26 \
 	--out ${bfile}1 \
 	--threads ${nthreads}
 
@@ -178,6 +184,7 @@ ${plink2} \
 	--new-id-max-allele-len 70 \
 	--make-bed \
 	--out ${bfile}1 \
+	--output-chr 26 \
 	--threads ${nthreads}
 
 cp ${bfile}.bim ${bfile}.bim.original3
@@ -230,6 +237,7 @@ elif [ "${related}" = "no" ]; then
 			--keep ${grmfile_all}.grm.id \
 			--make-bed \
 			--out ${bfile}1 \
+			--output-chr 26 \
 			--threads ${nthreads}
 
 		mv ${bfile}1.bed ${bfile}.bed
@@ -335,6 +343,7 @@ echo "Calculating MAF from formatted bfile with chr:pos format"
 ${plink2} \
 	--bfile "${bfile}" \
 	--new-id-max-allele-len 70 \
+	--output-chr 26 \
 	--freq \
 	--out "${bfile}" \
 	--threads ${nthreads}
@@ -470,6 +479,7 @@ ${plink2} \
 	--freq \
 	--hardy \
 	--missing \
+	--output-chr 26 \
 	--out ${section_01_dir}/data \
 	--threads ${nthreads}
 
