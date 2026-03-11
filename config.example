@@ -1,132 +1,191 @@
 #!/usr/bin/env bash
 
-# General details
-# Please make sure this is alphanumeric (underscores allowed; no spaces allowed)
+# =============================================================================
+# DEEP PIPELINE CONFIGURATION FILE
+# =============================================================================
+# For detailed guidance on each parameter, see the DEEP wiki:
+# https://github.com/MRCIEU/DEEP_mqtls/wiki/Install-and-set-up
+# =============================================================================
+
+
+# =============================================================================
+# SECTION A: ANALYST & STUDY DETAILS
+# =============================================================================
+
+# Study name: alphanumeric only, underscores allowed, no spaces
+# Example: study_name="ABC or ABC_child"
 study_name=""
 
-# Analyst's name
+# Your name
 analyst_name=""
 
-# Analyst's email address
+# Your email address
 analyst_email=""
 
-# This should be provided to you from the DEEP developers (along with a password)
+# SFTP username provided by the DEEP developers
+# Contact Josine.Min@bristol.ac.uk or Hannah.Elliott@bristol.ac.uk to obtain this
 sftp_username=""
 
-# This should be "~/.ssh/id_rsa" or "~/.ssh/id_dsa" on your HPC system/server. See instructions on the wiki on how to set up your key.
-key=""
+# Path to your SSH private key for authenticating with the DEEP SFTP server
+# This is typically ~/.ssh/id_rsa or ~/.ssh/id_ed25519
+# Instructions for setting up SSH keys:
+# https://github.com/MRCIEU/DEEP_mqtls/wiki/SSH-Key-Setup
+key="~/.ssh/id_ed25519"
 
-# Full path to where the input_data folder is which contains your data formatted as described in the github repo
-home_directory=""
 
-# Full path to the cloned github repo of scripts
-scripts_directory=""
+# =============================================================================
+# SECTION B: METHYLATION DATA
+# =============================================================================
 
-# Full path to the R and python directories if you don't use conda/mamba and can't use the "module load" command on your server to open R and python.
-R_directory=""
-# Here you need Python 3.9 or later for Hail package and python 2.7 for hase
-# for python 3
-Python_directory=""
-# for python 2
-Python2_directory=""
-
-# cohort information
-# Methylation array (one of the following: 450k, epic, or epic2. Please note that names are case-sensitive)
+# Methylation array platform used to generate your data
+# Options: 450k | epic | epic2   (case-sensitive)
 methylation_array="epic"
 
-# please specify tissue type: blood, PBMC, PBL, cord, saliva, or buccal
+# Tissue type from which DNA methylation was measured
+# Options: blood | PBMC | PBL | cord | saliva | buccal (case-sensitive)
 tissue="blood"
 
-# please specify the names of study specific variables for EWAS
-# these are study specific variables you usually adjust for such as case/control status, sample type, array type
-# if you do include a batch variable we would suggest not using slide (as there are too many catagories) - instead of slide we suggest using plate
-# these need to be the column names for these variables and so will need _factor or _numeric at the end
-# please leave a space between each variable
-study_specific_vars="Case_status_factor Sampletype_factor"
-
-# please specify the genome build (one of the following: 37 or 38)
-# 37 means GRCh37, AKA hg19 
-# 38 means GRCh38, AKA hg38.
-genome_build="38"
-
-# please specify whether methylation has been obtained for sorted cell types or bulk tissue (yes if you have e.g DNA methylation from sorted cell types)
+# Were the methylation measurements obtained from sorted (purified) cell types,
+# rather than bulk (mixed) tissue?
+# Example: "yes" if you have methylation from CD4+ T cells, monocytes, etc.
+# Options: yes | no
 sorted_methylation="no"
 
-# Age of samples (one of the following: <18, >18, all.)
-age=">18"
-
-# Smoking: Method for smoking prediction. (one of the following: "own", "maternal"). Own smoking is smoking of the individual. Maternal is smoking history of mother or environmental smoke exposure (for childhood cohorts)
-smoking="own"
-
-# Relatedness
-# Are the samples related? e.g. Complex family data, twin data etc. If so set this to "yes"
-# If these samples are expected to be unrelated set this to "no" (even if there may be cryptic relatedness)
-related="no"
-
-# reference panel (1000g, 1000g+h3a, topmed, 1000g+caapa)
-reference="topmed"
-
-# Specify the most similar ancestry of your samples with one of the following: EUR, AFR, AMR, EAS, SAS, or None.
-# If you are not sure, or ancestry is not matching with any of these populations.
-# This step is required by EasyQC, to compare the allele frequencies of your samples against reference panel of 1000G populations.
-ancestry="SAS"
-
-# Input data files
-betas="${home_directory}/input_data/data.RData"
-bfile_raw="${home_directory}/input_data/data"
-vcf_dir="${home_directory}/input_data/vcf/"
-covariates="${home_directory}/input_data/covariates.txt"
-
-# Specify the directory where raw idat files are stored (if you have them)
+# File path to raw IDAT files (leave blank if not available)
+# IDAT files are the raw output from the Illumina methylation array scanner
 idat_directory=""
 
-# Optional phenotype files for EWAS analyses (if there are no phenotypes available leave as NULL)
-phenotypes="${home_directory}/input_data/phenotypes.txt"
 
-# Imputation quality scores
-# This should be a file with three columns, SNP, MAF and quality scores
-quality_scores="${home_directory}/input_data/data.info"
+# =============================================================================
+# SECTION C: GENOTYPE DATA
+# =============================================================================
 
-# Cellcounts
-# Set this to the file name if you have directly measured cellcounts. These will be used for comparison with predicted celltypes. If you don't have them, set to NULL
-measured_cellcounts="NULL"
+# Genome build of your GENOTYPE reference data
+# Options: 37 (= GRCh37 / hg19) | 38 (= GRCh38 / hg38)
+# If unsure, check the manifest file used for your array
+genome_build="38"
 
-# Computing resources
-# Memory in GB; If on HPC systems, match this to the value requested in your job submission
+# Ancestry of your study participants
+# This is used to compare allele frequencies against the reference panel (TopMed)
+# Options: EUR | AFR | AMR | EAS | SAS | None
+# Use "None" if ancestry is mixed or does not clearly match one population
+ancestry="AFR"
+
+# Reference panel used for genotype imputation
+# Options: 1000g | 1000g + h3africa | topmed | 1000g + caapa
+# Use the panel that matches what was used during your imputation step
+# TopMed is recommended for diverse ancestries
+reference="topmed"
+
+# Are the samples related? (e.g. family data, twin data)
+# Options: yes | no
+# Use "no" if you are unsure whether cryptic relatedness exists
+related="no"
+
+
+# =============================================================================
+# SECTION D: PHENOTYPE DATA
+# =============================================================================
+# Study-specific covariates for EWAS adjustment
+# These are variables specific to your study design that are not universally
+# collected (e.g. case/control status, sample processing batch, array type).
+# Do NOT include standard covariates already handled by the pipeline (age, sex, cell counts).
+# Variable names must match column headers in your covariates file exactly,
+# and must end in _factor (categorical) or _numeric (continuous).
+# Separate multiple variables with a single space.
+# Example: study_specific_vars="CaseControl_factor Plate_factor"
+# Note on batch variables: only include if you have evidence of a batch effect
+# Avoid using slide (too many categories); use plate instead.
+# https://github.com/MRCIEU/DEEP_mqtls/wiki/Phenotype-data
+study_specific_vars=""
+
+# Age range of the study participants
+# Options: <18 | >18 | all
+# Use "all" if your cohort spans both adults and children, or if a small
+# minority fall outside the main age group (e.g. 95% adults with a few <18)
+age=">18"
+
+# Cellcounts: path to file containing directly measured cell type proportions
+# These will be compared against pipeline-predicted cell type proportions
+# Set to NULL if you do not have directly measured cellcounts
+measured_cellcounts=""
+
+# =============================================================================
+# SECTION E: SYSTEM PATHS AND INPUT DATA FILES
+# =============================================================================
+
+# Full path to your project home directory
+# This should be the parent folder containing your input_data/ subdirectory
+# Example: home_directory="/home/username/projects/DEEP"
+home_directory=""
+
+# Full path to the cloned DEEP_mqtls GitHub repository
+# Example: scripts_directory="/home/username/projects/DEEP/DEEP_mqtls"
+scripts_directory=""
+
+# Full path to the bin/ directory containing R and Python executables
+# Only required if you are NOT using conda/mamba AND cannot use "module load" on your HPC; otherwise, leave these blank
+R_directory=""
+Python_directory=""   # Python 3.9 or later (required for Hail)
+Python2_directory=""  # Python 2.7 (required for HASE; leave blank if not available)
+
+# Input data file paths
+# These default to the expected locations within your home_directory/input_data/ folder
+betas="${home_directory}/input_data/data.RData"
+bfile_raw="${home_directory}/input_data/data"
+vcf_dir="${home_directory}/input_data/topmed_vcfs/"
+covariates="${home_directory}/input_data/covariates.txt"
+phenotypes="${home_directory}/input_data/phenotypes.txt"   # Set to NULL if no phenotypes available
+quality_scores="${home_directory}/input_data/data.info"    # File with columns: SNP, MAF, quality score
+
+
+# =============================================================================
+# SECTION F: COMPUTING RESOURCES AND FILTERING PARAMETERS
+# =============================================================================
+# The defaults below are suitable for most datasets.
+# Only modify if you have specific requirements or are running on a resource-limited system.
+# See the DEEP wiki for guidance: https://github.com/MRCIEU/DEEP_mqtls/wiki
+
+# Memory allocation in GB
+# If running on an HPC (eg. using SLURM), set this to match what you request in your job submission script
 mem="20"
-# Parallelisation parameters
-# Number of threads to use per node
+
+# Number of CPU threads to use (parallelisation)
 nthreads="16"
 
-# Number of chunks to split methylation data during normalisation
+# Chunk size for methylation data during normalisation
+# Increase if you have memory issues; decrease for faster parallel runs on large datasets
 meth_chunks="100"
 
-# Number of chunks to split genetic data during mQTL and cellcount GWAS
+# Chunk size for genetic data during mQTL analysis and cellcount GWAS
+# A higher value means more parallel jobs but each job processes fewer SNPs
+# meth_chunks splits CpG sites; genetic_chunks splits SNPs - these are independent
 genetic_chunks="1000"
 
-# SNP filtering
-# HWE threshold, minor allele frequency, SNP missingness, individual missingness.
-# See 01b
-snp_hwe="1e-6"
-snp_maf="0.01"
-snp_miss="0.05"
-snp_imiss="0.05"
+# SNP quality control thresholds
+snp_hwe="1e-6"      # Hardy-Weinberg equilibrium p-value threshold
+snp_maf="0.01"      # Minor allele frequency minimum
+snp_miss="0.05"     # Maximum SNP missingness rate
+snp_imiss="0.05"    # Maximum individual missingness rate
 
-# GRM parameters (see 01b).
-rel_cutoff="0.05"
-grm_maf_cutoff="0.01"
+# Genetic relatedness matrix (GRM) parameters
+rel_cutoff="0.05"       # Relatedness coefficient threshold for sample exclusion
+grm_maf_cutoff="0.01"   # MAF threshold for SNPs used in GRM calculation
 
-# PCA paramaters (see 01b).
-n_pcs="20"
-pca_sd="7"
+# Principal component analysis (PCA) parameters
+n_pcs="20"      # Number of genetic PCs to compute
+pca_sd="7"      # SD threshold for outlier removal in PCA
 
-# Methylation PCs (see 03c and d).
-n_meth_pcs="20"
-meth_pc_cutoff="0.8"
-meth_pc_threshold="1e-7"
+# Methylation PC parameters (used in EWAS adjustment)
+n_meth_pcs="20"              # Number of methylation PCs to compute
+meth_pc_cutoff="0.8"         # Variance explained threshold for selecting PCs
+meth_pc_threshold="1e-7"     # P-value threshold for including methylation PCs as covariates
 
-# Matrixeqtl parameters
+# MatrixEQTL soft threshold (for cis-mQTL analysis)
 soft_threshold="1e-5"
 
-# DO NOT MODIFY
+
+# =============================================================================
+# DO NOT MODIFY BELOW THIS LINE
+# =============================================================================
 source ${scripts_directory}/resources/parameters
