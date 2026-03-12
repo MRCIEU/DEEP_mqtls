@@ -79,8 +79,11 @@ if ("Smoking_factor" %in% colnames(pheno)) {
   # Create Smoking_factor based on Smoking_numeric
   pheno$Smoking_factor <- ifelse(pheno$Smoking_numeric == 0, "No", "Yes")
   message("Smoking_factor variable created based on Smoking_numeric.")
+} else if ("Maternal_smoking_factor" %in% colnames(pheno)){
+  message("Maternal_smoking_factor variable already exists.")
+  pheno$Smoking_factor <- pheno$Maternal_smoking_factor
 } else {
-  message("Smoking_numeric column not found. Cannot create Smoking_factor. Please check your phenotype data")
+  message("Smoking column not found. Cannot create Smoking_factor. Please check your phenotype data")
 }
 
 message("Predicting mcigarette smoking score")#############################################
