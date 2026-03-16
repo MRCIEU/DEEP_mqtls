@@ -15,7 +15,7 @@ missing=()
 for i in {1..22}; do
   file=$(find "${vcf_dir}" -maxdepth 1 -type f \
     -regextype posix-extended \
-    -iregex ".*/chr${i}([^0-9].*vcf.*|vcf.*)" \
+    -iregex ".*/chr${i}([^0-9].*)?\.vcf\.(gz|bgz|zip)" \
     -print -quit)
 
   if [ -z "${file}" ]; then
@@ -37,7 +37,7 @@ for i in {1..22}; do
 
     chr_vcf=$(find "${vcf_dir}" -maxdepth 1 -type f \
     -regextype posix-extended \
-    -iregex ".*/chr${i}([^0-9].*vcf.*|vcf.*)" \
+    -iregex ".*/chr${i}([^0-9].*)?\.vcf\.(gz|bgz|zip)" \
     -print -quit)
 
   echo "Processing chr${i} VCF: ${chr_vcf}"
