@@ -32,6 +32,7 @@ pkglist <- c(
     "impute",
     "EpiDISH",
     "ewaff",
+    "meffonym",
     "MASS",
     "dplyr",
     "magrittr",
