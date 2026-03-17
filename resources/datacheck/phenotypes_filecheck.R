@@ -16,6 +16,17 @@ pheno <- read.table(phenotype_file,header=T,stringsAsFactors = F, colClasses = c
 cov1 <- dim(pheno)[1]
 cov2 <- dim(pheno)[2]
 
+# Check for duplicate IIDs in the phenotype file
+if (any(duplicated(pheno$IID))) {
+  duplicate_ids <- unique(pheno$IID[duplicated(pheno$IID)])
+  msg <- paste0("Duplicate IIDs found in phenotype file: ",
+                paste(head(duplicate_ids, 5), collapse = ", "),
+                if(length(duplicate_ids) > 5) "..." else "")
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+
+}
+
 meth_ids <- scan(meth_ids_file, what="character")
 phenotypes <- read.csv(phenotype_names,header = F)
 phenotypes <- as.character(phenotypes[,1])
