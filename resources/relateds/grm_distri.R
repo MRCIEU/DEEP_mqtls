@@ -60,37 +60,63 @@ x <- grm$grm$grm
 # only keep values within plotting range
 x_plot <- x[x >= xmin & x <= xmax]
 
-hist(
-  x_plot,
-  breaks = 500,
-  xaxt = "n",
-  xlim = c(xmin, xmax),
-  main = "GRM distribution",
-  xlab = "GRM value"
-)
+h <- hist(x_plot, breaks = 100, plot = FALSE)
+plot_counts <- h$counts
+plot_counts[plot_counts <= 0] <- 0.5 # Use 0.5 to keep it below 1 on log scale
 
-axis(
-  1,
-  at = ticks,
-  labels = sprintf("%.2f", ticks)
-)
-
-abline(v = cutoff, col = "red", lwd = 2)
-
-# out-of-range counts
 n_lo <- sum(x < xmin, na.rm = TRUE)
 n_hi <- sum(x > xmax, na.rm = TRUE)
 
-legend(
-  "topright",
-  legend = c(
-    paste0("cutoff = ", cutoff),
-    paste0("< ", xmin, ": ", n_lo),
-    paste0("> ", xmax, ": ", n_hi)
-  ),
-  col = c("red", "black", "black"),
-  lwd = c(2, NA, NA),
-  bty = "n"
+legend_text <- c(
+  paste0("Cutoff = ", cutoff),
+  paste0("< ", xmin, ": ", n_lo),
+  paste0("> ", xmax, ": ", n_hi),
+  "0.00: Unrelated",
+  "0.125: Third-degree",
+  "0.25: Half-sib",
+  "0.50: Full-sib/PO",
+  "1.00: Self/MZ"
 )
 
+colors <- c("red", "black", "black", "blue", "cyan", "darkgreen", "purple", "magenta")
+
+lwds <- c(2, NA, NA, 1, 1, 1, 1, 1)
+ltys <- c(2, NA, NA, 1, 1, 1, 1, 1)
+
+plot(
+  h$mids, 
+  plot_counts, 
+  type = "h",             
+  lwd = 5,                
+  lend = 1,               
+  log = "y", 
+  xaxt = "n",
+  xlim = c(xmin, xmax),
+  ylim = c(1, max(plot_counts) * 2),
+  main = "GRM Distribution (Log Y-scale)",
+  xlab = "Genetic Relationship Value",
+  ylab = "Frequency (Log scale)",
+  col = "darkgray"
+)
+
+axis(1, at = seq(xmin, xmax, by = 0.1), labels = sprintf("%.1f", seq(xmin, xmax, by = 0.1)))
+
+abline(v = cutoff, col = "red", lwd = 2, lty = 2)
+abline(v = 0, col = "blue", lwd = 1)
+abline(v = 0.125, col = "cyan", lwd = 1)
+abline(v = 0.25, col = "darkgreen", lwd = 1)
+abline(v = 0.5, col = "purple", lwd = 1)
+abline(v = 1.0, col = "magenta", lwd = 1)
+
+legend(
+  "topright",
+  legend = legend_text,
+  col = colors,
+  lwd = lwds,
+  lty = ltys,
+  bty = "n",
+  cex = 0.8,
+  y.intersp = 1.2
+)
 dev.off()
+message(paste("Plot saved to", outfile, ".pdf"))
