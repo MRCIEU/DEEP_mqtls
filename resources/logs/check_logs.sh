@@ -148,8 +148,9 @@ check_logs_01 () {
 	else
 		echo "IDAT directory found, checking 01f log file."
 		compare_version "01f"
-		if grep -i -q "Shrunk QC objects created" ${section_01f_logfile}; then
-			echo "01f-normalization.sh completed successfully."
+		if ls "${section_01_dir}/logs_f"/log*.txt >/dev/null 2>&1 && \
+   			grep -i -q "Shrunk QC objects created" "${section_01_dir}/logs_f"/log*.txt; then
+    		echo "01f-normalization.sh completed successfully."
 		else
 			echo "Problem: 01f-normalization.sh did not complete successfully"
 			exit 1
