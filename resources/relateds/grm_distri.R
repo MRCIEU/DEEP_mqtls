@@ -80,8 +80,8 @@ legend_text <- c(
   paste0("> ", xmax, ": ", n_hi),
   "0.00: Unrelated",
   "0.125: Third-degree",
-  "0.25: Half-sib",
-  "0.50: Full-sib/PO",
+  "0.25: Second-degree",
+  "0.50: First-degree",
   "1.00: MZ/Duplicates"
 )
 
