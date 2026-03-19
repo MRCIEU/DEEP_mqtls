@@ -1,5 +1,5 @@
 #!/bin/bash
-# generate pcs on the probes aross all the control probles
+# generate pcs on the probes across all the control probes
 # quantile normalize the datasets together
 
 # https://github.com/perishky/meffil/wiki/Functional-normalizing-separate-datasets
@@ -53,6 +53,19 @@ section_message () {
 if [ -z "${idat_directory}" ]; then
     echo "Error: idat_directory is empty. Please set idat_directory before running this script."
 	echo "If you only have access to qc.objects data, instead of idat files. Please contact Haotian.tang@bristol.ac.uk"
+    exit 1
+fi
+
+if [ ! -d "${idat_directory}" ]; then
+    echo "Error: The idat_directory path does not exist or is not a directory."
+    echo "Provided path: ${idat_directory}"
+    echo "Please check your config file and ensure the path is correct."
+    exit 1
+fi
+
+if [ ! -r "${idat_directory}" ]; then
+    echo "Error: You do not have read permissions for the idat_directory."
+    echo "Path: ${idat_directory}"
     exit 1
 fi
 
