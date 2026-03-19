@@ -47,7 +47,15 @@ outfile <- arguments[3]
 
 grm <- readGRM(infile)
 message("GRM distribution:")
-print(summary(grm$grm$grm))
+
+diag_idx <- grm$grm$id1 == grm$grm$id2
+grm_diagonal <- grm$grm[diag_idx, ]
+grm_off_diag <- grm$grm[!diag_idx, ]
+
+message("\n--- Summary of Diagonal Elements (Self-Relationship) ---")
+print(summary(grm_diagonal$grm))
+message("\n--- Summary of Off-Diagonal Elements (Pairwise) ---")
+print(summary(grm_off_diag$grm))
 
 pdf(paste0(outfile, ".pdf"), width = 10, height = 5)
 
@@ -55,7 +63,7 @@ xmin <- -0.3
 xmax <- 1.3
 tick <- 0.1
 ticks <- seq(xmin, xmax, by = tick)
-x <- grm$grm$grm
+x <- grm_off_diag$grm
 
 # only keep values within plotting range
 x_plot <- x[x >= xmin & x <= xmax]
