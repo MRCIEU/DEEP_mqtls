@@ -56,7 +56,6 @@ message("\n--- Summary of Diagonal Elements (Self-Relationship) ---")
 print(summary(grm_diagonal$grm))
 message("\n--- Summary of Off-Diagonal Elements (Pairwise) ---")
 print(summary(grm_off_diag$grm))
-
 pdf(paste0(outfile, ".pdf"), width = 10, height = 5)
 
 xmin <- -0.3
@@ -83,7 +82,7 @@ legend_text <- c(
   "0.125: Third-degree",
   "0.25: Half-sib",
   "0.50: Full-sib/PO",
-  "1.00: Self/MZ"
+  "1.00: MZ/Duplicates"
 )
 
 colors <- c("red", "black", "black", "blue", "cyan", "darkgreen", "purple", "magenta")
