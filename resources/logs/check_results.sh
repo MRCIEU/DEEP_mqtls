@@ -39,10 +39,10 @@ check_results_01a () {
 
 check_results_01b () {
 
-	if [ -f "${section_01_dir}/inferred_build.txt" ]; then
-		echo "Inferred build file present"
+	if [ -f "${section_01_dir}/01b_inferred_build.txt" ]; then
+		echo "Inferred build file from 01b present"
 	else
-		echo "Problem: inferred build file is absent"
+		echo "Problem: inferred build file from 01b is absent"
 		exit 1
 	fi
 
@@ -379,6 +379,13 @@ check_results_01g () {
         echo "Problem: directory ${section_01_dir}/01g does not exist"
         exit 1
     fi
+
+    if [ -f "${section_01_dir}/01g_inferred_build.txt" ]; then
+		echo "Inferred build file from 01g present"
+	else
+		echo "Problem: inferred build file from 01g is absent"
+		exit 1
+	fi
 
     # Main result prefixes
     local prefixes=(
