@@ -23,7 +23,6 @@ If you are interested in joining or finding out more, please contact either Josi
 ## Guidance for how to use this repository
 
 Detailed instructions for running each stage of the pipeline [can be found here](https://github.com/MRCIEU/DEEP_mqtls/wiki). 
-to change it
 
 This includes details on how what software you need to have installed, and the required input data and their format. 
 
