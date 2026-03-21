@@ -123,11 +123,16 @@ home_directory=""
 # Example: scripts_directory="/home/username/projects/DEEP/DEEP_mqtls"
 scripts_directory=""
 
-# Full path to the bin/ directory containing R and Python executables
-# Only required if you are NOT using conda/mamba AND cannot use "module load" on your HPC; otherwise, leave these blank
+# Paths to R/Python executables:
+# - If you use conda/mamba (`deep_env`) OR your HPC provides tools via `module load`,
+#   leave all three fields empty:
+#   R_directory="", Python_directory="", Python2_directory=""
+# - Only set these paths if you are not using conda/mamba or module load.
+# - If you set one path manually, set all three:
+#   R_directory, Python_directory, and Python2_directory.
 R_directory=""
 Python_directory=""   # Python 3.9 or later (required for Hail)
-Python2_directory=""  # Python 2.7 (required for HASE; leave blank if not available)
+Python2_directory=""  # Python 2.7 (required for HASE)
 
 # Input data file paths
 # These default to the expected locations within your home_directory/input_data/ folder
