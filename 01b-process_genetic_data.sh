@@ -493,8 +493,7 @@ echo "Moving smiss file to processed_data/genetic_data"
 mv ${section_01_dir}/data.smiss.gz ${home_directory}/processed_data/genetic_data/data.smiss.gz
 
 # Check missingness
-# zcat auto-resolve data.smiss -> data.smiss.gz on Linux; keep ".gz" explicit for readability.
-missingness=`zcat ${home_directory}/processed_data/genetic_data/data.smiss.gz | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
+missingness=`zcat ${home_directory}/processed_data/genetic_data/data.smiss | awk '{ sum += $6; n++ } END { if (n > 0) print sum / n; }'`
 
 echo "Average missingness: ${missingness}"
 
