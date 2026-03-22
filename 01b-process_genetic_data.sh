@@ -217,6 +217,7 @@ if [ "${related}" = "yes" ]; then
 	
 elif [ "${related}" = "no" ]; then
 	echo "Removing any cryptic relateds"
+	n_old=$(wc -l < "${grmfile_all}.grm.id")
 	# removing cryptic related samples that have value higher than rel_cutoff from the GRM and the bfile
 	${gcta} \
 		--grm ${grmfile_all} \
@@ -228,7 +229,20 @@ elif [ "${related}" = "no" ]; then
 		mv ${grmfile_all}1.grm.id ${grmfile_all}.grm.id
 		mv ${grmfile_all}1.grm.bin ${grmfile_all}.grm.bin
 		
-		echo "Sample size after removal cryptic relateds: $(wc -l < "${grmfile_all}.grm.id")"
+		n_new=$(wc -l < "${grmfile_all}.grm.id")
+		echo "Sample size after removal cryptic relateds: ${n_new}"
+
+		loss_percent=$(( (n_old - n_new) * 100 / n_old ))
+
+		if [ "${loss_percent}" -gt 10 ]; then
+    		echo "-------------------------------------------------------"
+    		echo "WARNING: High sample loss detected!"
+    		echo "Removed $((n_old - n_new)) samples (${loss_percent}% of total)."
+    		echo "The rel_cutoff (${rel_cutoff}) may be too stringent."
+			echo "Please contact please contact Haotian (haotian.tang@bristol.ac.uk)."
+    		echo "-------------------------------------------------------"
+			exit 1
+		fi
 
 		# filtering out the related samples
 		${plink2} \
