@@ -91,7 +91,6 @@ then
 	${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
 		${methylation_no_outliers_ewas} \
 		${winsorized_phenotype_file} \
-		${bfile}.fam \
 		${study_name} \
 		${age_smoking_prediction_plot} \
 		${updated_phenotype_file} \

@@ -13,11 +13,10 @@ arguments <- commandArgs(T)
 
 beta_file <- arguments[1]
 pheno_file <- arguments[2] # [winsorized_covariates_file from check_phenotypes]
-fam_file <- arguments[3]
-study_name <- arguments[4]
-prediction_plot <- arguments[5]
-updated_pheno_file <- arguments[6] 
-smoking_prediction_output_file <- arguments[7] 
+study_name <- arguments[3]
+prediction_plot <- arguments[4]
+updated_pheno_file <- arguments[5] 
+smoking_prediction_output_file <- arguments[6] 
 
 suppressPackageStartupMessages(library(meffonym))
 suppressPackageStartupMessages(library(ggplot2))
@@ -43,8 +42,6 @@ participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
 pheno <- pheno[pheno$IID%in%participants,]
 norm.beta <- norm.beta[,participants]
 message("Number of samples with covariate and methylation data: ", length(participants))
-
-message(paste(nrow(fam_file), "samples with genetic data matched to methylation data"))
 
 message("Predicting DNAmAge")#############################################
 
