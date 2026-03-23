@@ -1,0 +1,463 @@
+---
+title: "DEEP Pipeline Summary Report"
+subtitle: "`r params$study_name`"
+date: "`r format(Sys.time(), '%Y-%m-%d %H:%M')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+    self_contained: true
+params:
+  home_directory: ""
+  scripts_directory: ""
+  section_01_dir: ""
+  study_name: ""
+  ancestry: ""
+  genome_build: ""
+  meth_chip: ""
+  n_pcs: 10
+  n_hcs: 100
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center"
+)
+library(knitr)
+library(kableExtra)
+# Helper function to embed PDF as image
+embed_pdf <- function(pdf_path, width = "100%") {
+  if (!file.exists(pdf_path)) {
+    return(paste0("**File not found:** `", basename(pdf_path), "`"))
+  }
+  if (requireNamespace("pdftools", quietly = TRUE)) {
+    png_path <- tempfile(fileext = ".png")
+    tryCatch({
+      pdftools::pdf_convert(pdf_path, format = "png", pages = 1, 
+                            filenames = png_path, dpi = 150, verbose = FALSE)
+      knitr::include_graphics(png_path)
+    }, error = function(e) {
+      paste0("**Error converting PDF:** `", basename(pdf_path), "`")
+    })
+  } else {
+    paste0("[PDF: ", basename(pdf_path), "](", pdf_path, ")")
+  }
+}
+# Helper function to embed image
+embed_image <- function(img_path, width = "100%") {
+  if (!file.exists(img_path)) {
+    return(paste0("**File not found:** `", basename(img_path), "`"))
+  }
+  knitr::include_graphics(img_path)
+}
+# Helper function to check file existence
+file_status <- function(path) {
+  if (file.exists(path)) "Done" else "Missing"
+}
+# Helper function to parse 01d log for positive/negative control results
+parse_01d_log <- function(log_file) {
+  if (!file.exists(log_file)) {
+    return(NULL)
+  }
+  
+  lines <- readLines(log_file, warn = FALSE)
+  results <- list()
+  current_cpg <- NULL
+  current_type <- NULL
+  current_chr <- NULL
+  current_pos <- NULL
+  
+  for (i in seq_along(lines)) {
+    line <- lines[i]
+    
+    # Detect positive control
+    if (grepl("Processing positive control:", line)) {
+      current_type <- "positive"
+      current_cpg <- sub(".*control: (cg[0-9]+),.*", "\\1", line)
+      current_chr <- sub(".*SNP chr: ([0-9]+),.*", "\\1", line)
+      current_pos <- sub(".*pos: ([0-9]+),.*", "\\1", line)
+      results[[current_cpg]] <- list(type = current_type, chr = current_chr, pos = current_pos)
+    }
+    
+    # Detect negative control
+    if (grepl("Processing negative control:", line)) {
+      current_type <- "negative"
+      current_cpg <- sub(".*control: (NEG_cg[0-9]+).*", "\\1", line)
+      results[[current_cpg]] <- list(type = current_type)
+    }
+    
+    # Extract lowest p-value (positive controls only)
+    if (grepl("Lowest p-value within", line) && !is.null(current_cpg)) {
+      pval <- sub(".*: ([0-9.e+-]+).*", "\\1", line)
+      results[[current_cpg]]$pvalue <- pval
+    }
+    
+    # Extract lambda (use nocisChr version for positive controls)
+    if (grepl("with lambda", line) && !is.null(current_cpg)) {
+      lambda <- sub(".*with lambda ([0-9.]+).*", "\\1", line)
+      if (grepl("nocisChr", line) || current_type == "negative") {
+        results[[current_cpg]]$lambda <- lambda
+      } else if (is.null(results[[current_cpg]]$lambda)) {
+        # Use regular lambda if nocisChr not available
+        results[[current_cpg]]$lambda <- lambda
+      }
+    }
+  }
+  
+  if (length(results) == 0) return(NULL)
+  
+  # Convert to data.frame
+  do.call(rbind, lapply(names(results), function(cpg) {
+    r <- results[[cpg]]
+    data.frame(
+      CpG = cpg,
+      Type = r$type,
+      Chr = ifelse(is.null(r$chr), NA, r$chr),
+      Pos = ifelse(is.null(r$pos), NA, r$pos),
+      Min_Pvalue = ifelse(is.null(r$pvalue), NA, r$pvalue),
+      Lambda = ifelse(is.null(r$lambda), NA, r$lambda),
+      stringsAsFactors = FALSE
+    )
+  }))
+}
+# Define paths
+home_dir <- params$home_directory
+section_01 <- params$section_01_dir
+processed_data <- file.path(home_dir, "processed_data")
+Configuration Summary {.tabset}
+Study Information
+config_df <- data.frame(
+  Parameter = c("Study Name", "Ancestry", "Genome Build", "Methylation Chip", 
+                "Number of Genetic PCs", "Number of HCs"),
+  Value = c(params$study_name, params$ancestry, params$genome_build, 
+            params$meth_chip, params$n_pcs, params$n_hcs)
+)
+kable(config_df, col.names = c("Parameter", "Value")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+Directory Structure
+dir_df <- data.frame(
+  Directory = c("Home Directory", "Results (01)", "Processed Data"),
+  Path = c(home_dir, section_01, processed_data),
+  Status = c(
+    ifelse(dir.exists(home_dir), "Exists", "Missing"),
+    ifelse(dir.exists(section_01), "Exists", "Missing"),
+    ifelse(dir.exists(processed_data), "Exists", "Missing")
+  )
+)
+kable(dir_df) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+---
+01a: Data Check {.tabset}
+Cohort Descriptives
+cohort_desc_file <- file.path(section_01, "cohort_descriptives.RData")
+if (file.exists(cohort_desc_file)) {
+  load(cohort_desc_file)
+  
+  desc_df <- data.frame(
+    Metric = c(
+      "Genotype Sample Size",
+      "Number of SNPs",
+      "Mean Imputation Info",
+      "Mean MAF",
+      "Number of CpGs",
+      "Methylation Sample Size",
+      "Common Sample Size (Geno + Meth)",
+      "Measured Cell Counts"
+    ),
+    Value = c(
+      cohort_summary$geno_sample_size,
+      cohort_summary$n_snp,
+      round(cohort_summary$mean_info, 4),
+      round(cohort_summary$mean_maf, 4),
+      cohort_summary$n_CpGs,
+      cohort_summary$methylation_sample_size,
+      cohort_summary$geno_meth_common_ids,
+      cohort_summary$measured_cellcounts
+    )
+  )
+  
+  kable(desc_df, col.names = c("Metric", "Value")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+} else {
+  cat("**cohort_descriptives.RData not found**")
+}
+SNPs by Chromosome
+snp_chr_plot <- file.path(section_01, "no_snps_by_chr.pdf")
+embed_pdf(snp_chr_plot)
+SNP Quality
+quality_plot <- file.path(section_01, "snp_quality.pdf")
+embed_pdf(quality_plot)
+Sex Check (Methylation)
+sex_plot <- file.path(section_01, "XY_methylation_vs_sex.pdf")
+embed_pdf(sex_plot)
+---
+01b: Genetic Data Processing {.tabset}
+PCA Plot
+pca_plot <- file.path(section_01, "pcaplot.pdf")
+embed_pdf(pca_plot)
+Global Ancestry PCA
+global_pca <- file.path(section_01, paste0(params$study_name, "_global_pca.png"))
+if (file.exists(global_pca)) {
+  embed_image(global_pca)
+} else {
+  cat("**Global PCA plot not found**")
+}
+GRM Distribution
+grm_plot <- file.path(section_01, "grm_distrib_01b.pdf")
+embed_pdf(grm_plot)
+EasyQC Allele Frequency Check
+easyqc_plot <- file.path(section_01, "easyQC_topmed.multi.AFCHECK.png")
+if (file.exists(easyqc_plot)) {
+  embed_image(easyqc_plot)
+} else {
+  cat("**EasyQC plot not found**")
+}
+---
+01c: Phenotypes & Methylation {.tabset}
+GWAS/EWAS Sample Descriptives
+cohort_was_file <- file.path(section_01, "cohort_descriptives_was.RData")
+if (file.exists(cohort_was_file)) {
+  load(cohort_was_file)
+  
+  desc_df <- data.frame(
+    Metric = names(cohort_summary),
+    Value = sapply(cohort_summary, function(x) {
+      if (is.numeric(x)) round(x, 4) else as.character(x)
+    })
+  )
+  rownames(desc_df) <- NULL
+  
+  kable(desc_df) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>%
+    scroll_box(height = "400px")
+} else {
+  cat("**cohort_descriptives_was.RData not found**")
+}
+Cell Counts
+cellcount_plot <- file.path(section_01, "cellcounts_plot.pdf")
+embed_pdf(cellcount_plot)
+Age & Smoking Prediction
+age_smoke_plot <- file.path(section_01, paste0("age_smoking_prediction_plot_", params$study_name, ".jpg"))
+if (file.exists(age_smoke_plot)) {
+  embed_image(age_smoke_plot)
+} else {
+  cat("**Age/smoking prediction plot not found**")
+}
+EWAS Reports
+ewas_reports <- list.files(section_01, pattern = "qc1_ewas_report.*\\.html$", full.names = TRUE)
+if (length(ewas_reports) > 0) {
+  cat("Available EWAS QC reports:\n\n")
+  for (report in ewas_reports) {
+    cat(paste0("- [", basename(report), "](", report, ")\n"))
+  }
+} else {
+  cat("**No EWAS reports found**")
+}
+Methylation PCs
+meth_pc_scree <- list.files(section_01, pattern = "meth_pcs_scree_plot.*\\.pdf$", full.names = TRUE)[1]
+if (!is.na(meth_pc_scree) && file.exists(meth_pc_scree)) {
+  embed_pdf(meth_pc_scree)
+} else {
+  cat("**Methylation PC scree plot not found**")
+}
+---
+01d: mQTL Controls {.tabset}
+Summary Table
+log_01d <- file.path(section_01, "logs_d", "log.txt")
+control_results <- parse_01d_log(log_01d)
+if (!is.null(control_results) && nrow(control_results) > 0) {
+  # Format the table
+  control_results$Min_Pvalue <- ifelse(is.na(control_results$Min_Pvalue), "-", control_results$Min_Pvalue)
+  control_results$Lambda <- ifelse(is.na(control_results$Lambda), "-", round(as.numeric(control_results$Lambda), 4))
+  control_results$Chr <- ifelse(is.na(control_results$Chr), "-", control_results$Chr)
+  control_results$Pos <- ifelse(is.na(control_results$Pos), "-", control_results$Pos)
+  
+  kable(control_results, 
+        col.names = c("CpG", "Type", "Chr", "Position", "Min P-value", "Lambda (no cis)")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>%
+    row_spec(which(control_results$Type == "positive"), background = "#d4edda") %>%
+    row_spec(which(control_results$Type == "negative"), background = "#fff3cd")
+} else {
+  cat("**01d log not found or no control results parsed**")
+}
+Positive Control Manhattan Plots
+dir_01d <- file.path(section_01, "01d")
+if (dir.exists(dir_01d)) {
+  pos_manhattans <- list.files(dir_01d, pattern = "positive_control.*_manhattan\\.pdf$", full.names = TRUE)
+  pos_manhattans <- pos_manhattans[!grepl("nocisChr", pos_manhattans)]
+  
+  if (length(pos_manhattans) > 0) {
+    for (i in seq_len(min(5, length(pos_manhattans)))) {
+      cpg_name <- sub(".*positive_control_untransformed_(cg[0-9]+)_manhattan\\.pdf", "\\1", basename(pos_manhattans[i]))
+      cat(paste0("\n\n### ", cpg_name, "\n\n"))
+      print(embed_pdf(pos_manhattans[i]))
+    }
+  } else {
+    cat("**No positive control Manhattan plots found**")
+  }
+} else {
+  cat("**01d directory not found**")
+}
+Positive Control QQ Plots
+dir_01d <- file.path(section_01, "01d")
+if (dir.exists(dir_01d)) {
+  qq_plots <- list.files(dir_01d, pattern = "positive_control.*_qqplot\\.jpeg$", full.names = TRUE)
+  
+  if (length(qq_plots) > 0) {
+    for (i in seq_len(min(5, length(qq_plots)))) {
+      cpg_name <- sub(".*positive_control_untransformed_(cg[0-9]+)_qqplot\\.jpeg", "\\1", basename(qq_plots[i]))
+      cat(paste0("\n\n### ", cpg_name, "\n\n"))
+      print(embed_image(qq_plots[i]))
+    }
+  } else {
+    cat("**No QQ plots found**")
+  }
+} else {
+  cat("**01d directory not found**")
+}
+---
+01e: Genetic PC GWAS {.tabset}
+Manhattan Plots
+dir_01e <- file.path(section_01, "01e")
+if (dir.exists(dir_01e)) {
+  pc_manhattans <- list.files(dir_01e, pattern = "gwas_PC[0-9]+_manhattan\\.pdf$", full.names = TRUE)
+  
+  if (length(pc_manhattans) > 0) {
+    # Sort by PC number
+    pc_nums <- as.numeric(sub(".*gwas_PC([0-9]+)_manhattan\\.pdf", "\\1", basename(pc_manhattans)))
+    pc_manhattans <- pc_manhattans[order(pc_nums)]
+    
+    for (plot_file in pc_manhattans[1:min(5, length(pc_manhattans))]) {
+      pc_name <- sub("_manhattan\\.pdf$", "", basename(plot_file))
+      cat(paste0("\n\n### ", pc_name, "\n\n"))
+      print(embed_pdf(plot_file))
+    }
+  } else {
+    cat("**No PC GWAS Manhattan plots found**")
+  }
+} else {
+  cat("**01e directory not found**")
+}
+---
+01f: Normalization
+log_01f <- file.path(section_01, "logs_f")
+normalization_success <- FALSE
+if (dir.exists(log_01f)) {
+  log_files <- list.files(log_01f, pattern = "log.*\\.txt$", full.names = TRUE)
+  
+  if (length(log_files) > 0) {
+    latest_log <- log_files[order(file.mtime(log_files), decreasing = TRUE)[1]]
+    log_content <- readLines(latest_log, warn = FALSE)
+    
+    if (any(grepl("Shrunk QC objects created", log_content, ignore.case = FALSE))) {
+      normalization_success <- TRUE
+      cat("**Status:** Shrunk QC objects created successfully\n\n")
+    } else {
+      cat("**Status:** Normalization may not have completed - 'Shrunk QC objects created' not found in log\n\n")
+    }
+    
+    cat(paste0("Log file: `", basename(latest_log), "`\n"))
+  } else {
+    cat("**No log files found in logs_f**\n")
+  }
+} else {
+  cat("**01f logs directory not found - step may not have been run**\n")
+}
+# Check for output file
+norm_output <- file.path(home_dir, "processed_data", "methylation_data", "normalized_between_datasets.Robj")
+shrunk_pattern <- list.files(file.path(home_dir, "processed_data", "methylation_data"), 
+                              pattern = ".*shrunk.*\\.Robj$", ignore.case = TRUE)
+if (length(shrunk_pattern) > 0) {
+  cat("\n\n**Shrunk QC objects found:**\n\n")
+  for (f in shrunk_pattern) {
+    cat(paste0("- `", f, "`\n"))
+  }
+}
+---
+  
+01g: Haplotype Components {.tabset}
+HC Variance Explained
+hc_kernel_plot <- file.path(section_01, "hcs_kernel.pdf")
+if (file.exists(hc_kernel_plot)) {
+  embed_pdf(hc_kernel_plot)
+} else {
+  cat("**HC kernel plot not found - 01g may not have been run**")
+}
+HC Variance Table
+hc_prop_file <- file.path(section_01, "hcs_kernel_prop.csv")
+if (file.exists(hc_prop_file)) {
+  hc_prop <- read.csv(hc_prop_file)
+  
+  # Show top 20 HCs
+  kable(head(hc_prop, 20), digits = 4, 
+        col.names = c("HC", "Index", "Prop. Explained", "Cumulative")) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+} else {
+  cat("**HC variance proportion file not found**")
+}
+HC-PC Correlations
+hc_pc_cor_file <- file.path(section_01, "hc_pc_correlations.csv")
+if (file.exists(hc_pc_cor_file)) {
+  hc_pc_cor <- read.csv(hc_pc_cor_file)
+  
+  kable(head(hc_pc_cor, 20), digits = 4) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>%
+    scroll_box(height = "300px")
+} else {
+  cat("**HC-PC correlation file not found**")
+}
+GWAS Comparison Scatter Plots
+dir_01g <- file.path(section_01, "01g")
+if (dir.exists(dir_01g)) {
+  scatter_plots <- list.files(dir_01g, pattern = "scatter_comparison\\.pdf$", full.names = TRUE)
+  
+  if (length(scatter_plots) > 0) {
+    for (i in seq_len(min(3, length(scatter_plots)))) {
+      cpg_name <- sub("_(scatter_comparison\\.pdf)$", "", basename(scatter_plots[i]))
+      cat(paste0("\n\n### ", cpg_name, "\n\n"))
+      print(embed_pdf(scatter_plots[i]))
+    }
+  } else {
+    cat("**No scatter comparison plots found**")
+  }
+} else {
+  cat("**01g directory not found**")
+}
+---
+Step Completion Summary
+steps <- data.frame(
+  Step = c("01a", "01b", "01c", "01d", "01e", "01f", "01g"),
+  Description = c(
+    "Data Check",
+    "Genetic Data Processing", 
+    "Phenotypes & Methylation",
+    "mQTL Controls",
+    "Genetic PC GWAS",
+    "Normalization",
+    "Haplotype Components"
+  ),
+  Status = c(
+    file_status(file.path(section_01, "cohort_descriptives.RData")),
+    file_status(file.path(section_01, "pcaplot.pdf")),
+    file_status(file.path(section_01, "cohort_descriptives_was.RData")),
+    ifelse(dir.exists(file.path(section_01, "01d")), "Done", "Missing"),
+    ifelse(dir.exists(file.path(section_01, "01e")), "Done", "Missing"),
+    ifelse(length(list.files(file.path(home_dir, "processed_data", "methylation_data"), 
+                              pattern = "shrunk", ignore.case = TRUE)) > 0, "Done", "Missing"),
+    file_status(file.path(section_01, "hcs_kernel.pdf"))
+  )
+)
+kable(steps) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
+  row_spec(which(steps$Status == "Done"), background = "#d4edda") %>%
+  row_spec(which(steps$Status == "Missing"), background = "#f8d7da")
+---
+Session Info
+sessionInfo()
+---
