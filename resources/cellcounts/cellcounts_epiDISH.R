@@ -4,6 +4,7 @@ suppressMessages(library(EpiDISH))
 suppressMessages(library(meffil))
 suppressMessages(library(data.table))
 suppressMessages(library(stats))
+suppressMessages(library(ggplot2))
 
 arguments <- commandArgs(T);
 
