@@ -34,6 +34,7 @@ mkdir -p "${section_01_dir}/01e/"
 mkdir -p "${section_01_dir}/logs_f/"
 mkdir -p "${section_01_dir}/logs_g/"
 mkdir -p "${section_01_dir}/01g/"
+mkdir -p "${section_01_dir}/logs_h/"
 
 # QC phase2 and analysis phase folders
 mkdir -p "${section_02_dir}/logs_a/"
