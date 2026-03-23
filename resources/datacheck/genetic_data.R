@@ -194,7 +194,7 @@ if(any(qual[,2] < 0) | any(qual[,2] > 1))
 if(any(qual[,3] > 1.1))
 {
 	msg <- paste0("third column of quality scores file should be the info score. Some of the provided values are above 1.")
-	msg <- c(errorlist, msg)
+	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
 
