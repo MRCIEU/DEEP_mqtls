@@ -69,6 +69,8 @@ if [ ! -r "${idat_directory}" ]; then
     exit 1
 fi
 
+echo "idat_directory is set to: ${idat_directory}"
+
 if [ "$arg" = "shrink" ]
 then
 	section_message "shrink"
