@@ -49,7 +49,7 @@ if [ "${related}" = "yes" ]; then
 
     echo "Creating a list of SNPs to exclude"
     #awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' "${high_ld}.vcor" | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
-    zcat ${high_ld}.ld.gz |awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
+    zcat "${high_ld}.ld.gz" |awk 'NR==1 && $6 ~ /[A-Za-z]/ {next} {print $6}' | awk 'NF' | sort -u > "${high_ld}.exclude.ids"
 
     echo "Excluding high LD regions in genome first"
     ${plink2} \
