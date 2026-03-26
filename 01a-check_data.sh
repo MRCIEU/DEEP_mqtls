@@ -195,11 +195,11 @@ then
 
 
 	${R_directory}Rscript resources/datacheck/phenotypes_filecheck.R \
-		${phenotypes} \
-		${meth_ids} \
-		${sorted_methylation} \
-		${study_specific_vars} \
-		${phenotype_names}
+		"${phenotypes}" \
+		"${meth_ids}" \
+		"${sorted_methylation}" \
+		"${study_specific_vars}" \
+		"${phenotype_names}"
 
 fi
 
