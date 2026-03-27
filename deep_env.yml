@@ -16,6 +16,8 @@ dependencies:
   - r-matrixeqtl
   - r-matrixstats
   - r-remotes
+  - r-kableextra
+  - r-magick
   - r-plyr
   - r-cairo
   - r-plotrix
