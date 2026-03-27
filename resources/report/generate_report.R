@@ -2,12 +2,14 @@
 
 # Generate summary QC report for DEEP pipeline 01 modules
 # This script renders the Rmd template to HTML
-library(rmarkdown)
-library(knitr)
-library(kableExtra)
-library(ggplot2)
-library(magick)
-library(base64enc)
+suppressPackageStartupMessages({
+    library(rmarkdown)
+    library(knitr)
+    library(kableExtra)
+    library(ggplot2)
+    library(magick)
+    library(base64enc)
+})
 
 args <- commandArgs(TRUE)
 home_directory     <- as.character(args[1])
@@ -19,14 +21,6 @@ genome_build       <- as.character(args[6])
 meth_chip          <- as.character(args[7])
 n_pcs              <- as.numeric(args[8])
 n_hcs              <- as.numeric(args[9])
-
-# Check required packages
-required_packages <- c("rmarkdown", "knitr", "kableExtra", "ggplot2", "magick", "base64enc")
-missing_packages <- required_packages[!sapply(required_packages, requireNamespace, quietly = TRUE)]
-if (length(missing_packages) > 0) {
-    stop("Missing required packages: ", paste(missing_packages, collapse = ", "),
-         "\nPlease install them with: install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
-}
 
 # Define paths
 output_dir <- file.path(section_01_dir, "report")
