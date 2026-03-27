@@ -128,8 +128,8 @@ then
 
 	# Check missingness, there should be a small percentage of missingness (--hard-call-threshold 0.499999)
 	${plink2} --bfile ${bfile_raw} --missing --out ${section_01_dir}/data
-	gzip ${section_01_dir}/data.smiss
-	gzip ${section_01_dir}/data.vmiss
+	gzip -f ${section_01_dir}/data.smiss
+	gzip -f ${section_01_dir}/data.vmiss
 
 	nrow=`zcat ${section_01_dir}/data.smiss.gz | awk 'NR>1 && $5>0.02 {print $0}'  |wc -l`
 
