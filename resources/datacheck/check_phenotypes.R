@@ -155,6 +155,8 @@ save(summstats_list,file=paste0(raw_phenotype_summary_file,"_",study_name,".Rdat
 
 numeric_phenos <- grep("_numeric", colnames(pheno), value = TRUE)
 # add in here removal of age etc from numeric_phenos
+dont_winsorise <- c("Age_numeric")
+numeric_phenos <- numeric_phenos[!numeric_phenos %in% dont_winsorise]
 plot_list <- vector("list", length = length(numeric_phenos))
 names(plot_list) <- numeric_phenos
 summstats_list <- vector("list", length = length(numeric_phenos))
