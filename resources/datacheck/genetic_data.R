@@ -223,12 +223,13 @@ if(prop > 0.01)
 	warning("ERROR: ", msg)
 }
 
-prop <- sum(qual[,3] < 0.8) / nrow(qual)
-if(prop > 0.01)
+# Modified: Error if ANY SNPs have Info Score < 0.8
+low_info_count <- sum(qual[, 3] < 0.8)
+if (low_info_count > 0)
 {
-	msg <- paste0("more than 1% of the retained quality scores have a quality score < 0.8. Please filter the data. The wiki has a guide for doing this.")
-	errorlist <- c(errorlist, msg)
-	warning("ERROR: ", msg)
+    msg <- paste0("Found ", low_info_count, " SNPs with an info score < 0.8. Please remove these SNPs from your quality_scores file before proceeding.")
+    errorlist <- c(errorlist, msg)
+    warning("ERROR: ", msg)
 }
 
 message("Plotting info scores")
