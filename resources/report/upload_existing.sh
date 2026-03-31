@@ -58,7 +58,7 @@ echo ""
 # Upload everything
 echo "Uploading files"
 sftp $port -oIdentityFile=$key -oBatchMode=no -b - ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
-cd ../upload
+cd ../upload_debug
 put ${home_directory}/results/${study_name}_01.md5sum
 put ${home_directory}/results/${study_name}_01.${suff}.aes
 put ${home_directory}/results/config/${study_name}_config.tar.aes
