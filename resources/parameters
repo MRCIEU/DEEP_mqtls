@@ -317,7 +317,7 @@ fi
 # scripts and binaries
 plink="${scripts_directory}/resources/bin/plink1.90"
 plink2="${scripts_directory}/resources/bin/plink2"
-gcta="${scripts_directory}/resources/bin/gcta-1.95.1"
+gcta="${scripts_directory}/resources/bin/gcta-1.94.1"
 gemma="${scripts_directory}/resources/bin/gemma"
 hase="${scripts_directory}/resources/bin/hase"
 osca="${scripts_directory}/resources/bin/osca"
