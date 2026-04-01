@@ -59,14 +59,14 @@ message("Data is a correctly oriented matrix")
 
 # are individuals unique
 if(sorted_methylation == "no") {
-if(nid_meth < 200)
+if(nid_meth < 100)
 
 {
 	msg <- paste0("Number of individuals with methylation is less than ", nid_meth," please contact developers")
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
 }
-message("More than 200 individuals with methylation data")
+message("More than 100 individuals with methylation data")
 }
 
 #number of individuals
