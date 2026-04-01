@@ -112,18 +112,31 @@ if(any(grepl("rs", rownames(norm.beta))))
 	warning("ERROR: ", msg)
 }
 
+# check for presence of sex-chromosome probes
+# initialize
+sex_check_possible <- TRUE
+
 feat <- meffil.get.features(methylation_array)
 
-xy<-which(feat$chromosome%in%c("chrX","chrY"))
-probes_xy<-as.character(feat[xy,"name"])
-xy_overlap<-intersect(row.names(norm.beta),probes_xy)
+xy <- which(feat$chromosome%in%c("chrX","chrY"))
+probes_xy <- as.character(feat[xy,"name"])
+xy_overlap <- intersect(row.names(norm.beta),probes_xy)
 n.xy_overlap <- length(xy_overlap)
-no.overlap<-0.80*length(probes_xy)
+no.overlap <- 0.80*length(probes_xy)
+
 if(n.xy_overlap < no.overlap)
 {
 	msg <- paste0("fewer than 80% chrx and chry probes. Please include chrx and y probes")
-	errorlist <- c(errorlist, msg)
-	warning("ERROR: ", msg)
+	# Add to warninglist instead of errorlist
+  warninglist <- c(warninglist, msg)
+  warning("WARNING: ", msg)
+
+  if(n.xy_overlap < 100) {
+    sex_check_possible <- FALSE
+    msg <- paste0("Extremely few XY probes. Sex prediction will be disabled.")
+    warning("WARNING: ", msg)
+  }
+
 }
 
 #
