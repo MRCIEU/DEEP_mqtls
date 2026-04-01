@@ -100,6 +100,15 @@ if ("Smoking_factor" %in% colnames(pheno)) {
     theme_minimal()+
     theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
     theme(legend.position = "none")
+} else if ("Maternal_smoking_factor" %in% colnames(pheno)){
+  message("Maternal_smoking_factor found in phenotype dataframe: running mcigarette plot of reported smoking vs DNAm-estimated smoking")
+  mcigarette_plot <- ggplot(data=pheno, aes(x=Maternal_smoking_factor,y=p_smoking_mcigarette,color=Maternal_smoking_factor)) +
+    geom_boxplot()+
+    scale_colour_viridis(discrete=T,begin=0,end=0.65)+
+    labs(title=paste0(study_name," Maternal vs predicted smoking (mcigarette), \np=",signif(wilcox.test(p_smoking_mcigarette ~ Maternal_smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
+    theme_minimal()+
+    theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
+    theme(legend.position = "none")
   
 } else {
   # Run this command if 'Smoking_factor' column does not exist
@@ -131,6 +140,16 @@ if ("Smoking_factor" %in% colnames(pheno)) {
     theme_minimal()+
     theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
     theme(legend.position = "none")
+} else if ("Maternal_smoking_factor" %in% colnames(pheno)){
+  message("Maternal_smoking_factor found in phenotype dataframe: running plot of reported smoking vs Elliott DNAm-estimated smoking")
+  Elliott_plot <- ggplot(data=pheno, aes(x=Maternal_smoking_factor,y=p_smoking_elliott,color=Maternal_smoking_factor)) +
+    geom_boxplot()+
+    scale_colour_viridis(discrete=T,begin=0,end=0.65)+
+    labs(title=paste0(study_name," Maternal vs predicted smoking (Elliott), \np=",signif(wilcox.test(p_smoking_elliott ~ Maternal_smoking_factor, data = pheno, alternative = c("two.sided"))$p.value),digits=2))+
+    theme_minimal()+
+    theme(axis.text.x = element_text(angle = 15, vjust = 1, hjust=1))+
+    theme(legend.position = "none")
+  
 } else {
   # Run this command if 'Smoking_factor' column does not exist
   print("Smoking_factor not found in phenotype dataframe (if this is a measure you should have, please check the name of the smoking variable)
