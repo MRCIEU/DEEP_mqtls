@@ -203,13 +203,22 @@ if(nrow(covar) == 0){
   warning("ERROR: ", msg)
 }
 
-#Sex prediction won't work if the distribution of sex is too skewed. If this is the case (less than 10% for one sex), skip sex prediction.
-if((length(covar$Sex_factor[covar$Sex_factor == "M"]) < 0.05 * length(covar$Sex_factor) |
-    length(covar$Sex_factor[covar$Sex_factor == "F"]) < 0.05 * length(covar$Sex_factor))){
+run_sex_check <- sex_check_possible && (nrow(covar) > 0)
+
+#Sex prediction won't work if the distribution of sex is too skewed. If this is the case (less than % for one sex), skip sex prediction.
+if(run_sex_check){
+  m_count <- sum(covar$Sex_factor == "M", na.rm = TRUE)
+  f_count <- sum(covar$Sex_factor == "F", na.rm = TRUE)
+  total_sex <- m_count + f_count
   
-  message("Sexes are extremely skewed in this cohort (<5% males or females). Skipping sex-prediction.")
+  if(total_sex == 0 || (m_count < 0.05 * total_sex | f_count < 0.05 * total_sex)){
+    message("Sexes are extremely skewed (<5% males or females). Skipping sex-prediction.")
+    run_sex_check <- FALSE
+  }
+}
   
-} else{
+
+if(run_sex_check){
   
   feat_noNA <- feat[!is.na(feat$chromosome),]
   
