@@ -40,7 +40,7 @@ source ${config_file}
 if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directory" ]; then
     if command -v mamba &> /dev/null; then
         # Check if mamba is available and contains deep_env environment
-        if mamba env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
+        if mamba env list | awk '{print $1}' | grep -Fxq 'deep_env'; then
             echo "found deep_env environment in mamba"
             echo "Using mamba to run the script"
             RUN_CMD="mamba run -n deep_env "
@@ -49,7 +49,7 @@ if [ -z "$R_directory" ] && [ -z "$Python_directory" ] && [ -z "$Python2_directo
 
     if [ -z "$RUN_CMD" ] && command -v conda &> /dev/null; then
         # Check if conda is available and contains deep_env environment
-        if conda env list | awk 'NF > 0 && $1 !~ /^#/ && $1 !~ /^\// {print $1}' | grep -Fxq 'deep_env'; then
+        if conda env list | awk '{print $1}' | grep -Fxq 'deep_env'; then
             echo "found deep_env environment in conda"
             echo "Using conda to run the script"
             RUN_CMD="conda run -n deep_env "
