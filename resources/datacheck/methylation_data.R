@@ -219,9 +219,9 @@ if(run_sex_check){
   
 
 if(run_sex_check){
-  
+  message("Proceeding with sex prediction...")
+
   feat_noNA <- feat[!is.na(feat$chromosome),]
-  
   x_probes <- feat_noNA$name[feat_noNA$chromosome == "chrX"]
   y_probes <- feat_noNA$name[feat_noNA$chromosome == "chrY"]
   
@@ -240,9 +240,12 @@ if(run_sex_check){
   if(nrow(beta_x) == 0 | nrow(beta_y) == 0){
     message("No sex-chromosomal probes detected for the X and/or Y chromosomes. Skipping sex-prediction.")
     
-    
-  } else{
-    
+    run_sex_check <- FALSE
+  }
+}
+
+# Execute PCA and plot generation if conditions are still met
+if(run_sex_check){
     message("Predicting sex from DNA-methylation on sex-chromosomes.")
     
     #Perform a PCA on the X and Y chromosomes.
@@ -372,7 +375,8 @@ if(run_sex_check){
     if (mismatched_percentage > 0.10) {
       stop("Percentage of sex discrepancies is too high (> 10%). Please check your input data!")
     }
-  }
+  } else {
+  message("Sex prediction was skipped (due to configuration, low probe count, or skewed distribution).")
 }
 
 #
