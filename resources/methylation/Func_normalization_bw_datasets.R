@@ -14,10 +14,29 @@ stage <- arguments[4];
 # qc stage 1 shrink ======= remove unnecessary information from qc objects
 
 if (stage == "shrink") {
-  message("idat files folder: ", paste0(idat_input_folder))
   message("study name: ", study_name)
-  message("Create samplesheet")
-  samplesheet <- meffil.create.samplesheet(idat_input_folder, recursive=TRUE)
+
+  samplesheet_path <- if (length(arguments) >= 5 && nchar(arguments[5]) > 0) arguments[5] else ""
+
+  if (nchar(samplesheet_path) > 0) {
+    message("Reading samplesheet from: ", samplesheet_path)
+    samplesheet <- meffil.read.samplesheet(
+      base    = dirname(samplesheet_path),
+      pattern = paste0("^", basename(samplesheet_path), "$")
+    )
+    # If idat_directory is also provided (CSV and IDATs in different locations),
+    # rebuild Basename using idat_directory
+    if (nchar(idat_input_folder) > 0) {
+      message("Rebuilding IDAT Basename paths using idat_directory: ", idat_input_folder)
+      samplesheet$Basename <- file.path(
+        idat_input_folder,
+        paste(samplesheet$Slide, samplesheet$Array, sep = "_")
+      )
+    }
+  } else {
+    message("Creating samplesheet from IDAT files: ", idat_input_folder)
+    samplesheet <- meffil.create.samplesheet(idat_input_folder, recursive = TRUE)
+  }
 
   qc.objects <- meffil.qc(samplesheet, verbose=TRUE)
 
