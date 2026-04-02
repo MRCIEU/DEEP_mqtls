@@ -33,7 +33,7 @@ check_results_01a () {
 	if [ -f "${sex_pred_plot}" ]; then
 		echo "Sex prediction plot file present"
 	else
-		echo "Sex prediction plot file is absent. Please check that the samples are of a single sex (e.g., all male or all female)."
+		echo "The sex prediction plot file is missing. Please check if the samples are of a single sex (e.g., all male or all female) or if the sex probes are missing from the dataset."
 	fi
 }
 
