@@ -220,14 +220,22 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     temp <- as.data.frame(pc_analysis[[i]]$coefficients)
     names(temp) <- c("estimate", "se", "t", "p")
     temp <- temp[temp$p < 0.05,]
+    
+    #fix edge case where there is no p<0.05
+    if (nrow(temp) == 0) {
+    pc_plotlist[[i]] <- ggplot() +
+    labs(title = paste0("PC", i, " (no significant associations)")) +
+    theme_void()
+    next
+    }
+    
     temp <- temp[order(temp$p),]
     row.names.remove <- c("(Intercept)")
     temp <- temp[!(row.names(temp) %in% row.names.remove), ]
     temp$PC <- paste0("PC",i)
     # make barplot of p values
     temp$var <- as.character(rownames(temp))
-    # remove slides and rows and replace with a single value
-    # the plot is awful if you leave them all in
+    # remove slides and rows and replace with a single value to avoid untidy plotting
     batchvars <- as.character(temp$var)
     # TO DO: edit the below batch names:
     slidevars <- grep("^slide", batchvars, value = TRUE, ignore.case = TRUE)
