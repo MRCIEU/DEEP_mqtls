@@ -233,10 +233,48 @@ if (low_info_count > 0)
 }
 
 message("Plotting info scores")
-qual$mafbin <- cut(qual[,2], breaks=30)
-pdf(quality_plot)
-boxplot(V3 ~ mafbin, qual, xlab="MAF", ylab="Imputation quality")
+qual$maf_bin <- cut(qual[,2], breaks=30)
+bin_counts <- as.numeric(table(qual$maf_bin))
+n_bins <- length(bin_counts)
+
+pdf(quality_plot, height = 9, width = 10)
+
+layout(matrix(c(1, 2), nrow = 2, ncol = 1), heights = c(4, 6))
+par(mar = c(5, 5, 4, 2)) 
+
+plot(1:n_bins, bin_counts, 
+     type = "b", pch = 19, col = "darkblue", lwd = 2,
+     xaxt = "n", xlab = "", ylab = "SNP Count", 
+     main = "SNP Distribution & Quality Scores",
+     xlim = c(0.5, n_bins + 0.5))
+
+bin_labels <- levels(qual$maf_bin)
+usr <- par("usr")
+x_pos <- 1:n_bins
+y_pos <- usr[3] - (usr[4] - usr[3]) * 0.05
+
+text(x = x_pos, 
+     y = y_pos, 
+     labels = bin_labels, 
+     srt = 45, 
+     adj = 1, 
+     xpd = TRUE, 
+     cex = 0.7)
+
+par(mar = c(5, 5, 2, 2))
+
+boxplot(V3 ~ maf_bin, data = qual,
+        xlim = c(0.5, n_bins + 0.5),
+        xaxt = "n",
+        xlab = "MAF Range",
+        ylab = "Imputation quality",
+        col = "lightblue",
+        outcex = 0.3)
+
+axis(3, at = 1:n_bins, labels = FALSE, col = "grey80")
+
 null <- dev.off()
+layout(1)
 
 ##
 #FAM file check
