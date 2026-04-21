@@ -157,6 +157,7 @@ for (i in 1:22)
 		# errorlist <- c(errorlist, msg)
 		# warning("ERROR: ", msg)
 		message(msg)
+		message("Note: low proportion could be due to wrong build or missing coverage in bim")
 	}
 }
 
