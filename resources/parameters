@@ -323,6 +323,7 @@ hase="${scripts_directory}/resources/bin/hase"
 osca="${scripts_directory}/resources/bin/osca"
 smr="${scripts_directory}/resources/bin/smr-1.3.1"
 pbwt="${scripts_directory}/resources/bin/pbwt"
+king="${scripts_directory}/resources/bin/king"
 
 # Functions
 
