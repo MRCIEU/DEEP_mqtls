@@ -58,7 +58,7 @@ idat_directory=""
 # Optional: full path to an Illumina-format CSV sample sheet.
 # If set, meffil.read.samplesheet() will be used instead of meffil.create.samplesheet().
 # The CSV must contain: Sample_Name, Sex (M/F/NA), Sentrix_ID (or Slide_ID), Sentrix_Position (or Array_ID)
-# Example: samplesheet_path="/user/work/er20212/alspac_QC_phase1/input_data/samplesheet.csv"
+# Example: samplesheet_path="/user/path/to/your/samplesheet.csv"
 # - If your CSV is in the same directory as your IDAT files, leave idat_directory blank.
 # - If your CSV and IDAT files are in different directories, set both samplesheet_path AND idat_directory.
 # Leave blank to auto-generate samplesheet from IDAT files.
