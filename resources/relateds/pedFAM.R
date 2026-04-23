@@ -61,7 +61,7 @@ names(rel) <- c("IID_1", "IID_2", "relationship")
 
 # check relation labels
 relation_labels = table(rel$relationship)
-print(relation_labels)
+# print(relation_labels)
 setting_labels = c("Dup/MZ", "PO", "FS", "2nd", "3rd")
 rel <- subset(rel, relationship %in% setting_labels)
 
