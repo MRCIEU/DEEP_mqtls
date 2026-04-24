@@ -223,8 +223,6 @@ echo "Preparing KING input bfile"
 ${plink} \
     --bfile ${bfile} \
     --new-id-max-allele-len 70 \
-    --extract temp_hm3snps.txt \
-    --maf ${grm_maf_cutoff} \
     --make-bed \
     --out ${bfile}_king_input \
     --output-chr 26 \
