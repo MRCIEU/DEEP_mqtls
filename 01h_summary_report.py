@@ -13,7 +13,7 @@ Arguments:
                   then to <home_directory>/results/01.
 
 Cohort name, analyst, and all QC parameters are read from the config file.
-No study-specific values need to be hard-coded here.
+No study-specific values need to be hard-coded.
 """
 
 import argparse, base64, os, re, subprocess, sys, tempfile, glob
