@@ -11,18 +11,10 @@ print_version
 
 if [ "${related}" = "yes" ]; then
     echo "Related is set to yes, making grm sparse"
-    # grmfile_relateds generated in 01b
-
-    ${gcta} \
-	    --grm ${grmfile_relateds} \
-	    --make-bK-sparse 0.05 \
-	    --autosome \
-	    --make-grm \
-	    --out ${grmfile_fast}_rel \
-	    --thread-num ${nthreads}
+    echo "Use sparse GRM by KING from 01b"
 
 elif [ "${related}" = "no" ]; then
-    echo "Related is set to no. No need grm"
+    echo "Related is set to no. No need GRM"
     
 fi
 
@@ -96,7 +88,7 @@ do
             echo "grm from related individuals"
             ${gcta} \
                 --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_rel" \
+                --grm-sparse "${grmfile_king}_sparse" \
                 --fastGWA-mlm \
                 --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
@@ -181,7 +173,7 @@ do
         if [ "${related}" = "yes" ]; then
             ${gcta} \
                 --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_rel" \
+                --grm-sparse "${grmfile_king}_sparse" \
                 --fastGWA-mlm \
                 --h2-limit 100 \
                 --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
