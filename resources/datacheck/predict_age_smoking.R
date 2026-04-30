@@ -29,12 +29,14 @@ load(pheno_file)
 load(beta_file)
 
 # run predicted smoking for all with methylation data
+message("Predicting smoking scores")
 mcigarette <- meffonym.score(norm.beta, "mcigarette")
 p_smoking_mcigarette <- mcigarette$score
 smoking_elliott <- meffonym.score(norm.beta, "elliott-smoking")
 p_smoking_elliott <- smoking_elliott$score
 IID <- colnames(norm.beta)
 smoking_prediction_vars <- cbind(IID,p_smoking_mcigarette,p_smoking_elliott)
+message("Saving predicted smoking scores to file: ", smoking_prediction_output_file)
 write.table(smoking_prediction_vars,file=paste0(smoking_prediction_output_file),row.names = F,col.names = T,quote=F)
 
 # match up meth and pheno samples
