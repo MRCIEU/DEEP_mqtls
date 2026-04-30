@@ -158,6 +158,7 @@ grm_distribution="${section_01_dir}/grm_distrib"
 grmfile_fast="${home_directory}/processed_data/genetic_data/data_fast"
 grmfile_relateds="${home_directory}/processed_data/genetic_data/data_relateds"
 grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelateds"
+grmfile_king="${grmfile_all}_king"
 
 # PCA files
 pca="${home_directory}/processed_data/genetic_data/pca"
@@ -323,6 +324,7 @@ hase="${scripts_directory}/resources/bin/hase"
 osca="${scripts_directory}/resources/bin/osca"
 smr="${scripts_directory}/resources/bin/smr-1.3.1"
 pbwt="${scripts_directory}/resources/bin/pbwt"
+king="${scripts_directory}/resources/bin/king"
 
 # Functions
 
