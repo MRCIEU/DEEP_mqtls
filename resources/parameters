@@ -157,8 +157,9 @@ grmfile_all_01e="${home_directory}/processed_data/genetic_data/data_01e"
 grm_distribution="${section_01_dir}/grm_distrib"
 grmfile_fast="${home_directory}/processed_data/genetic_data/data_fast"
 grmfile_relateds="${home_directory}/processed_data/genetic_data/data_relateds"
-grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelateds"
+# grmfile_unrelateds="${home_directory}/processed_data/genetic_data/data_unrelateds"
 grmfile_king="${grmfile_all}_king"
+grmfile_pcrelate="${grmfile_all}_pcrelate"
 
 # PCA files
 pca="${home_directory}/processed_data/genetic_data/pca"
