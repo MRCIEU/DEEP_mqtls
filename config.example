@@ -119,7 +119,7 @@ age=">18"
 # Set to NULL if you do not have directly measured cellcounts
 measured_cellcounts=""
 
-admixed="no"  # Set to "yes" if your cohort has admixed ancestry
+admix="no"  # Set to "yes" if your cohort has admixed ancestry
 
 # =============================================================================
 # SECTION E: SYSTEM PATHS AND INPUT DATA FILES
