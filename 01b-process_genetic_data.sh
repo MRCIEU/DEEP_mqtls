@@ -179,13 +179,22 @@ n_failedSNPs=`wc -l ${bfile}.failed.SNPs.txt | awk '{ print $1 }'`
 echo "Removing ${n_failedSNPs} SNPs from data"
 
 ${plink2} \
-	--bfile ${bfile} \
-	--exclude ${bfile}.failed.SNPs.txt \
-	--new-id-max-allele-len 70 \
-	--make-bed \
-	--out ${bfile}1 \
-	--output-chr 26 \
-	--threads ${nthreads}
+    --bfile ${bfile} \
+    --exclude ${bfile}.failed.SNPs.txt \
+    --new-id-max-allele-len 70 \
+    --sort-vars \
+    --make-pgen \
+    --out ${bfile_sort} \
+    --output-chr 26 \
+    --threads ${nthreads}
+
+${plink2} \
+    --pfile ${bfile_sort} \
+    --make-bed \
+    --out ${bfile}1 \
+    --threads ${nthreads}
+
+rm -f ${bfile}.{pgen,psam,pvar,log}
 
 cp ${bfile}.bim ${bfile}.bim.original3
 mv ${bfile}1.bed ${bfile}.bed
@@ -215,18 +224,18 @@ ${plink2} \
 
 echo "Sample size in creating GCTA kinship matrix: $(wc -l < "${grmfile_all}.grm.id")"
 
-# =====================================================================
-# Make GRMs and plot distributions
-# =====================================================================
-# Pre-filter kinship calculation for plotting/QC purposes
+# # =====================================================================
+# # Make GRMs and plot distributions
+# # =====================================================================
+# # Pre-filter kinship calculation for plotting/QC purposes
 echo "Preparing KING input bfile"
 
 ${plink} \
     --bfile ${bfile} \
     --new-id-max-allele-len 70 \
     --make-bed \
-    --exclude range ${exclude_highld_region} \
-    --out ${bfile}_king_input \
+    --exclude range "${exclude_highld_region}" \
+    --out "${bfile}_king_input" \
     --output-chr 26 \
     --autosome \
     --threads ${nthreads}
