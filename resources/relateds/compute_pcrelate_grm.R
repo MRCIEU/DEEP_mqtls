@@ -43,10 +43,10 @@ geno_reader <- GdsGenotypeReader(filename = gds.fn)
 geno_data   <- GenotypeData(geno_reader)
 
 mypcair <- pcair(geno_data, kinobj = king_mat, divobj = king_mat,
-                 snps.include = pruned_snps, eigen.cnt = npc)
+                 snp.include = pruned_snps, eigen.cnt = npc)
 
 mypcrel <- pcrelate(geno_data, pcs = mypcair$vectors[, 1:npc],
-                    training.set = mypcair$unrels, snps.include = all_snps)
+                    training.set = mypcair$unrels)
 
 # --- Step 4: Export pairwise kinship and GRM ---
 kin_out <- data.frame(ID1 = mypcrel$kinBtwn$ID1, ID2 = mypcrel$kinBtwn$ID2, Kinship = mypcrel$kinBtwn$kin)
