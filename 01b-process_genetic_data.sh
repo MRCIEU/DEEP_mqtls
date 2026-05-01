@@ -216,134 +216,192 @@ ${plink2} \
 echo "Sample size in creating GCTA kinship matrix: $(wc -l < "${grmfile_all}.grm.id")"
 
 # =====================================================================
-# Make GRMs and plot distributions (4-Scenario Logic)
+# Make GRMs and plot distributions
 # =====================================================================
-gunzip -c ${hm3_snps} > temp_hm3snps.txt
-
 # Pre-filter kinship calculation for plotting/QC purposes
-echo "Creating pre-filter kinship matrix (KING) for distribution plots"
+echo "Preparing KING input bfile"
+
+${plink} \
+    --bfile ${bfile} \
+    --new-id-max-allele-len 70 \
+    --make-bed \
+    --exclude range ${exclude_highld_region} \
+    --out ${bfile}_king_input \
+    --output-chr 26 \
+    --autosome \
+    --threads ${nthreads}
+
 ${king} \
     -b ${bfile}_king_input.bed \
     --kinship \
     --cpus ${nthreads} \
     --prefix ${grmfile_king}_prefilter
 
-# Plot initial distributions
+echo "Plotting prefilter-GRM distributions (GCTA + KING) for full sample"
 ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
     "${grmfile_all}" \
     "${rel_cutoff}" \
     "${grm_distribution}_01b" \
-    "${grmfile_king}_prefilter.kin0"
+    "${grmfile_king}_prefilter.kin0" \
+    "king"
 
-# ---------------------------------------------------------------------
-# BRANCH 1: KEEP RELATIVES (Scenario 1 & 2)
-# ---------------------------------------------------------------------
-if [ "${related}" = "yes" ]; then
-    
-    if [ "${admix}" = "yes" ]; then
-        echo ">> SCENARIO 1: Related + Admixed"
-        echo ">> Action: Using PC-Relate (GENESIS) for structure-adjusted kinship"
-        
-        ${R_directory}Rscript resources/relateds/compute_pcrelate_grm.R \
-            "${bfile}" \
-            "${outfile_prefix}" \
-            "${npc}" \
-            "${nthreads}" \
-            "${rel_cutoff}"
-            
-    elif [ "${admix}" = "no" ]; then
-        echo ">> SCENARIO 2: Related + Homogeneous"
-        echo ">> Action: Creating standard KING kinship and Sparse GRM"
-        
+# Derive KING degree from rel_cutoff (GCTA scale: kinship = rel_cutoff / 2)
+kinship_cutoff=$(echo "${rel_cutoff} / 2" | bc -l)
+if   (( $(echo "$kinship_cutoff > 0.0884" | bc -l) )); then king_degree=2
+elif (( $(echo "$kinship_cutoff > 0.0442" | bc -l) )); then king_degree=3
+else king_degree=4
+fi
+echo ">> KING degree derived from rel_cutoff (${rel_cutoff}): --degree ${king_degree}"
+
+# =====================================================================
+# PRIMARY SPLIT: admix determines kinship method
+# =====================================================================
+
+if [ "${admix}" = "yes" ]; then
+    echo ">> Admixed population: using PC-Relate for kinship estimation"
+
+    if [ "${related}" = "yes" ]; then
+        echo ">> SCENARIO 1: Related + Admixed → PC-Relate sparse GRM (keep relatives)"
+        pcrelate_mode="keep"
+    elif [ "${related}" = "no" ]; then
+        echo ">> SCENARIO 3: Unrelated + Admixed → PC-Relate remove cryptic relatedness"
+        pcrelate_mode="remove"
+    else
+        echo "Error: Please set related flag to 'yes' or 'no' in config."
+        exit 1
+    fi
+
+    ${R_directory}Rscript resources/relateds/compute_pcrelate_grm.R \
+        "${bfile}_king_input" \
+        "${grmfile_pcrelate}" \
+        "${npc}" \
+        "${nthreads}" \
+        "${rel_cutoff}" \
+        "${pcrelate_mode}"
+
+    ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
+        "${grmfile_all}" \
+        "${rel_cutoff}" \
+        "${grm_distribution}_01b_pcrelate" \
+        "${grmfile_pcrelate}.pcrelate.kin0.txt" \
+        "pc_relate"
+
+    if [ "${related}" = "no" ]; then
+        n_before=$(wc -l < "${bfile}.fam")
+        n_remove=$(wc -l < "${grmfile_pcrelate}.remove_ids.txt")
+        echo ">> Sample size before PC-Relate removal: ${n_before}"
+        echo ">> Samples to remove (cryptic relateds): ${n_remove}"
+
+        ${plink2} \
+            --bfile ${bfile} \
+            --remove ${grmfile_pcrelate}.remove_ids.txt \
+            --new-id-max-allele-len 70 \
+            --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
+
+        mv ${bfile}_unrel_final.bed ${bfile}.bed
+        mv ${bfile}_unrel_final.bim ${bfile}.bim
+        mv ${bfile}_unrel_final.fam ${bfile}.fam
+
+        n_after=$(wc -l < "${bfile}.fam")
+        echo ">> Sample size after PC-Relate removal: ${n_after}"
+    fi
+
+    # PCs already computed by compute_pcrelate_grm.R (PC-Air)
+    cp "${grmfile_pcrelate}.pca.eigenvec" "${pca}.eigenvec"
+
+elif [ "${admix}" = "no" ]; then
+    echo ">> Non-admixed population: using KING for kinship estimation"
+
+    if [ "${related}" = "yes" ]; then
+        echo ">> SCENARIO 2: Related + Non-Admixed → KING sparse GRM"
+
         ${king} \
             -b ${bfile}_king_input.bed \
             --related \
-			--degree 3 \
+            --degree ${king_degree} \
             --cpus ${nthreads} \
             --prefix ${grmfile_king}_filter
 
         if [ -f "${grmfile_king}_filter.kin0" ]; then
-            # Reformat KING output to generate the sparse GRM
             awk '{ print $2, $4, $14 }' ${grmfile_king}_filter.kin0 | grep -v "4th" | sed 1d > ${grmfile_king}_filter.kin0.formatted
-            
+
             ${R_directory}Rscript resources/relateds/pedFAM.R \
                 ${bfile}_king_input.fam \
                 ${grmfile_king}_filter.kin0.formatted \
                 ${grmfile_king}_sparse
         fi
+
+    elif [ "${related}" = "no" ]; then
+        echo ">> SCENARIO 4: Unrelated + Non-Admixed → KING remove cryptic relatedness"
+        echo ">> rel_cutoff: ${rel_cutoff} -> KING --degree ${king_degree}"
+
+        ${king} \
+            -b ${bfile}_king_input.bed \
+            --unrelated \
+            --degree ${king_degree} \
+            --cpus ${nthreads} \
+            --prefix ${grmfile_king}_filter
+
+        n_before=$(wc -l < "${bfile}.fam")
+        echo ">> Sample size before KING removal: ${n_before}"
+
+        echo "Filtering genotypes to keep only the unrelated list"
+        ${plink2} \
+            --bfile ${bfile} \
+            --keep ${grmfile_king}_filterunrelated.txt \
+            --new-id-max-allele-len 70 \
+            --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
+        mv ${bfile}_unrel_final.bed ${bfile}.bed
+        mv ${bfile}_unrel_final.bim ${bfile}.bim
+        mv ${bfile}_unrel_final.fam ${bfile}.fam
+
+        n_after=$(wc -l < "${bfile}.fam")
+        echo ">> Sample size after KING removal: ${n_after}"
+
+    else
+        echo "Error: Please set related flag to 'yes' or 'no' in config."
+        exit 1
     fi
-# ---------------------------------------------------------------------
-# BRANCH 2: REMOVE RELATIVES (Scenario 3 & 4)
-# ---------------------------------------------------------------------
-elif [ "${related}" = "no" ]; then
 
-    echo ">> Action: Removing cryptic relatedness via KING"
-	echo "Your rela_cutoff is set to ${rel_cutoff}"
-	degree_cutoff=$(echo "${rel_cutoff} / 2" | bc -l)
-
-    ${king} \
-        -b ${bfile}_king_input.bed \
-        --unrelated --degree 3 \
-        --cpus ${nthreads} \
-        --prefix ${grmfile_king}_filter
-
-    echo "Filtering genotypes to keep only the unrelated list"
+    # PC calculation (admix=no only; admix=yes, then PCs already done by PC-Air)
     ${plink2} \
         --bfile ${bfile} \
-        --keep ${grmfile_king}_filterunrelated.txt \
-        --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
+        --new-id-max-allele-len 70 \
+        --extract temp_hm3snps.txt \
+        --indep-pairwise 10000 5 0.1 \
+        --maf 0.2 \
+        --out ${pca} \
+        --autosome \
+        --threads ${nthreads}
 
-    # Overwrite original bfile with the filtered unrelated set
-    mv ${bfile}_unrel_final.bed ${bfile}.bed
-    mv ${bfile}_unrel_final.bim ${bfile}.bim
-    mv ${bfile}_unrel_final.fam ${bfile}.fam
+    if [ "${related}" = "no" ]; then
+        ${plink2} \
+            --bfile ${bfile} \
+            --new-id-max-allele-len 70 \
+            --extract ${pca}.prune.in \
+            --pca 20 \
+            --out ${pca} \
+            --threads ${nthreads}
 
-    echo ">> SCENARIO 3/4: Sample is now cleaned of relatives. PC calculation will follow."
+    elif [ "${related}" = "yes" ]; then
+        ${plink2} \
+            --bfile ${bfile} \
+            --extract ${pca}.prune.in \
+            --new-id-max-allele-len 70 \
+            --make-bed \
+            --out ${bfile}_ldpruned \
+            --threads ${nthreads}
+
+        ${R_directory}Rscript resources/genetics/pcs_relateds.R \
+            ${bfile}_ldpruned \
+            ${pca} \
+            ${n_pcs} \
+            ${nthreads}
+    fi
 
 else
-    echo "Error: Set related flag to 'yes' or 'no' in config."
+    echo "Error: Please set admix flag to 'yes' or 'no' in config."
     exit 1
-fi
-
-#Calculate PCs
-#gunzip -c ${hm3_snps_no_ld} > temp_hm3snpsnold.txt
-# might to change the extract snpslist?
-${plink2} \
-	--bfile ${bfile} \
-	--new-id-max-allele-len 70 \
-	--extract temp_hm3snps.txt \
-	--indep-pairwise 10000 5 0.1 \
-	--maf 0.2 \
-	--out ${pca} \
-	--autosome \
-	--threads ${nthreads}
-
-if [ "${related}" = "no" ];then
-	${plink2} \
-		--bfile ${bfile} \
-		--new-id-max-allele-len 70 \
-		--extract ${pca}.prune.in \
-		--pca 20 \
-		--out ${pca} \
-		--threads ${nthreads}
-
-elif [ "${related}" = "yes" ]; then
-	${plink2} \
-		--bfile ${bfile} \
-		--extract ${pca}.prune.in \
-		--new-id-max-allele-len 70 \
-		--make-bed \
-		--out ${bfile}_ldpruned \
-		--threads ${nthreads}
-
-	${R_directory}Rscript resources/genetics/pcs_relateds.R \
-		${bfile}_ldpruned \
-		${pca} \
-		${n_pcs} \
-		${nthreads}
-else
-	echo "Error: Set related flag in config to yes or no"
-	exit 1
 fi
 
 # Get genetic outliers
