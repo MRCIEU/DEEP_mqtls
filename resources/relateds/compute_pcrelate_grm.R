@@ -45,7 +45,8 @@ geno_data   <- GenotypeData(geno_reader)
 mypcair <- pcair(geno_data, kinobj = king_mat, divobj = king_mat,
                  snp.include = pruned_snps, eigen.cnt = npc)
 
-mypcrel <- pcrelate(geno_data, pcs = mypcair$vectors[, 1:npc],
+geno_iter <- GenotypeBlockIterator(geno_data)
+mypcrel <- pcrelate(geno_iter, pcs = mypcair$vectors[, 1:npc],
                     training.set = mypcair$unrels)
 
 # --- Step 4: Export pairwise kinship and GRM ---
