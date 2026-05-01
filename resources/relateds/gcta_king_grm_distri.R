@@ -105,7 +105,7 @@ if (has_kin) {
 
 # --- Panel A: GCTA ---
 xmin_g  <- -0.2; xmax_g <- 1.2
-x_plot_g <- gcta_off_diag[gcta_off_diag >= xmin_g & gcta_off_diag <= xmax_g]
+x_plot_g <- gcta_off_diag$grm[gcta_off_diag$grm >= xmin_g & gcta_off_diag$grm <= xmax_g]
 h_g     <- hist(x_plot_g, breaks = 100, plot = FALSE)
 counts_g <- h_g$counts
 counts_g[counts_g <= 0] <- 0.5
