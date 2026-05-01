@@ -283,7 +283,7 @@ if [ "${admix}" = "yes" ]; then
     ${R_directory}Rscript resources/relateds/compute_pcrelate_grm.R \
         "${bfile}_king_input" \
         "${grmfile_pcrelate}" \
-        "${npc}" \
+        "${n_pcs}" \
         "${nthreads}" \
         "${rel_cutoff}" \
         "${pcrelate_mode}"
