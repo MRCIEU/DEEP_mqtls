@@ -4,6 +4,8 @@ suppressMessages(library(SNPRelate))
 suppressMessages(library(GENESIS))
 suppressMessages(library(GWASTools))
 suppressMessages(library(Matrix))
+if (!requireNamespace("BiocParallel", quietly = TRUE)) BiocManager::install("BiocParallel")
+suppressMessages(library(BiocParallel))
 
 args <- commandArgs(trailingOnly = TRUE)
 bfile      <- args[1]
