@@ -63,7 +63,15 @@ grm_sparse[grm_sparse < rel_cutoff] <- 0
 
 saveRDS(grm_mat, file = paste0(outfile, ".grm.rds"))
 writeMM(as(grm_sparse, "dgCMatrix"), file = paste0(outfile, ".sparse_grm.mtx"))
-write.table(data.frame(ID = rownames(mypcair$vectors), mypcair$vectors),
+fam_ids <- read.table(paste0(bfile, ".fam"), header = FALSE, stringsAsFactors = FALSE)
+iid <- rownames(mypcair$vectors)
+idx <- match(iid, fam_ids$V2)
+fid <- fam_ids$V1[idx]
+if (any(is.na(fid))) {
+  warning("Some IIDs were not found in .fam; using IID as FID for those samples.")
+  fid[is.na(fid)] <- iid[is.na(fid)]
+}
+write.table(data.frame(FID = fid, IID = iid, mypcair$vectors),
             file = paste0(outfile, ".pca.eigenvec"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 # --- Step 5: If mode=remove, identify cryptic relateds to remove ---
