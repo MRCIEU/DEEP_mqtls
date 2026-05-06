@@ -32,4 +32,4 @@ jobs:
       - name: Run ruff
         # Manually specify the two files to check
         run: |
-          ruff check DEEP_mqtls/01h_summary_report.py DEEP_mqtls/resources/datacheck/ancestry_infer.py
+          ruff check ./01h_summary_report.py ./resources/datacheck/ancestry_infer.py
