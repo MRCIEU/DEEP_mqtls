@@ -534,6 +534,7 @@ awk '{print $2}' < ${bfile}.fam > ${intersect_ids}
 
 #rm -f ${bfile}.*~
 rm temp_hm3snps.txt
+echo "add ${bfile_test_ids} for testing purposes"
 
 # local pca plot to be done
 echo "Successfully completed script 1b"
