@@ -103,6 +103,34 @@ check_logs_01c () {
     fi
 }
 
+check_logs_01g () {
+	local log_dir="${section_01_dir}/logs_g"
+	local log_files=(${log_dir}/log*.txt)
+
+	# define 3 chunks
+	local chunks=("vcf" "hc" "gwas")
+	local success_count=0
+
+	for chunk in "${chunks[@]}"; do
+		local pattern="Successfully completed script 01g $chunk chunk"
+		echo "Checking for pattern: $pattern"
+		if grep -q "$pattern" "${log_files[@]}"; then
+			success_count=$((success_count + 1))
+		else
+			echo "Missing success for $chunk"
+		fi
+	done
+
+	echo "Successful chunks: $success_count/${#chunks[@]}"
+
+	if [ $success_count -eq ${#chunks[@]} ]; then
+		echo "01g-HCs.sh completed successfully."
+	else
+		echo "Problem: 01g-HCs.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
+		exit 1
+	fi
+}
+
 check_logs_01 () {
 
 	exec &> >(tee ${section_01a_uploadlog})
@@ -162,11 +190,6 @@ check_logs_01 () {
 	else
 		echo "VCF directory found, checking 01g log file."
 		compare_version "01g"
-    	if grep -i -q "success" "${section_01g_logfile}"; then
-        	echo "01g-HCs.sh completed successfully."
-    	else
-        	echo "Problem: 01g-HCs.sh did not complete successfully"
-        	exit 1
-    	fi
+		check_logs_01g
 	fi
 }
