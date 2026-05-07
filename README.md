@@ -48,6 +48,8 @@ Before you submit an issue, please take a moment to review these guidelines to e
 
 **For Documentation:** Specify the page & section where the documentation was misleading or confusing. 
 
+**Pull Requests:** If you have developed a fix or an improvement, we welcome your contributions via Pull Requests. Please ensure your PR includes a clear description of the changes made.
+
 ## Guidance for contributing
 
 The scripts in this repository were developed by the core DEEP team, building on previous work from GoDMC. A list can be found under the Acknowledgements section below.
