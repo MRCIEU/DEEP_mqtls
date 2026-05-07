@@ -6,8 +6,44 @@ set -- $concatenated
 exec &> >(tee ${section_01g_logfile})
 print_version
 
+containsElement () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  echo "There is no method for ${1}."
+  echo "Please run:"
+  echo "./01g_HCs.sh [arg]"
+  echo "where arg is an optional argument that can be one of:"
+  printf '%s\n' ${@:2}
+  return 1
+}
+
+arg="all"
+declare -a sections=('all' 'vcf' 'hc' 'gwas')
+
+if [ -n "${1}" ]; then
+  arg="${1}"
+  containsElement "${1}" ${sections[@]}
+fi
+
+section_message () {
+  echo "-----------------------------------------------"
+  echo ""
+  echo "$1 section"
+  echo ""
+  echo "to run this part on its own type:"
+  echo "$ ./01g_HCs.sh $1"
+  echo ""
+  echo "-----------------------------------------------"
+  echo ""
+  echo ""
+}
+
 # because PCs are constructed from total variance explained, many are associated with genetically localized structures rather than population structure.
 # computing haplotype components (HCs) through PBWTpaint, which captures fine-scale local haplotype sharing patterns, can better account for subtle population structure in GWAS, but not for relatedness.
+
+if [ "$arg" = "vcf" ] || [ "$arg" = "all" ]
+then
+section_message "vcf"
 
 echo "Checking VCF files in: ${vcf_dir}"
 # exclude Chr X
@@ -123,6 +159,13 @@ for i in {1..22}; do
     rm "${genetic_processed_dir}/chr${i}_lifted.vcf.gz"
 done
 
+echo "Successfully completed script 01g vcf chunk"
+fi
+
+if [ "$arg" = "hc" ] || [ "$arg" = "all" ]
+then
+section_message "hc"
+
 for i in {1..22}; do
 
     echo "Computing pair-wise genetic distance for chr${i}..."
@@ -218,8 +261,15 @@ ${R_directory}Rscript resources/methylation/generate_qcovar_with_hcs.R \
     "${qcovar_hc_file}" \
     "${scripts_directory}" 
 
+echo "Successfully completed script 01g hc chunk"
+fi
+
 # qcovar file with PCs are from 01d
 # qcovar file with no correction from  01e
+
+if [ "$arg" = "gwas" ] || [ "$arg" = "all" ]
+then
+section_message "gwas"
 
 echo "Checking positive control file for 01g"
 ${R_directory}Rscript resources/genetics/check_positive_controls.R \
@@ -411,4 +461,9 @@ do
 
 done
 
-echo "Successfully completed script 01g"
+echo "Successfully completed script 01g gwas chunk"
+fi
+
+if [ "$arg" = "all" ]; then
+  echo "Successfully completed script 01g"
+fi
