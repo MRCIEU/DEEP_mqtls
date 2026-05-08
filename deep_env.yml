@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - pkgs/main
 dependencies:
-  - python=3.12.3|>=3.9
+  - python>=3.12,<3.14
   - onnx
   - r-base=4.4.3|>=4.1
   - r-devtools
