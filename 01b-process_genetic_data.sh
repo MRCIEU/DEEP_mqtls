@@ -191,6 +191,7 @@ ${plink2} \
 ${plink2} \
     --pfile ${bfile_sort} \
     --make-bed \
+    --output-chr 26 \
     --out ${bfile}1 \
     --threads ${nthreads}
 
@@ -305,6 +306,7 @@ if [ "${admix}" = "yes" ]; then
             --bfile ${bfile} \
             --remove ${grmfile_pcrelate}.remove_ids.txt \
             --new-id-max-allele-len 70 \
+            --output-chr 26 \
             --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
 
         mv ${bfile}_unrel_final.bed ${bfile}.bed
@@ -359,6 +361,7 @@ elif [ "${admix}" = "no" ]; then
             --bfile ${bfile} \
             --keep ${grmfile_king}_filterunrelated.txt \
             --new-id-max-allele-len 70 \
+            --output-chr 26 \
             --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
         mv ${bfile}_unrel_final.bed ${bfile}.bed
         mv ${bfile}_unrel_final.bim ${bfile}.bim
