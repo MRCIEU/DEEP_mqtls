@@ -52,6 +52,16 @@ if (length(keys) < 2) {
 
 pairs <- combn(keys, 2, simplify = FALSE)
 
+summary_rows <- data.frame(
+  cpg_name = character(),
+  key1 = character(),
+  key2 = character(),
+  slope = numeric(),
+  n_overlap = integer(),
+  r = numeric(),
+  stringsAsFactors = FALSE
+)
+
 for (pair in pairs) {
   key1 <- pair[1]
   key2 <- pair[2]
@@ -90,9 +100,34 @@ for (pair in pairs) {
   brks <- pretty(lim)
 
   fit <- lm(merged[[y_col]] ~ merged[[x_col]])
+  slope_val <- unname(coef(fit)[2])
+  r_val <- cor(merged[[x_col]], merged[[y_col]], use = "complete.obs")
+  n_overlap <- nrow(merged)
+
+  summary_rows <- rbind(
+    summary_rows,
+    data.frame(
+      cpg_name = cpg_name,
+      key1 = key1,
+      key2 = key2,
+      slope = round(slope_val, 3),
+      n_overlap = n_overlap,
+      r = r_val,
+      stringsAsFactors = FALSE
+    )
+  )
+
+  message(
+    "cpg=", cpg_name,
+    " pair=", key1, " vs ", key2,
+    " slope=", sprintf("%.3f", slope_val),
+    " n_overlap=", n_overlap,
+    " r=", sprintf("%.6f", r_val)
+  )
+
   ann_text <- sprintf("slope = %.3f, r = %.3f",
-                      coef(fit)[2],
-                      cor(merged[[x_col]], merged[[y_col]], use = "complete.obs"))
+                      slope_val,
+                      r_val)
 
   p <- ggplot(
     merged,
@@ -128,4 +163,11 @@ for (pair in pairs) {
   out_pdf <- file.path(outdir, paste0(cpg_name, "_", key1, "_", key2, "_scatter.pdf"))
   ggsave(out_pdf, p, width = 6, height = 6)
   message("Saved scatter plot: ", out_pdf)
+}
+
+if (nrow(summary_rows) > 0) {
+  message("Pairwise slope summary for cpg=", cpg_name)
+  print(summary_rows)
+} else {
+  message("No overlapping SNP pairs for cpg=", cpg_name, "; no slope summary generated.")
 }
