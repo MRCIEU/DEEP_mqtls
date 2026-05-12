@@ -220,12 +220,25 @@ check_results_01c () {
         exit 1
     fi
 
-	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
-    	echo "Raw and edited phenotypes summary files are present"
+	if [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
+    	echo "Raw phenotypes summary files are present"
 	else
-    	echo "Problem: One or more raw and edited phenotypes summary files are absent"
+    	echo "Problem: One or more raw phenotypes summary files are absent"
     	exit 1
 	fi
+	
+	# Check if winsorisation was applied to numeric phenotypes in input data
+	if grep -q "no numeric vars to winsorise" "${section_01_dir}/logs_c"/log*.txt; then
+    	echo "Winsorisation was not applied to phenotype input data so no edited phenotypes output files expected"
+	else
+    # Winsorisation was applied to numeric phenotypes in input data
+    	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ]; then
+        	echo "Edited phenotypes summary files are present"
+    	else
+        echo "Problem: One or more edited phenotypes summary files are absent"
+        exit 1
+  	  fi
+fi
 }
 
 check_results_01d () {
