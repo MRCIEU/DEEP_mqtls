@@ -119,7 +119,14 @@ age=">18"
 # Set to NULL if you do not have directly measured cellcounts
 measured_cellcounts=""
 
-admix="no"  # Set to "yes" if your cohort has admixed ancestry
+# Define if the cohort exhibits systematic genetic structure or stratification.
+# This setting triggers additional corrections (e.g., PCA-relate).
+# This may arise from:
+# 1) Diverse ancestry or admixed ancestry/backgrounds (e.g., Hispanic)
+# 2) Samples collected from multiple distinct geographical areas/sub-populations
+# 3) Known internal genetic heterogeneity
+# Default is "no".
+structured="no"
 
 # =============================================================================
 # SECTION E: SYSTEM PATHS AND INPUT DATA FILES
