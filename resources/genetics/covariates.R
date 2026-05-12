@@ -55,6 +55,8 @@ if(cellcount_file=="NULL")
 fam <- read.table(fam_file)
 common_iid <- intersect(fam[,2], allcovs$IID)
 allcovs <- allcovs[allcovs$IID %in% common_iid, ]
+message("allcovs header:")
+message(paste(colnames(allcovs), collapse = "\t"))
 
 # write.table(allcovs,file=paste(out_file,".plink",sep=""),row.names=F,col.names=F,quote=F)
 write.table(allcovs, file=paste0(out_file, ".txt"), row=F, col=T, qu=F)
