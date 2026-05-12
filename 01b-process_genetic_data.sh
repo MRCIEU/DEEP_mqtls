@@ -264,17 +264,17 @@ fi
 echo ">> KING degree derived from rel_cutoff (${rel_cutoff}): --degree ${king_degree}"
 
 # =====================================================================
-# PRIMARY SPLIT: admix determines kinship method
+# PRIMARY SPLIT: structured flag from config determines kinship method
 # =====================================================================
 
-if [ "${admix}" = "yes" ]; then
-    echo ">> Admixed population: using PC-Relate for kinship estimation"
+if [ "${structured}" = "yes" ]; then
+    echo ">> Structured population: using PC-Relate for kinship estimation"
 
     if [ "${related}" = "yes" ]; then
-        echo ">> SCENARIO 1: Related + Admixed → PC-Relate sparse GRM (keep relatives)"
+        echo ">> SCENARIO 1: Related + Structured -> PC-Relate sparse GRM (keep relatives)"
         pcrelate_mode="keep"
     elif [ "${related}" = "no" ]; then
-        echo ">> SCENARIO 3: Unrelated + Admixed → PC-Relate remove cryptic relatedness"
+        echo ">> SCENARIO 3: Unrelated + Structured -> PC-Relate remove cryptic relatedness"
         pcrelate_mode="remove"
     else
         echo "Error: Please set related flag to 'yes' or 'no' in config."
@@ -320,11 +320,11 @@ if [ "${admix}" = "yes" ]; then
     # PCs already computed by compute_pcrelate_grm.R (PC-Air)
     cp "${grmfile_pcrelate}.pca.eigenvec" "${pca}.eigenvec"
 
-elif [ "${admix}" = "no" ]; then
-    echo ">> Non-admixed population: using KING for kinship estimation"
+elif [ "${structured}" = "no" ]; then
+    echo ">> Non-structured population: using KING for kinship estimation"
 
     if [ "${related}" = "yes" ]; then
-        echo ">> SCENARIO 2: Related + Non-Admixed → KING sparse GRM"
+        echo ">> SCENARIO 2: Related + Non-Structured -> KING sparse GRM"
 
         ${king} \
             -b ${bfile}_king_input.bed \
@@ -343,7 +343,7 @@ elif [ "${admix}" = "no" ]; then
         fi
 
     elif [ "${related}" = "no" ]; then
-        echo ">> SCENARIO 4: Unrelated + Non-Admixed → KING remove cryptic relatedness"
+        echo ">> SCENARIO 4: Unrelated + Non-Structured -> KING remove cryptic relatedness"
         echo ">> rel_cutoff: ${rel_cutoff} -> KING --degree ${king_degree}"
 
         ${king} \
@@ -375,7 +375,7 @@ elif [ "${admix}" = "no" ]; then
         exit 1
     fi
 
-    # PC calculation (admix=no only; admix=yes, then PCs already done by PC-Air)
+    # PC calculation (structured=no only; structured=yes, then PCs already done by PC-Air)
     ${plink2} \
         --bfile ${bfile} \
         --new-id-max-allele-len 70 \
@@ -412,7 +412,7 @@ elif [ "${admix}" = "no" ]; then
     fi
 
 else
-    echo "Error: Please set admix flag to 'yes' or 'no' in config."
+    echo "Error: Please set structured flag to 'yes' or 'no' in config."
     exit 1
 fi
 
