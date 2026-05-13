@@ -4,20 +4,15 @@
 #' 2. Two input files are needed: 
 #'    a. A .fam file from the PLINK format genotype. It contains the individuals' FIDs and IIDs and some other information. 
 #'        see (https://www.cog-genomics.org/plink/1.9/formats#fam) for details.
-#'    b. A inferredRelationship file. We will use the UKB provided one. 
-#'        It should contains: "IID1", "IID2", and a "relationship" columns. The "relationship" column should contain
-#'        the following elements (these are used by UK Biobank to indicate the inferred relationship between 
-#'        two individuals, see https://www.biorxiv.org/content/early/2017/07/20/166298) :
-#'          "MZtwin", 
-#'          "parentOffspring",
-#'          "fullSib", 
-#'          "second",
-#'          "third"
+#'    b. A relationship/kinship file with at least three columns: IID1, IID2, and a
+#'       numeric coefficient column in the last position (e.g. KING .kin0 column 13).
 #'          
 #'  Author: Longda Jiang, longda.jiang@uq.edu.au
 #'  Date: June 28, 2018
 #'  Version: 1.0.1
 #'  Modified by Gibran Hemani to accept King output (2024-02-07)
+#'  Modified by Haotian Tang to directly use predicted values from KING output (*2 to 
+#'   convert to grm value) (2026-05-13)
 
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -54,19 +49,18 @@ fam_file <- fam_file[, 1:2]
 names(fam_file) <- c("FID", "IID")
 fam_file$order <- 1:nrow(fam_file)
 
-rel <- read.table(file=path_to_rel, head=F, stringsAsFactors = F) 
+rel <- read.table(file=path_to_rel, head=F, stringsAsFactors = F)
 # the rel file we only need the 1, 2, and last columns:
 rel <- rel[, c(1, 2, ncol(rel))]
-names(rel) <- c("IID_1", "IID_2", "relationship")
-
-# check relation labels
-relation_labels = table(rel$relationship)
-# print(relation_labels)
-setting_labels = c("Dup/MZ", "PO", "FS", "2nd", "3rd")
-rel <- subset(rel, relationship %in% setting_labels)
+names(rel) <- c("IID_1", "IID_2", "coef")
+message("Number of NA values in relationship coefficients: ", sum(is.na(rel$coef)))
+rel <- rel[!is.na(rel$coef), ]
+rel$coef <- as.numeric(rel$coef)
+message("Scaling relationship coefficients by 2 (KING kinship -> GRM scale)")
+rel$coef <- rel$coef * 2
 
 rel2 <- rel[,c(2,1,3)]
-names(rel2) <- c("IID_1", "IID_2", "relationship")
+names(rel2) <- c("IID_1", "IID_2", "coef")
 rel <- rbind(rel, rel2)
 
 ###############
@@ -74,7 +68,7 @@ rel <- rbind(rel, rel2)
 ###############
 rel <- merge(rel, fam_file[,c("IID", "order")], by.x="IID_1", by.y="IID")
 rel <- merge(rel, fam_file[,c("IID", "order")], by.x="IID_2", by.y="IID")
-rel <- rel[, c("IID_1", "IID_2", "relationship", "order.x", "order.y")]
+rel <- rel[, c("IID_1", "IID_2", "coef", "order.x", "order.y")]
 
 # The order of IID_1 is important: 
 # The order of IID_1 should always be larger than the order of IID_2. 
@@ -89,14 +83,6 @@ rel <- rel[rel$order.x > rel$order.y, ]
 ###############
 # generate the FAM
 ###############
-
-rel$coef <- 0 
-
-rel[rel$relationship == "Dup/MZ", "coef"] <- 1
-rel[rel$relationship == "PO", "coef"] <- 0.5
-rel[rel$relationship == "FS", "coef"] <- 0.5
-rel[rel$relationship == "2nd", "coef"] <- 0.25
-rel[rel$relationship == "3rd", "coef"] <- 0.125
 
 # the diagonal elements of FAM is simply 1
 rel_part2 <- fam_file[,c("IID", "IID")]
