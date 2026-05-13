@@ -74,6 +74,35 @@ if (any(is.na(fid))) {
 write.table(data.frame(FID = fid, IID = iid, mypcair$vectors),
             file = paste0(outfile, ".pca.eigenvec"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
+# Write GCTA sparse GRM files for fastGWA (--grm-sparse prefix)
+message(">> Generating GCTA sparse GRM files for fastGWA...")
+
+# Align grm.id order with matrix row/column order
+sample_order <- rownames(grm_sparse)
+grm_id_idx <- match(sample_order, iid)
+grm_id_df <- data.frame(FID = fid[grm_id_idx], IID = sample_order, stringsAsFactors = FALSE)
+
+write.table(grm_id_df,
+            file = paste0(outfile, ".grm.id"),
+            sep = " ",
+            quote = FALSE,
+            row.names = FALSE,
+            col.names = FALSE)
+
+# pedFAM-style .grm.sp: lower triangle including diagonal, 0-based indices
+sp_summary <- summary(as(grm_sparse, "dgCMatrix"))
+sp_lower <- sp_summary[sp_summary$i >= sp_summary$j, , drop = FALSE]
+sp_lower$i <- sp_lower$i - 1
+sp_lower$j <- sp_lower$j - 1
+
+write.table(sp_lower[, c("i", "j", "x")],
+            file = paste0(outfile, ".grm.sp"),
+            sep = " ",
+            quote = FALSE,
+            row.names = FALSE,
+            col.names = FALSE)
+message(">> Written: ", outfile, ".grm.id and ", outfile, ".grm.sp")
+
 # --- Step 5: If mode=remove, identify cryptic relateds to remove ---
 if (mode == "remove") {
   message(">> Identifying samples for removal (mode=remove)...")
