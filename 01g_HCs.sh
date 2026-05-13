@@ -286,11 +286,69 @@ ${R_directory}Rscript resources/genetics/check_positive_controls.R \
 echo "Performing GWAS with HCs/PCs/no-correction as covariates, other covs, like cell types, age and sex still included"
 # GWAS with HCs as covariates
 
-covar_option=""
+# choose sparse GRM and fastGWA mode the same way as 01d/01e
+use_sparse_grm="no"
+fastgwa_mode="lr"
+grm_sparse_prefix=""
+
+if [ "${related}" = "yes" ] && [ "${structured}" = "yes" ]; then
+  echo "Related + Structured: using PC-Relate sparse GRM from 01b"
+  fastgwa_mode="mlm"
+  use_sparse_grm="yes"
+
+  if [ -f "${grmfile_pcrelate}.grm.sp" ] && [ -f "${grmfile_pcrelate}.grm.id" ]; then
+    grm_sparse_prefix="${grmfile_pcrelate}"
+    echo "Using PC-Relate GCTA sparse GRM prefix: ${grm_sparse_prefix}"
+  else
+    echo "Error: Required PC-Relate sparse GRM files not found:"
+    echo "  ${grmfile_pcrelate}.grm.sp"
+    echo "  ${grmfile_pcrelate}.grm.id"
+    exit 1
+  fi
+
+elif [ "${related}" = "yes" ] && [ "${structured}" = "no" ]; then
+  echo "Related + non-structured: using KING sparse GRM from 01b"
+  fastgwa_mode="mlm"
+  use_sparse_grm="yes"
+  grm_sparse_prefix="${grmfile_king}_sparse"
+
+  if [ -f "${grmfile_king}_sparse.grm.sp" ] && [ -f "${grmfile_king}_sparse.grm.id" ]; then
+    echo "Using KING sparse GRM prefix: ${grm_sparse_prefix}"
+  else
+    echo "Error: Required KING sparse GRM files not found:"
+    echo "  ${grmfile_king}_sparse.grm.sp"
+    echo "  ${grmfile_king}_sparse.grm.id"
+    exit 1
+  fi
+
+elif [ "${related}" = "no" ]; then
+  echo "Unrelated sample: no GRM needed (fastGWA-lr)"
+  fastgwa_mode="lr"
+  use_sparse_grm="no"
+  grm_sparse_prefix=""
+
+else
+  echo "Error: Invalid related/structured flag combination. Set both to yes or no."
+  exit 1
+fi
+
+fastgwa_option=()
+grm_sparse_option=()
+if [ "${use_sparse_grm}" = "yes" ]; then
+  fastgwa_option=("--fastGWA-mlm")
+  grm_sparse_option=("--grm-sparse" "${grm_sparse_prefix}")
+elif [ "${fastgwa_mode}" = "lr" ]; then
+  fastgwa_option=("--fastGWA-lr")
+else
+  echo "Error: Unsupported fastGWA mode: ${fastgwa_mode}"
+  exit 1
+fi
+
+covar_args=()
 if [ -f "${ccovar_file}" ]; then
   ncols=$(awk -F'\t' 'NR==1{print NF; exit}' "${ccovar_file}" 2>/dev/null || echo 0)
   if [ "${ncols}" -gt 2 ]; then
-    covar_option="--covar ${ccovar_file}"
+    covar_args=("--covar" "${ccovar_file}")
   else
     echo "No categorical covariates detected in ${ccovar_file}; skipping --covar for GCTA."
   fi
@@ -298,7 +356,11 @@ else
   echo "Warning: ccovar file not found: ${ccovar_file}"
 fi
 
-echo "covar option: ${covar_option}"
+if [ "${#covar_args[@]}" -gt 0 ]; then
+  echo "Using categorical covariates from ${ccovar_file}"
+else
+  echo "No categorical covariates passed to GCTA"
+fi
 
 base_methylation_no_outliers="${methylation_no_outliers_gwas%.Robj}"
 
@@ -328,82 +390,47 @@ do
             "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta"
 
         echo "Perform fastGWA (untransformed) in positive control"
-        if [ "${related}" = "yes" ]; then
-            echo "Related is set to yes, using GRM from related individuals"
-            ${gcta} \
-                --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_rel" \
-                --fastGWA-mlm \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
-
-            ${gcta} \
-                --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_rel" \
-                --fastGWA-mlm \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_hc_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
-
-            ${gcta} \
-                --bfile "${bfile}" \
-                --grm-sparse "${grmfile_fast}_rel" \
-                --fastGWA-mlm \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_noPC_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
-
-        elif [ "${related}" = "no" ]; then
-            echo "Related is set to no"
-            echo "section_01_dir: ${section_01_dir}"
-            echo "positive_control_cpg: ${positive_control_cpg}"
-
-            ${gcta} \
-                --bfile "${bfile}" \
-                --fastGWA-lr \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
-
-            ${gcta} \
-                --bfile "${bfile}" \
-                --fastGWA-lr \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_hc_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
-
-            ${gcta} \
-                --bfile "${bfile}" \
-                --fastGWA-lr \
-                --h2-limit 100 \
-                --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-                --qcovar "${qcovar_noPC_file}" \
-                ${covar_option} \
-                --covar-maxlevel 300 \
-                --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
-                --thread-num "${nthreads}"
+        if [ "${use_sparse_grm}" = "yes" ]; then
+          echo "Using sparse GRM prefix: ${grm_sparse_prefix}"
+        else
+          echo "No GRM mode: fastGWA-lr"
         fi
+
+        ${gcta} \
+          --bfile "${bfile}" \
+          "${grm_sparse_option[@]}" \
+          "${fastgwa_option[@]}" \
+          --h2-limit 100 \
+          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
+          --qcovar "${qcovar_file}" \
+          "${covar_args[@]}" \
+          --covar-maxlevel 300 \
+          --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
+          --thread-num "${nthreads}"
+
+        ${gcta} \
+          --bfile "${bfile}" \
+          "${grm_sparse_option[@]}" \
+          "${fastgwa_option[@]}" \
+          --h2-limit 100 \
+          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
+          --qcovar "${qcovar_hc_file}" \
+          "${covar_args[@]}" \
+          --covar-maxlevel 300 \
+          --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
+          --thread-num "${nthreads}"
+
+        ${gcta} \
+          --bfile "${bfile}" \
+          "${grm_sparse_option[@]}" \
+          "${fastgwa_option[@]}" \
+          --h2-limit 100 \
+          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
+          --qcovar "${qcovar_noPC_file}" \
+          "${covar_args[@]}" \
+          --covar-maxlevel 300 \
+          --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
+          --thread-num "${nthreads}"
 
         for prefix in pc_positive_control_untransformed_${positive_control_cpg} \
                       hc_positive_control_untransformed_${positive_control_cpg} \
