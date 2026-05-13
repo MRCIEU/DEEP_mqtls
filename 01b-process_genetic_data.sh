@@ -245,14 +245,14 @@ ${king} \
     -b ${bfile}_king_input.bed \
     --kinship \
     --cpus ${nthreads} \
-    --prefix ${grmfile_king}_prefilter
+    --prefix ${grmfile_king}_all_pairs
 
-echo "Plotting prefilter-GRM distributions (GCTA + KING) for full sample"
+echo "Plotting all-pairs GRM distributions (GCTA + KING) for full sample"
 ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
     "${grmfile_all}" \
     "${rel_cutoff}" \
     "${grm_distribution}_01b" \
-    "${grmfile_king}_prefilter.kin0" \
+    "${grmfile_king}_all_pairs.kin0" \
     "king"
 
 # Derive KING degree from rel_cutoff (GCTA scale: kinship = rel_cutoff / 2)
@@ -324,23 +324,23 @@ elif [ "${structured}" = "no" ]; then
     echo ">> Non-structured population: using KING for kinship estimation"
 
     if [ "${related}" = "yes" ]; then
-        echo ">> SCENARIO 2: Related + Non-Structured -> KING sparse GRM"
+        echo ">> SCENARIO 2: Related + Non-Structured -> reuse KING all-pairs for sparse GRM"
+        echo ">> Reusing ${grmfile_king}_all_pairs.kin0 with kinship cutoff ${kinship_cutoff}"
 
-        ${king} \
-            -b ${bfile}_king_input.bed \
-            --related \
-            --degree ${king_degree} \
-            --cpus ${nthreads} \
-            --prefix ${grmfile_king}_filter
-
-        if [ -f "${grmfile_king}_filter.kin0" ]; then
-            awk '{ print $2, $4, $14 }' ${grmfile_king}_filter.kin0 | grep -v "4th" | sed 1d > ${grmfile_king}_filter.kin0.formatted
-
-            ${R_directory}Rscript resources/relateds/pedFAM.R \
-                ${bfile}_king_input.fam \
-                ${grmfile_king}_filter.kin0.formatted \
-                ${grmfile_king}_sparse
+        if [ ! -f "${grmfile_king}_all_pairs.kin0" ]; then
+            echo "Error: ${grmfile_king}_all_pairs.kin0 not found. Cannot build related-pairs file."
+            exit 1
         fi
+
+        awk -v kcut="${kinship_cutoff}" 'NR == 1 || ($8 + 0) >= kcut' \
+            "${grmfile_king}_all_pairs.kin0" > "${grmfile_king}_filter.kin0"
+
+        awk 'NR > 1 { print $2, $4, $8 }' ${grmfile_king}_filter.kin0 > ${grmfile_king}_filter.kin0.values
+
+        ${R_directory}Rscript resources/relateds/pedFAM.R \
+            ${bfile}_king_input.fam \
+            ${grmfile_king}_filter.kin0.values \
+            ${grmfile_king}_sparse
 
     elif [ "${related}" = "no" ]; then
         echo ">> SCENARIO 4: Unrelated + Non-Structured -> KING remove cryptic relatedness"
