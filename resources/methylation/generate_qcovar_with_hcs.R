@@ -114,4 +114,5 @@ print(qc_uniques)
 message("Categorical covariates unique counts:")
 print(cc_uniques)
 
+message(paste("qcovar_hc_file header:", paste(colnames(quant_cov), collapse = "\t")))
 write.table(quant_cov, file = qcovar_hc_file, sep = "\t", row.names = FALSE,  quote = FALSE, col.names = FALSE)
