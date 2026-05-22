@@ -318,6 +318,7 @@ if [ "${structured}" = "yes" ]; then
     fi
 
     # PCs already computed by compute_pcrelate_grm.R (PC-Air)
+    cp "${grmfile_pcrelate}.pca.eigenval" "${pca}.eigenval"
     cp "${grmfile_pcrelate}.pca.eigenvec" "${pca}.eigenvec"
 
 elif [ "${structured}" = "no" ]; then
@@ -415,6 +416,11 @@ else
     echo "Error: Please set structured flag to 'yes' or 'no' in config."
     exit 1
 fi
+
+# Scree plot PCs variance explained
+${R_directory}Rscript resources/genetics/var_explained_plot.R \
+    ${pca}.eigenval \
+    ${pca_scree_plot}
 
 # Get genetic outliers
 echo "Generating PCA plot"
@@ -617,7 +623,7 @@ awk '{print $1,$2}' < ${bfile}.fam > ${intersect_ids_plink}
 awk '{print $2}' < ${bfile}.fam > ${intersect_ids}
 
 #rm -f ${bfile}.*~
-rm temp_hm3snps.txt
+rm -f temp_hm3snps.txt
 
 # local pca plot to be done
 echo "Successfully completed script 1b"
