@@ -74,6 +74,10 @@ if (any(is.na(fid))) {
 write.table(data.frame(FID = fid, IID = iid, mypcair$vectors),
             file = paste0(outfile, ".pca.eigenvec"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 
+write.table(mypcair$values,
+            file = paste0(outfile, ".pca.eigenval"),
+            sep = "\n", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
 # Write GCTA sparse GRM files for fastGWA (--grm-sparse prefix)
 message(">> Generating GCTA sparse GRM files for fastGWA...")
 
