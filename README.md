@@ -5,12 +5,14 @@
 ## README
 This repository contains the scripts to run the DEEP pipeline which includes:
 
-* Genome-wide scans for DNA methylation quantitative trait loci
-* GWAS of DNAm derived phenotypes
-* EWAS of genetic phenotypes
-* Epigenetic prediction of human phenotypes
+* Genome-wide scans for DNA methylation quantitative trait loci in diverse population groups
+* EWAS of cardiometabolic traits in diverse population groups
+* EWAS of child health phenotypes in diverse population groups
+* Improve disease and exposure prediction across diverse population groups
 
 Please note the scripts in this repository are copyright of the Diverse Epigenetic Epidemiology Partnership and released with a [GPL v3 license](LICENSE).
+
+Scripts were cloned from the GoDMC2 pipeline (https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2) and adopted for DEEP purposes. We thank the GoDMC developers group for the development of their pipeline.
 
 ### What is DEEP?
 
@@ -63,5 +65,6 @@ The developer group of these scripts are listed in alphabetical order below:
 - Josine Min 
 - Haotian Tang
 - Sarah Watkins
+- Prachand Issarapu
   
-Scripts were cloned from the GoDMC2 pipeline (https://github.com/genetics-of-dna-methylation-consortium/godmc_phase2) and adopted for DEEP purposes. We thank the GoDMC developers group for the development of their pipeline.
+
