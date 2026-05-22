@@ -135,6 +135,7 @@ allele_ref_hm3="${home_directory}/processed_data/genetic_data/data_hm3.allele_co
 exclude_highld_region="${scripts_directory}/resources/genetics/exclude_b38.txt"
 
 pcaplot="${section_01_dir}/pcaplot.pdf"
+pca_scree_plot="${section_01_dir}/pca_scree_plot.pdf"
 allele_ref="${section_02_dir}/data.allele_codes.gz"
 SNPfail1="${home_directory}/processed_data/genetic_data/SNPfail1.txt"
 easyQC="${home_directory}/processed_data/genetic_data/data.easyqc"
