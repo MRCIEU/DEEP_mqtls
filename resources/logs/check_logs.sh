@@ -104,31 +104,50 @@ check_logs_01c () {
 }
 
 check_logs_01g () {
-	local log_dir="${section_01_dir}/logs_g"
-	local log_files=(${log_dir}/log*.txt)
+		local log_dir="${section_01_dir}/logs_g"
+		local log_files=(${log_dir}/log*.txt)
 
-	# define 3 chunks
-	local chunks=("vcf" "hc" "gwas")
-	local success_count=0
+		local has_timestamped_log=0
+		for f in "${log_files[@]}"; do
+			if [[ "$f" =~ log[0-9]{4}-[0-9]{2}-[0-9]{2}_ ]]; then
+				has_timestamped_log=1
+				break
+			fi
+		done
 
-	for chunk in "${chunks[@]}"; do
-		local pattern="Successfully completed script 01g $chunk chunk"
-		echo "Checking for pattern: $pattern"
-		if grep -q "$pattern" "${log_files[@]}"; then
-			success_count=$((success_count + 1))
+		if [ $has_timestamped_log -eq 1 ]; then
+			local chunks=("vcf" "hc" "gwas")
+			local success_count=0
+			for chunk in "${chunks[@]}"; do
+				local pattern="Successfully completed script 01g $chunk chunk"
+				echo "Checking for pattern: $pattern"
+				if grep -q "$pattern" "${log_files[@]}"; then
+					success_count=$((success_count + 1))
+				else
+					echo "Missing success for $chunk"
+				fi
+			done
+			echo "Successful chunks: $success_count/${#chunks[@]}"
+			if [ $success_count -eq ${#chunks[@]} ]; then
+				echo "01g-HCs.sh completed successfully."
+			else
+				echo "Problem: 01g-HCs.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
+				exit 1
+			fi
 		else
-			echo "Missing success for $chunk"
+			local old_log="${log_dir}/log.txt"
+			if [ -f "$old_log" ]; then
+				if grep -iq "success" "$old_log"; then
+					echo "01g-HCs.sh (old version) completed successfully."
+				else
+					echo "Problem: 01g-HCs.sh (old version) did not complete successfully (no 'success' found)"
+					exit 1
+				fi
+			else
+				echo "Problem: No log file found for 01g-HCs.sh (neither timestamped nor log.txt)"
+				exit 1
+			fi
 		fi
-	done
-
-	echo "Successful chunks: $success_count/${#chunks[@]}"
-
-	if [ $success_count -eq ${#chunks[@]} ]; then
-		echo "01g-HCs.sh completed successfully."
-	else
-		echo "Problem: 01g-HCs.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
-		exit 1
-	fi
 }
 
 check_logs_01 () {
