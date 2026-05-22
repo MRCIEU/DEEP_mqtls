@@ -14,6 +14,7 @@ p <- ggplot(df, aes(x = PC, y = var_explained)) +
     geom_point(colour = "steelblue", size = 2) +
     labs(x = "PC", y = "Variance explained (%)") +
     scale_x_continuous(breaks = df$PC) +
+    expand_limits(y = 0) +
     theme_bw() +
     theme(axis.text = element_text(size = 8))
 
