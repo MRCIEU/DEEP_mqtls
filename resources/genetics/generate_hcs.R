@@ -50,35 +50,30 @@ fwrite(HCs, output_hcs, row.names = FALSE, sep = ' ', col.names=TRUE)
 
 singvals <- res$d
 prop1 <- (singvals) / sum(singvals)
-cum_explained  <- cumsum(prop1)
 ve <- data.frame(
   HC = paste0("HC", seq_along(singvals)),
   index = seq_along(singvals),
-  prop_explained = prop1,
-  cum_explained = cum_explained
+  prop_explained = prop1
 )
 
 ve_csv <- file.path(output_kernel)
 data.table::fwrite(ve, ve_csv)
 
-# Plot: bar of per-HC explained variance, with cumulative line
-ve_plot <- ggplot(ve, aes(x = index)) +
-  geom_col(aes(y = prop_explained, fill = "prop"), color = NA) +
-  geom_line(aes(y = cum_explained, color = "cum prop"), linewidth = 0.9) +
-  geom_point(aes(y = cum_explained, color = "cum prop"), size = 1.6) +
-  
-  # Colors
-  scale_fill_manual(values = c("prop" = "#4C78A8"), name = "") +
-  scale_color_manual(values = c("cum prop" = "#F58518"), name = "") +
-  
-  scale_x_continuous(breaks = seq(0, nrow(ve), by = 10)) +
+# Plot: line of per-HC explained variance
+ve_plot <- ggplot(ve, aes(x = index, y = prop_explained)) +
+  geom_point(size = 1.5) +
+  geom_line() +
+  scale_y_log10() +
+  scale_x_continuous(breaks = ve$index) +
   labs(
-    x = "Component index",
-    y = "Proportion / Cumulative proportion",
-    title = "HC Energy Proportion and Cumulative Proportion"
+    title = "Scree Plot of Top Haplotype Components",
+    x     = "HC",
+    y     = "Proportion Eigenvalues (log scale)"
   ) +
   theme_bw() +
-  theme(legend.position = "top")
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7)
+  )
 
 ve_pdf <- file.path(output_plot)
 ggsave(ve_pdf, ve_plot, width = 10, height = 6)
