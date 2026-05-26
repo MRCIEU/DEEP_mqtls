@@ -103,16 +103,15 @@ fwrite(res, file = file.path(out_dir, "hc_pc_correlations.csv"))
 # Linear models: HC predicts PC (HC -> PC) and PC predicts HC (PC -> HC)
 
 get_model_stats <- function(fit, actual, pred) {
-  r2  <- summary(fit)$r.squared
+  r2     <- summary(fit)$r.squared
   r2_adj <- summary(fit)$adj.r.squared
-  
-  # Pearson correlation
-  r <- cor(actual, pred)
-  
-  # RMSE
-  rmse <- sqrt(mean((actual - pred)^2))
-  
-  list(r2 = r2, r2_adj = r2_adj, r = r, rmse = rmse)
+  r      <- cor(actual, pred)
+
+  fstat <- summary(fit)$fstatistic
+  p_overall <- if (is.null(fstat)) NA_real_
+               else unname(pf(fstat["value"], fstat["numdf"], fstat["dendf"], lower.tail = FALSE))
+
+  list(r2 = r2, r2_adj = r2_adj, r = r, p = p_overall)
 }
 
 # --------------------------------------------------------------------
@@ -139,7 +138,7 @@ for (pc in pc_cols) {
   # Stats
   stats <- get_model_stats(fit, dt$pc_value, dt$pred)
 
-  title_str <- sprintf("%s (R² = %.3f, RMSE = %.3f)", pc, stats$r2, stats$rmse)
+  title_str <- sprintf("%s (adj R2 = %.3f, p = %s)", pc, stats$r2_adj, format.pval(stats$p, digits = 2))
 
   p <- ggplot(dt, aes(x = pred, y = pc_value)) +
     geom_point(alpha = 0.6, size = 0.8) +
@@ -188,7 +187,7 @@ for (hc in hc_cols) {
   stats <- get_model_stats(fit, dt$hc_value, dt$pred)
 
   # Annotation text
-  title_str <- sprintf("%s (R² = %.3f, RMSE = %.3f)", hc, stats$r2, stats$rmse)
+  title_str <- sprintf("%s (adj R2 = %.3f, p = %s)", hc, stats$r2_adj, format.pval(stats$p, digits = 2))
 
   p <- ggplot(dt, aes(x = pred, y = hc_value)) +
     geom_point(alpha = 0.6, size = 0.7) +
