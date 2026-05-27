@@ -158,7 +158,7 @@ numeric_phenos <- grep("_numeric", colnames(pheno), value = TRUE)
 dont_winsorise <- c("Age_numeric", "Gestage_numeric")
 numeric_phenos <- numeric_phenos[!numeric_phenos %in% dont_winsorise]
 
-if(length(numeric_phenos>0)){
+if(length(numeric_phenos) > 0){
 plot_list <- vector("list", length = length(numeric_phenos))
 names(plot_list) <- numeric_phenos
 summstats_list <- vector("list", length = length(numeric_phenos))
