@@ -56,7 +56,7 @@ validate_and_select_reference <- function(tissue, methylation_array, age) {
       } else if (age == "<18") {
         return(list(zheng = centEpiFibIC.m))
       } else if (age == "all") {
-        stop("No reference available for buccal tissue in all age range with EPIC array.")
+        return(list(zheng = centEpiFibIC.m))
       }
     }
   }
