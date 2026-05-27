@@ -220,11 +220,20 @@ check_results_01c () {
         exit 1
     fi
 
-	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
-    	echo "Raw and edited phenotypes summary files are present"
+	# Raw outputs are always expected
+	if [ -f "${section_01_dir}/raw_phenotype_distribution_plot_${study_name}.jpg" ] && [ -f "${section_01_dir}/raw_phenotypes_summary_${study_name}.Rdata" ]; then
+		echo "Raw phenotypes summary files are present"
 	else
-    	echo "Problem: One or more raw and edited phenotypes summary files are absent"
-    	exit 1
+		echo "Problem: One or more raw phenotypes summary files are absent"
+		exit 1
+	fi
+
+	# Edited (winsorized) outputs are optional: check_phenotypes.R only generates them
+	# when there is at least one non-Age/Gestage _numeric phenotype to winsorize.
+	if [ -f "${section_01_dir}/edited_phenotypes_summary_${study_name}.Rdata" ] && [ -f "${section_01_dir}/edited_phenotype_distribution_plot_${study_name}.jpg" ]; then
+		echo "Edited (winsorized) phenotypes summary files are present"
+	else
+		echo "Note: edited (winsorized) phenotypes summary files are absent. This is expected if the cohort has no winsorizable numeric phenotypes (i.e. only Sex/Age/Gestage/factor variables). If you do have additional _numeric phenotypes, please check the 01c check_phenotype R log."
 	fi
 }
 
