@@ -73,8 +73,13 @@ for i in {1..22}; do
 
     chr_vcf=$(find "${vcf_dir}" -maxdepth 1 -type f \
     -regextype posix-extended \
-    -iregex ".*/chr${i}([^0-9].*)?\.vcf\.(gz|bgz|zip)" \
+    -iregex ".*/chr${i}([^0-9].*)?\.vcf(\.(gz|bgz|zip))?" \
     -print -quit)
+
+  if [ -z "${chr_vcf}" ]; then
+    echo "ERROR: could not locate VCF for chr${i} in ${vcf_dir}"
+    exit 2
+  fi
 
   echo "Processing chr${i} VCF: ${chr_vcf}"
   echo "Converting to PLINK bed/bim/fam format for liftover check"
