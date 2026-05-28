@@ -10,6 +10,7 @@ fam_file <- arguments[2]
 output_hcs <- arguments[3]
 output_kernel <- arguments[4]
 output_plot <- arguments[5]
+output_hc_scatter_plot <- arguments[6]
 
 # no header in fam file
 fam <- fread(fam_file, header = FALSE)
@@ -77,3 +78,29 @@ ve_plot <- ggplot(ve, aes(x = index, y = prop_explained)) +
 
 ve_pdf <- file.path(output_plot)
 ggsave(ve_pdf, ve_plot, width = 10, height = 6)
+
+# HC1 vs HCk scatter panel (k = 2..20, capped by available HCs)
+max_k <- min(20, number_of_HCs)
+if (max_k >= 2) {
+  hc_df <- as.data.frame(HCs[, c("FID", "IID", paste0("HC", 1:max_k))])
+  pair_list <- lapply(2:max_k, function(k) {
+    data.frame(
+      HC1 = hc_df[["HC1"]],
+      HCk = hc_df[[paste0("HC", k)]],
+      pair = factor(paste0("HC1 vs HC", k),
+                    levels = paste0("HC1 vs HC", 2:max_k))
+    )
+  })
+  scatter_df <- do.call(rbind, pair_list)
+
+  scatter_plot <- ggplot(scatter_df, aes(x = HC1, y = HCk)) +
+    geom_point(size = 0.6, alpha = 0.6) +
+    facet_wrap(~ pair, ncol = 5, scales = "free") +
+    labs(title = "HC1 vs HC2..HC20", x = "HC1", y = NULL) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 8))
+
+  ggsave(output_hc_scatter_plot, scatter_plot, width = 14, height = 10)
+} else {
+  message("Not enough HCs to plot HC1 vs HCk pairs (need >= 2 HCs)")
+}

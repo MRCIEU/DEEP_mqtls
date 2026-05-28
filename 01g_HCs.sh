@@ -248,7 +248,8 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${bfile}.fam" \
     "${hcs_file}" \
     "${hcs_kernel_prop}" \
-    "${hcs_plot}" 
+    "${hcs_plot}" \
+    "${hcs_scatter_plot}"
 
 echo "Computing correlation and linear model between HCs and PCs"
 # correlation betweene HCs and PCs; linear reg for hcs against pcs; pcs against hcs

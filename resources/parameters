@@ -200,6 +200,7 @@ full_chunklength="${home_directory}/processed_data/genetic_data/full_chunklength
 hcs_file="${home_directory}/processed_data/covariate_data/hcs_file.txt"
 hcs_kernel_prop="${section_01_dir}/hcs_kernel_prop.csv"
 hcs_plot="${section_01_dir}/hcs_kernel.pdf"
+hcs_scatter_plot="${section_01_dir}/hcs_scatter_plot.pdf"
 
 # phenotype files
 winsorized_pheno="${home_directory}/processed_data/phenotype_data/winsorized_pheno.Robj"
