@@ -2,6 +2,8 @@ suppressMessages(library(data.table))
 library(Matrix)
 library(sparsesvd)
 suppressMessages(library(ggplot2))
+suppressMessages(library(ggExtra))
+suppressMessages(library(gridExtra))
 
 arguments <- commandArgs(T)
 
@@ -80,27 +82,40 @@ ve_pdf <- file.path(output_plot)
 ggsave(ve_pdf, ve_plot, width = 10, height = 6)
 
 # HC1 vs HCk scatter panel (k = 2..20, capped by available HCs)
+# First tile: HC1 marginal density; subsequent tiles: HC1 vs HCk scatter with
+# a y-axis marginal density of HCk attached to each subplot.
 max_k <- min(20, number_of_HCs)
 if (max_k >= 2) {
   hc_df <- as.data.frame(HCs[, c("FID", "IID", paste0("HC", 1:max_k))])
-  pair_list <- lapply(2:max_k, function(k) {
-    data.frame(
-      HC1 = hc_df[["HC1"]],
-      HCk = hc_df[[paste0("HC", k)]],
-      pair = factor(paste0("HC1 vs HC", k),
-                    levels = paste0("HC1 vs HC", 2:max_k))
-    )
-  })
-  scatter_df <- do.call(rbind, pair_list)
 
-  scatter_plot <- ggplot(scatter_df, aes(x = HC1, y = HCk)) +
-    geom_point(size = 0.6, alpha = 0.6) +
-    facet_wrap(~ pair, ncol = 5, scales = "free") +
-    labs(title = "HC1 vs HC2..HC20", x = "HC1", y = NULL) +
+  hc1_density <- ggplot(hc_df, aes(x = HC1)) +
+    geom_density(fill = "grey80", colour = "grey40", alpha = 0.6) +
+    labs(title = "HC1 distribution", x = "HC1", y = "density") +
     theme_bw() +
-    theme(strip.text = element_text(size = 8))
+    theme(plot.title = element_text(size = 9))
 
-  ggsave(output_hc_scatter_plot, scatter_plot, width = 14, height = 10)
+  build_scatter <- function(k) {
+    sub <- data.frame(HC1 = hc_df[["HC1"]], HCk = hc_df[[paste0("HC", k)]])
+    g <- ggplot(sub, aes(x = HC1, y = HCk)) +
+      geom_point(size = 0.6, alpha = 0.6) +
+      labs(title = paste0("HC1 vs HC", k), x = "HC1", y = paste0("HC", k)) +
+      theme_bw() +
+      theme(plot.title = element_text(size = 9))
+    ggExtra::ggMarginal(g, margins = "y", type = "density",
+               fill = "grey80", colour = "grey40", alpha = 0.6)
+  }
+
+  scatter_list <- lapply(2:max_k, build_scatter)
+  all_panels <- c(list(hc1_density), scatter_list)
+
+  n_panels <- length(all_panels)
+  n_rows   <- ceiling(n_panels / 5)
+
+  combined <- gridExtra::arrangeGrob(grobs = all_panels, ncol = 5,
+                          top = "HC1 distribution and HC1 vs HC2..HC20")
+
+  ggsave(output_hc_scatter_plot, combined,
+         width = 14, height = max(3 * n_rows, 6), limitsize = FALSE)
 } else {
   message("Not enough HCs to plot HC1 vs HCk pairs (need >= 2 HCs)")
 }
