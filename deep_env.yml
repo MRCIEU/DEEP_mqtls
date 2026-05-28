@@ -28,6 +28,7 @@ dependencies:
   - r-qqman
   - r-ggtext
   - r-ggextra
+  - r-gridextra
   - r-diptest
   - r-mixtools
   - r-corrplot
