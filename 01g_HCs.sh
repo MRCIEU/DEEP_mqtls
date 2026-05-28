@@ -151,6 +151,9 @@ echo "Preparing sample and SNP lists from 01b processed data"
 awk '{print $2}' "${bfile}.bim" > "${genetic_processed_dir}/snp_list"
 awk '{print $2}' "${bfile}.fam" > "${genetic_processed_dir}/sample_list"
 
+echo "${wc -l < "${genetic_processed_dir}/snp_list"} SNPs in snp_list"
+echo "${wc -l < "${genetic_processed_dir}/sample_list"} samples in sample_list"
+
 for i in {1..22}; do
     echo "Preparing cleaned chr${i} vcf data"
         ${plink2} --vcf "${genetic_processed_dir}/chr${i}_lifted.vcf.gz" \
@@ -250,6 +253,8 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${hcs_kernel_prop}" \
     "${hcs_plot}" \
     "${hcs_scatter_plot}"
+
+
 
 echo "Computing correlation and linear model between HCs and PCs"
 # correlation betweene HCs and PCs; linear reg for hcs against pcs; pcs against hcs
