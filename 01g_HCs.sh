@@ -151,8 +151,8 @@ echo "Preparing sample and SNP lists from 01b processed data"
 awk '{print $2}' "${bfile}.bim" > "${genetic_processed_dir}/snp_list"
 awk '{print $2}' "${bfile}.fam" > "${genetic_processed_dir}/sample_list"
 
-echo "${wc -l < "${genetic_processed_dir}/snp_list"} SNPs in snp_list"
-echo "${wc -l < "${genetic_processed_dir}/sample_list"} samples in sample_list"
+echo "$(wc -l < "${genetic_processed_dir}/snp_list") SNPs in snp_list"
+echo "$(wc -l < "${genetic_processed_dir}/sample_list") samples in sample_list"
 
 for i in {1..22}; do
     echo "Preparing cleaned chr${i} vcf data"
@@ -254,6 +254,12 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${hcs_plot}" \
     "${hcs_scatter_plot}"
 
+echo "Generating scatter plots for HC1 vs HC2 and HC3 vs HC4, coloured by factors (population-structure check)"
+${R_directory}Rscript resources/genetics/hc_pop_scatter.R \
+    "${hcs_file}" \
+    "${winsorized_phenotype_file}" \
+    "${study_name}" \
+    "${section_01_dir}"
 
 
 echo "Computing correlation and linear model between HCs and PCs"
