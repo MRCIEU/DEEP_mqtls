@@ -31,6 +31,8 @@ snps_pca  <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.2)
 snpset_pruned <- snpgdsLDpruning(genofile, snp.id = snps_pca, ld.threshold = 0.1,
                                  slide.max.n = 10000, num.thread = nthreads)
 pruned_snps <- unlist(snpset_pruned)
+write.table(pruned_snps, file = paste0(outfile, ".prune.in"),
+            quote = FALSE, row.names = FALSE, col.names = FALSE)
 
 # --- Step 2: KING with ALL SNPs ---
 message(">> Calculating KING matrix with all SNPs...")
