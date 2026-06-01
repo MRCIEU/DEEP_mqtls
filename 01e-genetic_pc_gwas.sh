@@ -78,7 +78,7 @@ else
   echo "Warning: ccovar file not found: ${ccovar_file}"
 fi
 
-for pc in {1..5}; do
+for pc in {1..1}; do
     pc_col="PC${pc}"
     pheno_file="${home_directory}/processed_data/covariate_data/genetic_pc_gwas.PC${pc}.pheno"
 
@@ -96,6 +96,7 @@ for pc in {1..5}; do
       "${grm_sparse_option[@]}" \
       "${fastgwa_option[@]}" \
       --h2-limit 100 \
+      --dc 1\
       --pheno "${pheno_file}" \
       --qcovar "${qcovar_noPC_file}" \
       "${covar_args[@]}" \
