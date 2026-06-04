@@ -212,6 +212,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
     print(paste0("Linear model formula: ", model_formula))
     fit <- lm(formula = model_formula, data = pcs)
     pc_analysis[[i]] <- summary(fit)
+
+    cat("Adjusted R-squared: ", round(summary(fit)$adj.r.squared, 4), "\n")
+    print(round(summary(fit)$coefficients, 4))
   }
   #save(pc_analysis, file=paste0(""))
   
