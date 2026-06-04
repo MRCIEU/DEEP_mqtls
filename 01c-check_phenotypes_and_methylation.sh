@@ -204,6 +204,13 @@ then
 		"${bfile}.fam" \
 		"${covariates_combined}"
 
+	echo "Generating side-by-side scatter plots for genetic PC1vPC2, PC2vPC3 and PC1vPC3, coloured by Age, Sex and population factors (population-structure check)"
+	${R_directory}Rscript resources/genetics/pc_pop_scatter.R \
+		"${covariates_combined}.txt" \
+		"${winsorized_phenotype_file}" \
+		"${study_name}" \
+		"${section_01_dir}"
+
 	echo "Successfully completed script 01c combine_covariates chunk"
 
 fi

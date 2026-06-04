@@ -254,9 +254,10 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${hcs_plot}" \
     "${hcs_scatter_plot}"
 
-echo "Generating scatter plots for HC1 vs HC2 and HC3 vs HC4, coloured by factors (population-structure check)"
+echo "Generating side-by-side scatter plots for HC1vHC2, HC2vHC3 and HC1vHC3, coloured by factors (population-structure check)"
 ${R_directory}Rscript resources/genetics/hc_pop_scatter.R \
     "${hcs_file}" \
+    "${covariates_combined}.txt" \
     "${winsorized_phenotype_file}" \
     "${study_name}" \
     "${section_01_dir}"
