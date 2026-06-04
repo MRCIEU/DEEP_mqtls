@@ -171,6 +171,7 @@ plot.out <- ggarrange(hannum_plot, mcigarette_plot, Elliott_plot,
                       labels = c("A","B","C"),
                       ncol = 2, nrow = 2)
 print(plot.out)
+dev.off()
 
 # save out:
 # as phenotype file
