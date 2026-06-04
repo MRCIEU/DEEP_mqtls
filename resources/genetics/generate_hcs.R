@@ -105,6 +105,11 @@ if (max_k >= 2) {
                fill = "grey80", colour = "grey40", alpha = 0.6)
   }
 
+  # ggExtra::ggMarginal() triggers drawing while building its grobs, which in
+  # a non-interactive Rscript session opens R's default device and leaves a
+  # stray empty Rplots.pdf in the working directory. Send that default device
+  # to a null device so only the explicit ggsave() output is written.
+  pdf(NULL)
   scatter_list <- lapply(2:max_k, build_scatter)
   all_panels <- c(list(hc1_density), scatter_list)
 
@@ -116,6 +121,7 @@ if (max_k >= 2) {
 
   ggsave(output_hc_scatter_plot, combined,
          width = 14, height = max(3 * n_rows, 6), limitsize = FALSE)
+  invisible(dev.off())
 } else {
   message("Not enough HCs to plot HC1 vs HCk pairs (need >= 2 HCs)")
 }
