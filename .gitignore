@@ -10,6 +10,7 @@ processed_data/
 # resources/genetics/easyQC_hrc_temp.ecf
 # resources/genetics/easyQC_hrc_edit.ecf.out
 temp_hm3snps.txt
+Rplots.pdf
 
 # Ignore resource files downloaded from server and website
 EasyQC_9.2.tar.gz
