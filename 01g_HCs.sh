@@ -280,11 +280,11 @@ ${R_directory}Rscript resources/genetics/corr_lm_hc_pc.R \
     ${genetic_outlier_ids} \
     ${section_01_dir}
 
-# generate qcovar file with HCs for gwas
+# Generate qcovar file with profile-likelihood selected HCs for GWAS.
 ${R_directory}Rscript resources/methylation/generate_qcovar_with_hcs.R \
     "${covariates_combined}.txt" \
     "${bfile}.fam" \
-    "${hcs_file}" \
+    "${hcs_profile_selected_file}" \
     "${qcovar_hc_file}" \
     "${scripts_directory}" 
 
