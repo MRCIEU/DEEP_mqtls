@@ -42,7 +42,6 @@ if (file.exists(selected_hcs_file)) {
 }
 
 required_spectrum_columns <- c("HC", "index", "prop_explained")
-minimum_noise_hcs <- 5L
 
 profile_likelihood <- function(values, analysis, index_offset = 0L) {
   n_values <- length(values)
@@ -169,21 +168,14 @@ fwrite(likelihood_results, likelihood_file)
 primary_selected <- primary[selected == TRUE]
 secondary_selected <- secondary[selected == TRUE]
 final_cutoff <- as.integer(secondary_selected$cutoff_hc)
-selection_status <- if (secondary_selected$n_noise < minimum_noise_hcs) {
-  "review_required"
-} else {
-  "ok"
-}
 
 selection_summary <- data.table(
   n_hcs_available = length(values),
   primary_cutoff = as.integer(primary_selected$cutoff_hc),
   secondary_local_q = as.integer(secondary_selected$local_q),
   final_cutoff = final_cutoff,
-  minimum_noise_hcs = minimum_noise_hcs,
   remaining_noise_hcs = as.integer(secondary_selected$n_noise),
-  input_scale = "raw_prop_explained",
-  status = selection_status
+  input_scale = "raw_prop_explained"
 )
 fwrite(selection_summary, selection_file)
 
@@ -237,45 +229,32 @@ ggsave(
   dpi = 300
 )
 
-if (selection_status == "review_required") {
-  message(
-    "Profile-likelihood cutoff HC",
-    final_cutoff,
-    " leaves only ",
-    secondary_selected$n_noise,
-    " noise HCs; at least ",
-    minimum_noise_hcs,
-    " are required. Selection requires review, so no selected HC file ",
-    "was written."
-  )
-} else {
-  message("Reading complete HC file: ", complete_hcs_file)
-  complete_hcs <- fread(complete_hcs_file)
-  required_hc_columns <- paste0("HC", seq_len(final_cutoff))
-  required_output_columns <- c("FID", "IID", required_hc_columns)
-  missing_hc_columns <- setdiff(required_output_columns, names(complete_hcs))
+message("Reading complete HC file: ", complete_hcs_file)
+complete_hcs <- fread(complete_hcs_file)
+required_hc_columns <- paste0("HC", seq_len(final_cutoff))
+required_output_columns <- c("FID", "IID", required_hc_columns)
+missing_hc_columns <- setdiff(required_output_columns, names(complete_hcs))
 
-  if (length(missing_hc_columns) > 0L) {
-    stop(
-      "Complete HC file is missing required column(s): ",
-      paste(missing_hc_columns, collapse = ", ")
-    )
-  }
-
-  selected_hcs <- complete_hcs[, ..required_output_columns]
-  fwrite(
-    selected_hcs,
-    selected_hcs_file,
-    sep = " ",
-    col.names = TRUE
-  )
-  message(
-    "Selected HC file written with HC1..HC",
-    final_cutoff,
-    ": ",
-    selected_hcs_file
+if (length(missing_hc_columns) > 0L) {
+  stop(
+    "Complete HC file is missing required column(s): ",
+    paste(missing_hc_columns, collapse = ", ")
   )
 }
+
+selected_hcs <- complete_hcs[, ..required_output_columns]
+fwrite(
+  selected_hcs,
+  selected_hcs_file,
+  sep = " ",
+  col.names = TRUE
+)
+message(
+  "Selected HC file written with HC1..HC",
+  final_cutoff,
+  ": ",
+  selected_hcs_file
+)
 
 message("Profile-likelihood results written to: ", likelihood_file)
 message("Profile-likelihood selection written to: ", selection_file)
