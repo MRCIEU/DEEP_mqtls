@@ -254,6 +254,15 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${hcs_plot}" \
     "${hcs_scatter_plot}"
 
+echo "Selecting HCs using profile likelihood"
+${R_directory}Rscript resources/genetics/select_hcs_profile_likelihood.R \
+    "${hcs_kernel_prop}" \
+    "${hcs_file}" \
+    "${hcs_profile_selected_file}" \
+    "${hcs_profile_likelihood}" \
+    "${hcs_profile_selection}" \
+    "${hcs_profile_plot}"
+
 echo "Generating side-by-side scatter plots for HC1vHC2, HC2vHC3 and HC1vHC3, coloured by factors (population-structure check)"
 ${R_directory}Rscript resources/genetics/hc_pop_scatter.R \
     "${hcs_file}" \
