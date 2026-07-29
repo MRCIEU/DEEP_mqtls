@@ -287,7 +287,8 @@ if [ "${structured}" = "yes" ]; then
         "${n_pcs}" \
         "${nthreads}" \
         "${rel_cutoff}" \
-        "${pcrelate_mode}"
+        "${pcrelate_mode}" \
+        "${pca_loadings}"
 
     ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
         "${grmfile_all}" \
@@ -392,9 +393,16 @@ elif [ "${structured}" = "no" ]; then
             --bfile ${bfile} \
             --new-id-max-allele-len 70 \
             --extract ${pca}.prune.in \
-            --pca 20 \
+            --pca biallelic-var-wts ${n_pcs} vcols=chrom,pos,maj,nonmaj \
             --out ${pca} \
             --threads ${nthreads}
+
+        ${R_directory}Rscript resources/genetics/format_plink_pca_loadings.R \
+            "${pca}.eigenvec.var" \
+            "${pca}.prune.in" \
+            "${pca_loadings}" \
+            "${n_pcs}"
+        rm -f "${pca}.eigenvec.var"
 
     elif [ "${related}" = "yes" ]; then
         ${plink2} \
@@ -409,7 +417,8 @@ elif [ "${structured}" = "no" ]; then
             ${bfile}_ldpruned \
             ${pca} \
             ${n_pcs} \
-            ${nthreads}
+            ${nthreads} \
+            "${pca_loadings}"
     fi
 
 else
