@@ -165,6 +165,7 @@ grmfile_pcrelate="${grmfile_all}_pcrelate"
 # PCA files
 pca="${home_directory}/processed_data/genetic_data/pca"
 pcs_all="${pca}.eigenvec"
+pca_loadings="${pca}.loadings.tsv.gz"
 snp_01e="${home_directory}/processed_data/genetic_data/snps_01e"
 high_ld="${home_directory}/processed_data/genetic_data/high_ld"
 
@@ -403,4 +404,3 @@ print_version () {
 	echo ""
 
 }
-
