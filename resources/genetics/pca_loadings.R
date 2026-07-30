@@ -118,10 +118,13 @@ save_pcair_loadings <- function(gds_file,
 
   n_pcs <- as.integer(n_pcs)
   nthreads <- as.integer(nthreads)
-  pca_snp_ids <- as.integer(pca_snp_ids)
   if (n_pcs < 1L || n_pcs > ncol(mypcair$vectors)) {
     stop("Requested PC count is incompatible with mypcair$vectors.")
   }
+  # SNPRelate permits either integer or character values in the GDS `snp.id`
+  # node. DEEP commonly uses chr:pos_alleles variant IDs, so preserve the
+  # original storage type when passing IDs back to snpgdsPCA(). Coercing these
+  # IDs to integer would turn them into NA.
   if (length(pca_snp_ids) == 0L || anyNA(pca_snp_ids) ||
       anyDuplicated(pca_snp_ids)) {
     stop("The PC-AiR SNP set must contain unique, non-missing GDS SNP IDs.")
@@ -150,8 +153,8 @@ save_pcair_loadings <- function(gds_file,
     verbose = FALSE
   )
   if (!identical(
-    as.integer(snp_loading_object$snp.id),
-    as.integer(pca_unrelated$snp.id)
+    as.character(snp_loading_object$snp.id),
+    as.character(pca_unrelated$snp.id)
   )) {
     stop("SNP order changed while calculating PC-AiR SNP loadings.")
   }
@@ -225,7 +228,10 @@ save_pcair_loadings <- function(gds_file,
   all_snp_ids <- gdsfmt::read.gdsn(
     gdsfmt::index.gdsn(gds, "snp.id")
   )
-  selected_index <- match(snp_loading_object$snp.id, all_snp_ids)
+  selected_index <- match(
+    as.character(snp_loading_object$snp.id),
+    as.character(all_snp_ids)
+  )
   if (anyNA(selected_index)) {
     stop("Could not match SNP loadings to GDS variant metadata.")
   }
