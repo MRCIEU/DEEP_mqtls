@@ -116,7 +116,12 @@ metadata_columns <- c(
   "CHR", "POS", "SNP", "LOADING_ALLELE", "OTHER_ALLELE"
 )
 report_pc_columns <- paste0("PC", seq_len(n_report_pcs))
-required_columns <- c(metadata_columns, report_pc_columns)
+plot_pc_columns <- paste0("PC", seq_len(20L))
+required_columns <- unique(c(
+  metadata_columns,
+  report_pc_columns,
+  plot_pc_columns
+))
 missing_columns <- setdiff(required_columns, colnames(loadings))
 if (length(missing_columns) > 0L) {
   stop(
@@ -145,6 +150,14 @@ if (nrow(loading_matrix) <= ncol(loading_matrix)) {
   stop("Too few variants for robust Mahalanobis distance estimation.")
 }
 
+plot_loading_matrix <- as.matrix(
+  loadings[, plot_pc_columns, drop = FALSE]
+)
+storage.mode(plot_loading_matrix) <- "double"
+if (any(!is.finite(plot_loading_matrix))) {
+  stop("PC1-PC20 plot loadings contain non-finite values.")
+}
+
 # PCA loadings generated in 01b are autosomal. Accept either "1" or "chr1"
 # spelling, then enforce chromosomes 1-22 so ordering and smoothing are stable.
 chr_text <- sub("^CHR", "", toupper(trimws(as.character(loadings$CHR))))
@@ -163,6 +176,7 @@ if (any(!is.finite(position)) || any(position < 1)) {
 variant_order <- order(chr_numeric, position, as.character(loadings$SNP))
 loadings <- loadings[variant_order, , drop = FALSE]
 loading_matrix <- loading_matrix[variant_order, , drop = FALSE]
+plot_loading_matrix <- plot_loading_matrix[variant_order, , drop = FALSE]
 chr_numeric <- chr_numeric[variant_order]
 position <- position[variant_order]
 
@@ -295,7 +309,7 @@ regions_file <- paste0(output_prefix, ".regions.tsv")
 summary_file <- paste0(output_prefix, ".summary.tsv")
 note_file <- paste0(output_prefix, ".note.txt")
 statistic_plot_file <- paste0(output_prefix, ".smoothed_statistic.png")
-loadings_plot_file <- paste0(output_prefix, ".PC1-PC10_loadings.png")
+loadings_plot_file <- paste0(output_prefix, ".PC1-PC20_loadings.png")
 
 write_gzip_table(statistics, statistics_file)
 write_gzip_table(statistics[is_outlier, , drop = FALSE], outlier_file)
@@ -402,7 +416,7 @@ note_lines <- c(
   "A candidate region may represent long-range LD structure, but its reported",
   "start and end are smoothing-based QC boundaries, not fine-mapped biological",
   "boundaries.",
-  "The PC1-PC10 loading figure follows the paper's Figure 1 plotting method:",
+  "The PC1-PC20 loading figure follows the paper's Figure 1 plotting method:",
   "SNP column index versus loading is displayed with ggplot2::geom_hex(), and",
   "the viridis fill colour represents the number of SNPs in each hexagonal bin.",
   "It is not automatically removed because 01e runs after downstream steps have",
@@ -505,17 +519,19 @@ grDevices::dev.off()
 
 # Reproduce the plotting approach used for Figure 1 in paper4-bedpca:
 # one loading panel per PC, geom_hex() over SNP column index, a viridis count
-# scale, and five columns of panels. The paper plotted PC1-PC40; DEEP reports
-# PC1-PC10, so this produces two rows of five panels.
+# scale, and five columns of panels. The paper plotted PC1-PC40; DEEP plots
+# PC1-PC20, producing four rows of five panels.
 loading_plot_data <- data.frame(
-  COLUMN_INDEX = rep(genome_index, times = n_report_pcs),
-  LOADING = as.vector(loading_matrix[, report_pc_columns, drop = FALSE]),
+  COLUMN_INDEX = rep(genome_index, times = length(plot_pc_columns)),
+  LOADING = as.vector(
+    plot_loading_matrix[, plot_pc_columns, drop = FALSE]
+  ),
   PC = factor(
     rep(
-      paste0("Loadings of ", report_pc_columns),
+      paste0("Loadings of ", plot_pc_columns),
       each = length(genome_index)
     ),
-    levels = paste0("Loadings of ", report_pc_columns)
+    levels = paste0("Loadings of ", plot_pc_columns)
   )
 )
 paper_style_loading_plot <- ggplot2::ggplot(
@@ -540,7 +556,7 @@ paper_style_loading_plot <- ggplot2::ggplot(
 Cairo::CairoPNG(
   filename = loadings_plot_file,
   width = 3000,
-  height = 1500,
+  height = 3000,
   pointsize = 16,
   res = 200
 )

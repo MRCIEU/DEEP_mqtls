@@ -365,7 +365,7 @@ check_results_01e () {
         "${pca_ld_report}.summary.tsv"
         "${pca_ld_report}.note.txt"
         "${pca_ld_report}.smoothed_statistic.png"
-        "${pca_ld_report}.PC1-PC10_loadings.png"
+        "${pca_ld_report}.PC1-PC20_loadings.png"
     )
     for file in "${pca_ld_required_files[@]}"; do
         if [ ! -s "${file}" ]; then
@@ -378,7 +378,7 @@ check_results_01e () {
         echo "Problem: PCA LD-structure gzip output is invalid"
         exit 1
     fi
-    echo "PC1-PC10 PCA LD-structure QC report present"
+    echo "PC1-PC10 PCA LD-structure QC report and PC1-PC20 loading plot present"
 
     for i in {1..5}; do
         pc="PC${i}"
