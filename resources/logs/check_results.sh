@@ -60,6 +60,16 @@ check_results_01b () {
 		exit 1
 	fi
 
+	if [ -s "${pca_loadings}" ] &&
+		gzip -t "${pca_loadings}" 2>/dev/null &&
+		${R_directory}Rscript resources/genetics/validate_pca_loadings_file.R \
+			"${pca_loadings}" "${n_pcs}"; then
+		echo "PCA SNP-loading file present and structurally valid"
+	else
+		echo "Problem: PCA SNP-loading file is absent, empty, or structurally invalid"
+		exit 1
+	fi
+
 	if [ -f "${section_01_dir}/easyQC_topmed.multi.AFCHECK.png" ] && [ -f "${section_01_dir}/easyQC_topmed.rep" ]; then
     	echo "easyQC plot and results present"
 	else
@@ -347,6 +357,28 @@ check_results_01e () {
         echo "Problem: directory ${section_01_dir}/01e does not exist"
         exit 1
     fi
+
+    pca_ld_required_files=(
+        "${pca_ld_report}.snp_stats.tsv.gz"
+        "${pca_ld_report}.outlier_snps.tsv.gz"
+        "${pca_ld_report}.regions.tsv"
+        "${pca_ld_report}.summary.tsv"
+        "${pca_ld_report}.note.txt"
+        "${pca_ld_report}.smoothed_statistic.png"
+        "${pca_ld_report}.PC1-PC10_loadings.png"
+    )
+    for file in "${pca_ld_required_files[@]}"; do
+        if [ ! -s "${file}" ]; then
+            echo "Problem: PCA LD-structure report file is absent or empty: ${file}"
+            exit 1
+        fi
+    done
+    if ! gzip -t "${pca_ld_report}.snp_stats.tsv.gz" 2>/dev/null ||
+       ! gzip -t "${pca_ld_report}.outlier_snps.tsv.gz" 2>/dev/null; then
+        echo "Problem: PCA LD-structure gzip output is invalid"
+        exit 1
+    fi
+    echo "PC1-PC10 PCA LD-structure QC report present"
 
     for i in {1..5}; do
         pc="PC${i}"

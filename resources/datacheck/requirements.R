@@ -21,6 +21,8 @@ pkglist <- c(
     "parallel",
     "parallelly",
     "matrixStats",
+    "bigutilsr",
+    "robustbase",
     "sparsesvd",
     "Matrix",
     "viridis",

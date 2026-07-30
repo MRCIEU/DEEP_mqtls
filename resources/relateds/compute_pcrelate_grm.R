@@ -14,6 +14,11 @@ npc        <- as.numeric(args[3])
 nthreads   <- as.numeric(args[4])
 rel_cutoff <- as.numeric(args[5])
 mode       <- if(length(args) >= 6) args[6] else "keep"  # "keep" or "remove"
+loadings_file <- if(length(args) >= 7) {
+  args[7]
+} else {
+  paste0(outfile, ".pca.loadings.tsv.gz")
+}
 
 gds.fn <- paste0(bfile, ".gds")
 if (!file.exists(gds.fn)) {
@@ -129,4 +134,28 @@ if (mode == "remove") {
 }
 
 close(geno_reader)
+
+script_argument <- grep(
+  "^--file=",
+  commandArgs(trailingOnly = FALSE),
+  value = TRUE
+)
+if (length(script_argument) != 1L) {
+  stop("Could not determine the PC-Relate script location.")
+}
+script_file <- sub("^--file=", "", script_argument)
+source(file.path(
+  dirname(dirname(normalizePath(script_file))),
+  "genetics",
+  "pca_loadings.R"
+))
+save_pcair_loadings(
+  gds_file = gds.fn,
+  mypcair = mypcair,
+  pca_snp_ids = pruned_snps,
+  n_pcs = npc,
+  nthreads = nthreads,
+  outfile = loadings_file
+)
+
 message(">> PC-Relate Processing finished.")

@@ -166,6 +166,7 @@ grmfile_pcrelate="${grmfile_all}_pcrelate"
 pca="${home_directory}/processed_data/genetic_data/pca"
 pcs_all="${pca}.eigenvec"
 pca_loadings="${pca}.loadings.tsv.gz"
+pca_ld_report="${section_01_dir}/01e/pca_ld_structure"
 snp_01e="${home_directory}/processed_data/genetic_data/snps_01e"
 high_ld="${home_directory}/processed_data/genetic_data/high_ld"
 
