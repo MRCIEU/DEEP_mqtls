@@ -236,13 +236,28 @@ save_pcair_loadings <- function(gds_file,
     stop("Could not match SNP loadings to GDS variant metadata.")
   }
 
-  variant_ids <- as.character(gdsfmt::read.gdsn(
-    gdsfmt::index.gdsn(gds, "snp.rs.id")
-  )[selected_index])
-  missing_variant_ids <- is.na(variant_ids) | variant_ids == ""
-  variant_ids[missing_variant_ids] <- as.character(
-    snp_loading_object$snp.id[missing_variant_ids]
+  # `snp.rs.id` is optional in SNP GDS files. Some snpgdsBED2GDS()
+  # conversions store the PLINK variant names directly in `snp.id` and do not
+  # create an `snp.rs.id` node. Prefer rs IDs when the node exists, otherwise
+  # use the already matched GDS SNP IDs.
+  rs_id_node <- tryCatch(
+    gdsfmt::index.gdsn(gds, "snp.rs.id"),
+    error = function(e) NULL
   )
+  if (is.null(rs_id_node)) {
+    message(
+      "GDS node 'snp.rs.id' is absent; using 'snp.id' as the output SNP ID."
+    )
+    variant_ids <- as.character(all_snp_ids[selected_index])
+  } else {
+    variant_ids <- as.character(
+      gdsfmt::read.gdsn(rs_id_node)[selected_index]
+    )
+    missing_variant_ids <- is.na(variant_ids) | variant_ids == ""
+    variant_ids[missing_variant_ids] <- as.character(
+      all_snp_ids[selected_index][missing_variant_ids]
+    )
+  }
 
   allele_strings <- as.character(gdsfmt::read.gdsn(
     gdsfmt::index.gdsn(gds, "snp.allele")

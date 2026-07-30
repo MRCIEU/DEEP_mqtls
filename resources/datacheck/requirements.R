@@ -15,6 +15,7 @@ pkglist <- c(
     "GenomicRanges",
     "lattice",
     "ggplot2",
+    "hexbin",
     "ggExtra",
     "data.table",
     "MatrixEQTL",

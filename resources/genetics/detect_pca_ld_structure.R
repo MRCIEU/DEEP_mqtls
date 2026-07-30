@@ -59,6 +59,13 @@ if (!requireNamespace("bigutilsr", quietly = TRUE)) {
 if (!requireNamespace("Cairo", quietly = TRUE)) {
   stop("R package 'Cairo' is required to write PCA LD-structure plots.")
 }
+if (!requireNamespace("ggplot2", quietly = TRUE) ||
+    !requireNamespace("hexbin", quietly = TRUE)) {
+  stop(
+    "R packages 'ggplot2' and 'hexbin' are required for the ",
+    "paper-style PCA loading plot."
+  )
+}
 
 # These two functions intentionally keep the statistical core as close as
 # possible to bigsnpr::bed_autoSVD(). Do not replace dist_ogk() with a classical
@@ -369,6 +376,8 @@ note_lines <- c(
   paste0("Modified Tukey threshold: ", format(threshold, digits = 16)),
   paste0("Outlier variants: ", sum(is_outlier)),
   paste0("Candidate long-range LD regions: ", nrow(regions)),
+  "The modified Tukey threshold is one global value calculated from all",
+  "chromosome-wise smoothed SNP statistics; it is not SNP-specific.",
   "",
   "Interpretation:",
   paste0(
@@ -393,18 +402,32 @@ note_lines <- c(
   "A candidate region may represent long-range LD structure, but its reported",
   "start and end are smoothing-based QC boundaries, not fine-mapped biological",
   "boundaries.",
+  "The PC1-PC10 loading figure follows the paper's Figure 1 plotting method:",
+  "SNP column index versus loading is displayed with ggplot2::geom_hex(), and",
+  "the viridis fill colour represents the number of SNPs in each hexagonal bin.",
   "It is not automatically removed because 01e runs after downstream steps have",
   "already consumed the formal PCs from 01b. Review the tables and plots before",
   "deciding whether PCA should be recomputed in 01b."
 )
 writeLines(note_lines, con = note_file)
 
-# Use genomic variant index, as in the paper's loading plots. Chromosome labels
-# are placed at chromosome midpoints and boundaries are shown with grey lines.
+# The LD-statistic plot uses genomic variant index with chromosome labels.
 genome_index <- seq_len(nrow(statistics))
 chromosome_starts <- vapply(chromosome_indices, min, integer(1))
 chromosome_ends <- vapply(chromosome_indices, max, integer(1))
 chromosome_midpoints <- (chromosome_starts + chromosome_ends) / 2
+
+# Always include the single global threshold in the y-axis. Without this,
+# datasets with zero outliers have threshold > max(smoothed_statistic), which
+# places the threshold line outside the default plotting range.
+statistic_y_range <- range(c(smoothed_statistic, threshold), finite = TRUE)
+statistic_y_padding <- diff(statistic_y_range) * 0.05
+if (!is.finite(statistic_y_padding) || statistic_y_padding == 0) {
+  statistic_y_padding <- max(1, abs(statistic_y_range)) * 0.05
+}
+statistic_y_limits <- statistic_y_range +
+  c(-statistic_y_padding, statistic_y_padding)
+outlier_count <- sum(is_outlier)
 
 Cairo::CairoPNG(
   filename = statistic_plot_file,
@@ -419,13 +442,19 @@ graphics::plot(
   smoothed_statistic,
   pch = 16,
   cex = 0.22,
-  col = ifelse(is_outlier, "#D73027", "#3B6FB6"),
+  col = "#3B6FB6",
   xaxt = "n",
   xlab = "Chromosome",
   ylab = "Smoothed robust distance",
+  ylim = statistic_y_limits,
   main = paste0(
     "PCA loading LD-structure diagnostic (",
     paste0("PC1-PC", n_report_pcs), ")"
+  ),
+  sub = paste0(
+    "One global modified Tukey threshold = ",
+    format(threshold, digits = 6),
+    "; SNPs above threshold = ", outlier_count
   )
 )
 graphics::axis(
@@ -434,63 +463,88 @@ graphics::axis(
   labels = names(chromosome_midpoints),
   tick = FALSE
 )
-graphics::abline(h = threshold, col = "#D73027", lwd = 2, lty = 2)
 graphics::abline(v = chromosome_ends[-length(chromosome_ends)],
                  col = "grey85", lwd = 0.8)
-graphics::legend(
-  "topright",
-  legend = c("Variant", "Above modified Tukey threshold", "Threshold"),
-  col = c("#3B6FB6", "#D73027", "#D73027"),
-  pch = c(16, 16, NA),
-  lty = c(NA, NA, 2),
-  bty = "n",
-  cex = 0.8
-)
+graphics::abline(h = threshold, col = "#D73027", lwd = 2.5, lty = 2)
+if (outlier_count > 0L) {
+  graphics::points(
+    genome_index[is_outlier],
+    smoothed_statistic[is_outlier],
+    pch = 16,
+    cex = 0.32,
+    col = "#D73027"
+  )
+  graphics::legend(
+    "topright",
+    legend = c(
+      "SNP",
+      paste0("SNP above threshold (n=", outlier_count, ")"),
+      "One global modified Tukey threshold"
+    ),
+    col = c("#3B6FB6", "#D73027", "#D73027"),
+    pch = c(16, 16, NA),
+    lty = c(NA, NA, 2),
+    bty = "n",
+    cex = 0.8
+  )
+} else {
+  graphics::legend(
+    "topright",
+    legend = c(
+      "SNP",
+      "One global modified Tukey threshold (no SNPs above)"
+    ),
+    col = c("#3B6FB6", "#D73027"),
+    pch = c(16, NA),
+    lty = c(NA, 2),
+    bty = "n",
+    cex = 0.8
+  )
+}
 grDevices::dev.off()
+
+# Reproduce the plotting approach used for Figure 1 in paper4-bedpca:
+# one loading panel per PC, geom_hex() over SNP column index, a viridis count
+# scale, and five columns of panels. The paper plotted PC1-PC40; DEEP reports
+# PC1-PC10, so this produces two rows of five panels.
+loading_plot_data <- data.frame(
+  COLUMN_INDEX = rep(genome_index, times = n_report_pcs),
+  LOADING = as.vector(loading_matrix[, report_pc_columns, drop = FALSE]),
+  PC = factor(
+    rep(
+      paste0("Loadings of ", report_pc_columns),
+      each = length(genome_index)
+    ),
+    levels = paste0("Loadings of ", report_pc_columns)
+  )
+)
+paper_style_loading_plot <- ggplot2::ggplot(
+  loading_plot_data,
+  ggplot2::aes(x = COLUMN_INDEX, y = LOADING)
+) +
+  ggplot2::geom_hex() +
+  ggplot2::facet_wrap(
+    ggplot2::vars(PC),
+    ncol = 5,
+    scales = "free_y"
+  ) +
+  ggplot2::scale_fill_viridis_c(name = "SNP count") +
+  ggplot2::labs(x = "Column index", y = NULL) +
+  ggplot2::theme_minimal(base_size = 13) +
+  ggplot2::theme(
+    panel.grid.minor = ggplot2::element_blank(),
+    strip.text = ggplot2::element_text(face = "bold"),
+    legend.position = "right"
+  )
 
 Cairo::CairoPNG(
   filename = loadings_plot_file,
-  width = 2600,
-  height = 3200,
+  width = 3000,
+  height = 1500,
   pointsize = 16,
   res = 200
 )
-graphics::par(
-  mfrow = c(5, 2),
-  mar = c(3.2, 4.2, 2.2, 0.8),
-  oma = c(2, 1, 2, 0)
-)
-for (pc_column in report_pc_columns) {
-  graphics::plot(
-    genome_index,
-    loading_matrix[, pc_column],
-    pch = 16,
-    cex = 0.18,
-    col = ifelse(is_outlier, "#D73027", "#33333355"),
-    xaxt = "n",
-    xlab = "",
-    ylab = "Loading",
-    main = pc_column
-  )
-  graphics::axis(
-    1,
-    at = chromosome_midpoints,
-    labels = names(chromosome_midpoints),
-    tick = FALSE,
-    cex.axis = 0.65
-  )
-  graphics::abline(h = 0, col = "grey70", lwd = 0.8)
-  graphics::abline(v = chromosome_ends[-length(chromosome_ends)],
-                   col = "grey90", lwd = 0.6)
-}
-graphics::mtext(
-  "PCA SNP loadings; red variants exceed the smoothed robust-distance threshold",
-  side = 3,
-  outer = TRUE,
-  line = 0.3,
-  cex = 1.1
-)
-graphics::mtext("Chromosome", side = 1, outer = TRUE, line = 0.3)
+print(paper_style_loading_plot)
 grDevices::dev.off()
 
 message(
