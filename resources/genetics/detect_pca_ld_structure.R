@@ -419,6 +419,8 @@ note_lines <- c(
   "The PC1-PC20 loading figure follows the paper's Figure 1 plotting method:",
   "SNP column index versus loading is displayed with ggplot2::geom_hex(), and",
   "the viridis fill colour represents the number of SNPs in each hexagonal bin.",
+  "Grey vertical lines mark chromosome boundaries; x-axis labels are",
+  "chromosome numbers placed at each chromosome midpoint.",
   "It is not automatically removed because 01e runs after downstream steps have",
   "already consumed the formal PCs from 01b. Review the tables and plots before",
   "deciding whether PCA should be recomputed in 01b."
@@ -539,23 +541,38 @@ paper_style_loading_plot <- ggplot2::ggplot(
   ggplot2::aes(x = COLUMN_INDEX, y = LOADING)
 ) +
   ggplot2::geom_hex() +
+  ggplot2::geom_vline(
+    xintercept = chromosome_ends[-length(chromosome_ends)],
+    colour = "grey70",
+    linewidth = 0.3
+  ) +
   ggplot2::facet_wrap(
     ggplot2::vars(PC),
     ncol = 5,
     scales = "free_y"
   ) +
   ggplot2::scale_fill_viridis_c(name = "SNP count") +
-  ggplot2::labs(x = "Column index", y = NULL) +
+  ggplot2::scale_x_continuous(
+    breaks = chromosome_midpoints,
+    labels = names(chromosome_midpoints)
+  ) +
+  ggplot2::labs(x = "Chromosome (SNP column index order)", y = NULL) +
   ggplot2::theme_minimal(base_size = 13) +
   ggplot2::theme(
     panel.grid.minor = ggplot2::element_blank(),
+    axis.text.x = ggplot2::element_text(
+      angle = 90,
+      hjust = 1,
+      vjust = 0.5,
+      size = 8
+    ),
     strip.text = ggplot2::element_text(face = "bold"),
     legend.position = "right"
   )
 
 Cairo::CairoPNG(
   filename = loadings_plot_file,
-  width = 3000,
+  width = 5000,
   height = 3000,
   pointsize = 16,
   res = 200
