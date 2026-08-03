@@ -16,9 +16,12 @@ rel_cutoff <- as.numeric(args[5])
 mode       <- if(length(args) >= 6) args[6] else "keep"  # "keep" or "remove"
 
 gds.fn <- paste0(bfile, ".gds")
-if (!file.exists(gds.fn)) {
-  snpgdsBED2GDS(paste0(bfile, ".bed"), paste0(bfile, ".fam"), paste0(bfile, ".bim"), gds.fn)
+if (file.exists(gds.fn)) {
+  message("Removing existing GDS to avoid stale PC-AiR input: ", gds.fn)
+  unlink(gds.fn)
 }
+
+snpgdsBED2GDS(paste0(bfile, ".bed"), paste0(bfile, ".fam"), paste0(bfile, ".bim"), gds.fn)
 
 # --- Step 1: SNP Selection (two tracks) ---
 genofile <- snpgdsOpen(gds.fn)
