@@ -316,11 +316,20 @@ if [ "${structured}" = "yes" ]; then
 
         n_after=$(wc -l < "${bfile}.fam")
         echo ">> Sample size after PC-Relate removal: ${n_after}"
+
+        awk 'NR==FNR {keep[$2]=1; next} ($2 in keep)' \
+            "${bfile}.fam" \
+            "${grmfile_pcrelate}.pca.eigenvec" \
+            > "${grmfile_pcrelate}.pca.eigenvec.final"
     fi
 
     # PCs already computed by compute_pcrelate_grm.R (PC-Air)
+    if [ "${related}" = "no" ]; then
+        cp "${grmfile_pcrelate}.pca.eigenvec.final" "${pca}.eigenvec"
+    else
+        cp "${grmfile_pcrelate}.pca.eigenvec" "${pca}.eigenvec"
+    fi
     cp "${grmfile_pcrelate}.pca.eigenval" "${pca}.eigenval"
-    cp "${grmfile_pcrelate}.pca.eigenvec" "${pca}.eigenvec"
 
 elif [ "${structured}" = "no" ]; then
     echo ">> Non-structured population: using KING for kinship estimation"
