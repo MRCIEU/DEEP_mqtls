@@ -8,25 +8,6 @@ print_version
 
 echo "Running GWAS for genetic PCs (PC1-PC5)"
 
-# PCA long-range LD structure report.
-#
-# NOTE: This reproduces one outlier-detection round from the method used by
-# bigsnpr::bed_autoSVD(): robust OGK Mahalanobis distance on PC1-PC10 SNP
-# loadings, chromosome-wise Gaussian smoothing with radius 50 variants, and a
-# skewness/multiple-testing-adjusted Tukey threshold. This is diagnostic only;
-# it never removes variants or replaces the formal PCs produced in 01b.
-echo "Generating PC1-PC10 SNP-loading long-range LD structure QC report"
-if ! ${R_directory}Rscript resources/genetics/detect_pca_ld_structure.R \
-        "${pca_loadings}" \
-        "${pca_ld_report}" \
-        10 \
-        50 \
-        0.05 \
-        20; then
-    echo "Error: PC1-PC10 SNP-loading LD-structure QC report failed"
-    exit 1
-fi
-
 # Step 1: decide whether to use a sparse GRM and fastGWA mode; GRMs are generated in 01b
 use_sparse_grm="no"
 fastgwa_mode="lr"
