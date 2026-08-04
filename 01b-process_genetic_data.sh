@@ -435,6 +435,18 @@ else
     exit 1
 fi
 
+echo "Generating PCA SNP-loading long-range LD structure QC report"
+if ! ${R_directory}Rscript resources/genetics/detect_pca_ld_structure.R \
+        "${pca_loadings}" \
+        "${pca_ld_report}" \
+        "${n_pcs}" \
+        50 \
+        0.05 \
+        20; then
+    echo "Error: PCA SNP-loading LD-structure QC report failed"
+    exit 1
+fi
+
 # Scree plot PCs variance explained
 ${R_directory}Rscript resources/genetics/var_explained_plot.R \
     ${pca}.eigenval \
