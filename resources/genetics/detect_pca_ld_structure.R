@@ -15,8 +15,8 @@
 #      long-range LD regions.
 #
 # The original bed_autoSVD() procedure removes flagged variants, recomputes the
-# PCA, and repeats. DEEP runs this script in 01e as a QC report only, after 01c
-# and 01d have already consumed the formal 01b PCs. It therefore MUST NOT alter
+# PCA, and repeats. DEEP runs this script in 01b as a QC report only, after the
+# formal 01b PCs and SNP loadings have been written. It therefore MUST NOT alter
 # pca.eigenvec, pca.eigenval, the genotype data, or the loading file.
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -86,11 +86,11 @@ gaussian_smooth_by_chromosome <- function(
 
   for (chromosome_name in names(chromosome_indices)) {
     index <- chromosome_indices[[chromosome_name]]
-    if ((2L * radius + 1L) >= length(index)) {
+    if ((2L * radius + 1L) > length(index)) {
       stop(
         "Chromosome ", chromosome_name, " has only ", length(index),
         " PCA variants; Gaussian radius ", radius,
-        " requires more than ", 2L * radius + 1L, " variants."
+        " requires at least ", 2L * radius + 1L, " variants."
       )
     }
     smoothed[index] <- bigutilsr::rollmean(statistic[index], radius)
@@ -421,9 +421,9 @@ note_lines <- c(
   "the viridis fill colour represents the number of SNPs in each hexagonal bin.",
   "Grey vertical lines mark chromosome boundaries; x-axis labels are",
   "chromosome numbers placed at each chromosome midpoint.",
-  "It is not automatically removed because 01e runs after downstream steps have",
-  "already consumed the formal PCs from 01b. Review the tables and plots before",
-  "deciding whether PCA should be recomputed in 01b."
+  "It is not automatically removed because this 01b QC step is report-only.",
+  "Review the tables and plots before deciding whether PCA should be recomputed",
+  "after excluding candidate long-range LD variants."
 )
 writeLines(note_lines, con = note_file)
 
