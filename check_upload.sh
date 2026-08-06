@@ -3,12 +3,16 @@
 source resources/setup.sh "$@"
 set -- $concatenated
 
+usage () {
+	echo $"Usage: $0 [-c <config_file>] <pipeline section> {check|upload} [sftp|manual]"
+}
+
 checkFirstArg () {
 	local e
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo $"Error: $1 is not a valid section identifier"
 	echo $"Need to specify a value from 01"
-	echo $"Usage: $0 <pipeline section> {check|upload}"
+	usage
 	exit 1
 }
 
@@ -17,7 +21,16 @@ checkSecondArg () {
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo $"Error: $2 is not a valid action"
 	echo $"Specify either 'check' or 'upload'"
-	echo $"Usage: $0 <pipeline section> {check|upload}"
+	usage
+	exit 1
+}
+
+checkUploadMode () {
+	local e
+	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+	echo $"Error: $1 is not a valid upload mode"
+	echo $"Specify either 'sftp' or 'manual'"
+	usage
 	exit 1
 }
 
@@ -29,6 +42,22 @@ checkFirstArg "$1" "${sections[@]}"
 
 actions=("check" "upload")
 checkSecondArg "$2" "${actions[@]}"
+
+upload_mode="${3:-sftp}"
+upload_modes=("sftp" "manual")
+if [[ "$2" = "upload" ]]; then
+	checkUploadMode "$upload_mode" "${upload_modes[@]}"
+elif [[ -n "$3" ]]; then
+	echo $"Error: upload mode can only be specified with the 'upload' action"
+	usage
+	exit 1
+fi
+
+if [[ -n "$4" ]]; then
+	echo $"Error: too many arguments"
+	usage
+	exit 1
+fi
 
 echo ""
 echo "Checking log files for $1"
@@ -46,7 +75,8 @@ port="-P 2222"
 if [[ "$2" = "upload" && ( $1 = "01" ) ]]; then
 
 	echo ""
-	if command -v sftp >/dev/null 2>&1; then
+	if [[ "$upload_mode" = "sftp" ]]; then
+		if command -v sftp >/dev/null 2>&1; then
     echo "sftp detected"
 
     if ! sftp $port -oIdentityFile="$key" -oBatchMode=no -b - "${sftp_username}@${sftp_address}:${sftp_path}" <<EOF
@@ -63,6 +93,9 @@ else
     echo "Please ensure you can connect to the server using sftp before tarring results."
 	exit 1
 fi
+	else
+		echo "Manual upload mode selected; skipping sftp connection check."
+	fi
 
 
 	echo ""
@@ -98,7 +131,8 @@ fi
     gpg --output ${home_directory}/results/${study_name}_${1}.${suff}.aes --symmetric --cipher-algo AES256 ${home_directory}/results/${study_name}_${1}.${suff}
     echo ""
 
-	if command -v sftp >/dev/null 2>&1; then
+	if [[ "$upload_mode" = "sftp" ]]; then
+		if command -v sftp >/dev/null 2>&1; then
         sftp $port -oIdentityFile=$key -oBatchMode=no -b - ${sftp_username}@${sftp_address}:${sftp_path} <<EOF
         dir
         cd ../upload
@@ -108,5 +142,12 @@ fi
 		put ${home_directory}/results/config/${study_name}_config.md5sum 
 bye
 EOF
+		fi
+	else
+		echo "Manual upload mode selected; upload these files manually:"
+		echo "${home_directory}/results/${study_name}_${1}.md5sum"
+		echo "${home_directory}/results/${study_name}_${1}.${suff}.aes"
+		echo "${home_directory}/results/config/${study_name}_config.tar.aes"
+		echo "${home_directory}/results/config/${study_name}_config.md5sum"
 	fi
 fi
