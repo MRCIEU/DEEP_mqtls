@@ -402,9 +402,12 @@ elif [ "${structured}" = "no" ]; then
             --bfile ${bfile} \
             --new-id-max-allele-len 70 \
             --extract ${pca}.prune.in \
-            --pca biallelic-var-wts ${n_pcs} vcols=chrom,pos,maj,nonmaj \
+            --pca biallelic-var-wts ${n_pcs} vcols=chrom,pos,ref,alt,maj,nonmaj \
             --out ${pca} \
             --threads ${nthreads}
+
+# PC weight columns in .eigenvec.var start after variant annotation columns:
+# #CHROM, POS, ID, REF, ALT, MAJ, NONMAJ, PC1, PC2, ...
 
         ${R_directory}Rscript resources/genetics/format_plink_pca_loadings.R \
             "${pca}.eigenvec.var" \
