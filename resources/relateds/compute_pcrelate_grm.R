@@ -36,8 +36,23 @@ all_snps <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.01)
 
 # Track B: MAF > 0.2 + LD pruned — for PC-Air PCA (consistent with plink2 PCA in admix=no)
 snps_pca  <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.2)
-snpset_pruned <- snpgdsLDpruning(genofile, snp.id = snps_pca, ld.threshold = 0.1,
-                                 slide.max.n = 10000, num.thread = nthreads)
+plink_r2_threshold <- 0.1
+snpgds_ld_threshold <- sqrt(plink_r2_threshold)
+message(
+  ">> Running SNPRelate LD pruning with method='corr', |r| threshold=",
+  signif(snpgds_ld_threshold, 6),
+  " to approximate PLINK r^2 threshold=", plink_r2_threshold,
+  "."
+)
+snpset_pruned <- snpgdsLDpruning(
+  genofile,
+  snp.id = snps_pca,
+  method = "corr",
+  ld.threshold = snpgds_ld_threshold,
+  slide.max.n = 10000,
+  num.thread = nthreads,
+  start.pos = "first"
+)
 pruned_snps <- unlist(snpset_pruned)
 
 # --- Step 2: KING with ALL SNPs ---
