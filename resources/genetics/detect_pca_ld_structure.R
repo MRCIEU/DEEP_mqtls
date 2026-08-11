@@ -307,7 +307,6 @@ statistics_file <- paste0(output_prefix, ".snp_stats.tsv.gz")
 outlier_file <- paste0(output_prefix, ".outlier_snps.tsv.gz")
 regions_file <- paste0(output_prefix, ".regions.tsv")
 summary_file <- paste0(output_prefix, ".summary.tsv")
-note_file <- paste0(output_prefix, ".note.txt")
 statistic_plot_file <- paste0(output_prefix, ".smoothed_statistic.png")
 loadings_plot_file <- paste0(output_prefix, ".PC1-PC20_loadings.png")
 
@@ -358,74 +357,27 @@ utils::write.table(
   col.names = TRUE
 )
 
-note_lines <- c(
-  "DEEP PCA long-range LD structure diagnostic",
-  "",
-  "IMPORTANT:",
-  "This is a QC-only, single-round report. It does not remove variants,",
-  "recompute PCA, or modify pca.eigenvec, pca.eigenval, genotype data,",
-  "or pca.loadings.tsv.gz.",
-  "",
-  "Method matched to the outlier-detection step in bigsnpr::bed_autoSVD():",
+diagnostic_summary_lines <- c(
+  "DEEP PCA long-range LD structure diagnostic summary",
+  paste0("Input loading file: ", normalizePath(loadings_file)),
+  paste0("PCs used: ", paste(report_pc_columns, collapse = ",")),
+  paste0("Variants tested: ", nrow(statistics)),
   paste0(
-    "1. Use SNP loadings from ",
-    paste(report_pc_columns, collapse = ", "), "."
+    "Gaussian roll radius/window: ", roll_radius, "/",
+    2L * roll_radius + 1L, " variants"
   ),
-  "2. Compute sqrt(bigutilsr::dist_ogk(loadings)).",
-  paste0(
-    "3. Apply bigutilsr::rollmean separately within each chromosome ",
-    "using a radius of ", roll_radius, " variants (a ",
-    2L * roll_radius + 1L, "-variant Gaussian-weighted window)."
-  ),
-  paste0(
-    "4. Compute bigutilsr::tukey_mc_up(smoothed statistic, alpha = ",
-    tukey_alpha, ")."
-  ),
-  "   With coef=NULL, this adjusts for medcouple skewness and multiple testing.",
-  paste0(
-    "5. Flag variants above the threshold and report runs of at least ",
-    min_region_snps, " consecutive flagged variants as candidate regions."
-  ),
-  "",
+  paste0("Tukey alpha: ", format(tukey_alpha, scientific = FALSE)),
   paste0("Modified Tukey threshold: ", format(threshold, digits = 16)),
   paste0("Outlier variants: ", sum(is_outlier)),
+  paste0("Minimum consecutive outlier SNPs for region: ", min_region_snps),
   paste0("Candidate long-range LD regions: ", nrow(regions)),
-  "The modified Tukey threshold is one global value calculated from all",
-  "chromosome-wise smoothed SNP statistics; it is not SNP-specific.",
-  "",
-  "Interpretation:",
-  paste0(
-    "The robust Mahalanobis distance combines each SNP's loadings across ",
-    paste(report_pc_columns, collapse = ", "),
-    " into one statistic. It is large when a SNP has an unusual joint loading",
-    " pattern after robustly accounting for the centre, scale, and covariance",
-    " of the loading columns."
-  ),
-  paste0(
-    "Gaussian smoothing replaces each SNP's raw distance with a weighted local",
-    " average over up to ", 2L * roll_radius + 1L,
-    " variants on the same chromosome. Variants nearest the focal SNP receive",
-    " the largest weights. This emphasises clusters of unusual SNPs and",
-    " suppresses isolated spikes."
-  ),
-  "IS_OUTLIER marks every SNP whose smoothed statistic exceeds the modified",
-  paste0(
-    "Tukey threshold. REGION_ID is assigned only to runs of at least ",
-    min_region_snps, " consecutive outlier SNPs."
-  ),
-  "A candidate region may represent long-range LD structure, but its reported",
-  "start and end are smoothing-based QC boundaries, not fine-mapped biological",
-  "boundaries.",
-  "The PC1-PC20 loading figure follows the paper's Figure 1 plotting method:",
-  "SNP column index versus loading is displayed with ggplot2::geom_hex(), and",
-  "the viridis fill colour represents the number of SNPs in each hexagonal bin.",
-  "Grey vertical lines mark chromosome boundaries; x-axis labels are",
-  "chromosome numbers placed at each chromosome midpoint.",
-  "It is not automatically removed because this 01b QC step is report-only.",
-  "Review the tables and plots before deciding whether PCA should be recomputed",
-  "after excluding candidate long-range LD variants."
+  paste0("Summary table: ", summary_file),
+  paste0("SNP statistics: ", statistics_file),
+  paste0("Candidate regions: ", regions_file),
+  paste0("Smoothed statistic plot: ", statistic_plot_file),
+  paste0("PC1-PC20 loading plot: ", loadings_plot_file)
 )
-writeLines(note_lines, con = note_file)
+message(paste(diagnostic_summary_lines, collapse = "\n"))
 
 # The LD-statistic plot uses genomic variant index with chromosome labels.
 genome_index <- seq_len(nrow(statistics))
