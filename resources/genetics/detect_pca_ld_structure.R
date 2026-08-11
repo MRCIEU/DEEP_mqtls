@@ -432,6 +432,12 @@ genome_index <- seq_len(nrow(statistics))
 chromosome_starts <- vapply(chromosome_indices, min, integer(1))
 chromosome_ends <- vapply(chromosome_indices, max, integer(1))
 chromosome_midpoints <- (chromosome_starts + chromosome_ends) / 2
+chromosome_label_order <- as.character(seq_len(22L))
+chromosome_axis_breaks <- chromosome_midpoints[chromosome_label_order]
+chromosome_axis_breaks <- chromosome_axis_breaks[
+  !is.na(chromosome_axis_breaks)
+]
+chromosome_axis_labels <- names(chromosome_axis_breaks)
 
 # Always include the single global threshold in the y-axis. Without this,
 # datasets with zero outliers have threshold > max(smoothed_statistic), which
@@ -452,7 +458,7 @@ Cairo::CairoPNG(
   pointsize = 20,
   res = 200
 )
-graphics::par(mar = c(5, 5, 3, 1))
+graphics::par(mar = c(7, 5, 3, 1))
 graphics::plot(
   genome_index,
   smoothed_statistic,
@@ -460,7 +466,7 @@ graphics::plot(
   cex = 0.22,
   col = "#3B6FB6",
   xaxt = "n",
-  xlab = "Chromosome",
+  xlab = "",
   ylab = "Smoothed robust distance",
   ylim = statistic_y_limits,
   main = paste0(
@@ -475,10 +481,20 @@ graphics::plot(
 )
 graphics::axis(
   1,
-  at = chromosome_midpoints,
-  labels = names(chromosome_midpoints),
+  at = chromosome_axis_breaks,
+  labels = FALSE,
   tick = FALSE
 )
+plot_user_limits <- graphics::par("usr")
+graphics::text(
+  x = chromosome_axis_breaks,
+  y = plot_user_limits[3] - diff(plot_user_limits[3:4]) * 0.035,
+  labels = chromosome_axis_labels,
+  srt = 45,
+  adj = c(1, 1),
+  xpd = NA
+)
+graphics::mtext("Chromosome", side = 1, line = 5.4)
 graphics::abline(v = chromosome_ends[-length(chromosome_ends)],
                  col = "grey85", lwd = 0.8)
 graphics::abline(h = threshold, col = "#D73027", lwd = 2.5, lty = 2)
@@ -553,15 +569,15 @@ paper_style_loading_plot <- ggplot2::ggplot(
   ) +
   ggplot2::scale_fill_viridis_c(name = "SNP count") +
   ggplot2::scale_x_continuous(
-    breaks = chromosome_midpoints,
-    labels = names(chromosome_midpoints)
+    breaks = unname(chromosome_axis_breaks),
+    labels = chromosome_axis_labels
   ) +
   ggplot2::labs(x = "Chromosome (SNP column index order)", y = NULL) +
   ggplot2::theme_minimal(base_size = 13) +
   ggplot2::theme(
     panel.grid.minor = ggplot2::element_blank(),
     axis.text.x = ggplot2::element_text(
-      angle = 90,
+      angle = 45,
       hjust = 1,
       vjust = 0.5,
       size = 8
