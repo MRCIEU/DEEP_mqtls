@@ -6,6 +6,8 @@ set -- $concatenated
 exec &> >(tee ${section_01e_logfile})
 print_version
 
+echo "Please note this module is no longer required, since SNP loadings with LD-structure detection replace genetic PC GWAS as the default PCA LD-structure diagnostic."
+
 echo "Running GWAS for genetic PCs (PC1-PC5)"
 
 # Step 1: decide whether to use a sparse GRM and fastGWA mode; GRMs are generated in 01b
