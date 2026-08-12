@@ -288,7 +288,8 @@ if [ "${structured}" = "yes" ]; then
         "${nthreads}" \
         "${rel_cutoff}" \
         "${pcrelate_mode}" \
-        "${pca_loadings}"
+        "${pca_loadings}" \
+        "temp_hm3snps.txt"
 
     ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
         "${grmfile_all}" \
