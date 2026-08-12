@@ -19,6 +19,10 @@ loadings_file <- if(length(args) >= 7) {
 } else {
   paste0(outfile, ".pca.loadings.tsv.gz")
 }
+if (length(args) < 8 || !nzchar(args[8]) || args[8] %in% c("NULL", "NA")) {
+  stop("HM3 SNP list must be provided as argument 8 for PC-AiR LD pruning.")
+}
+hm3_snp_list <- args[8]
 
 gds.fn <- paste0(bfile, ".gds")
 if (file.exists(gds.fn)) {
@@ -35,7 +39,45 @@ genofile <- snpgdsOpen(gds.fn)
 all_snps <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.01)
 
 # Track B: MAF > 0.2 + LD pruned — for PC-Air PCA (consistent with plink2 PCA in admix=no)
-snps_pca  <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.2)
+snps_pca <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.2)
+
+if (!file.exists(hm3_snp_list) || file.info(hm3_snp_list)$size == 0L) {
+  stop("HM3 SNP list is missing or empty: ", hm3_snp_list)
+}
+message(">> Restricting PC-AiR LD-pruning candidates to HM3 SNP list: ", hm3_snp_list)
+hm3_snp_names <- unique(trimws(readLines(hm3_snp_list, warn = FALSE)))
+hm3_snp_names <- hm3_snp_names[nzchar(hm3_snp_names)]
+if (length(hm3_snp_names) == 0L) {
+  stop("HM3 SNP list contains no SNP IDs: ", hm3_snp_list)
+}
+
+gds_snp_id <- read.gdsn(index.gdsn(genofile, "snp.id"))
+bim_file <- paste0(bfile, ".bim")
+if (!file.exists(bim_file)) {
+  stop("Could not find PLINK BIM file for HM3 SNP mapping: ", bim_file)
+}
+bim <- read.table(bim_file, header = FALSE, stringsAsFactors = FALSE)
+if (ncol(bim) < 2L) {
+  stop("PLINK BIM file has fewer than two columns: ", bim_file)
+}
+if (nrow(bim) != length(gds_snp_id)) {
+  stop(
+    "BIM row count (", nrow(bim), ") does not match GDS snp.id count (",
+    length(gds_snp_id), "). Cannot safely map HM3 SNPs."
+  )
+}
+bim_snp_id <- as.character(bim[[2]])
+hm3_index <- match(hm3_snp_names, bim_snp_id)
+mapped_hm3_snps <- unique(gds_snp_id[hm3_index[!is.na(hm3_index)]])
+snps_pca <- intersect(snps_pca, mapped_hm3_snps)
+message(
+  ">> HM3 list contains ", length(hm3_snp_names), " SNP IDs; ",
+  length(mapped_hm3_snps), " map to the GDS; ",
+  length(snps_pca), " remain after MAF > 0.2 and autosome filters."
+)
+if (length(snps_pca) == 0L) {
+  stop("No HM3 SNPs remain for PC-AiR LD pruning after mapping and MAF filtering.")
+}
 plink_r2_threshold <- 0.1
 snpgds_ld_threshold <- sqrt(plink_r2_threshold)
 message(
