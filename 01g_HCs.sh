@@ -254,6 +254,15 @@ ${R_directory}Rscript resources/genetics/generate_hcs.R \
     "${hcs_plot}" \
     "${hcs_scatter_plot}"
 
+echo "Selecting HCs using profile likelihood"
+${R_directory}Rscript resources/genetics/select_hcs_profile_likelihood.R \
+    "${hcs_kernel_prop}" \
+    "${hcs_file}" \
+    "${hcs_profile_selected_file}" \
+    "${hcs_profile_likelihood}" \
+    "${hcs_profile_selection}" \
+    "${hcs_profile_plot}"
+
 echo "Generating side-by-side scatter plots for HC1vHC2, HC2vHC3 and HC1vHC3, coloured by factors (population-structure check)"
 ${R_directory}Rscript resources/genetics/hc_pop_scatter.R \
     "${hcs_file}" \
@@ -271,11 +280,11 @@ ${R_directory}Rscript resources/genetics/corr_lm_hc_pc.R \
     ${genetic_outlier_ids} \
     ${section_01_dir}
 
-# generate qcovar file with HCs for gwas
+# Generate qcovar file with profile-likelihood selected HCs for GWAS.
 ${R_directory}Rscript resources/methylation/generate_qcovar_with_hcs.R \
     "${covariates_combined}.txt" \
     "${bfile}.fam" \
-    "${hcs_file}" \
+    "${hcs_profile_selected_file}" \
     "${qcovar_hc_file}" \
     "${scripts_directory}" 
 
