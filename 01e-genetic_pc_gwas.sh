@@ -6,7 +6,7 @@ set -- $concatenated
 exec &> >(tee ${section_01e_logfile})
 print_version
 
-echo "Please note this module is no longer required, since SNP loadings with LD-structure detection replace genetic PC GWAS as the default PCA LD-structure diagnostic."
+echo "Please note this module is no longer required, since SNP loadings with LD-structure detection replace genetic PC GWAS as the default PCA LD-structure diagnostic in Module 01b."
 
 echo "Running GWAS for genetic PCs (PC1-PC5)"
 
