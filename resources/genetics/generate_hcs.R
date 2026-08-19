@@ -20,13 +20,15 @@ sample_id <- data.frame(fam[, .(V1, V2)])
 colnames(sample_id) = c("FID", "IID")
 nind = nrow(sample_id)
 
-if (nind < 100) {
-    number_of_HCs = nind
-    message("Number of individuals less than 100, setting number of HCs to ", nind, "\n")
-    } else {
-    number_of_HCs = 100
-    message("Setting number of HCs to 100\n")
-}
+initial_rank <- if (nind < 100) nind else 100
+rank_candidates <- unique(c(initial_rank, 80, 60, 40, 20))
+rank_candidates <- rank_candidates[rank_candidates <= initial_rank]
+
+message(
+  "SVD rank candidates: ",
+  paste(rank_candidates, collapse = " -> "),
+  "\n"
+)
 
 message("Reading full chunk length data\n")
 # no header in the full length file
@@ -36,7 +38,43 @@ message("Making sparse matrix\n")
 A <- sparseMatrix(df$V1, df$V2, x = log10(df$V3+1), dims=c(nind,nind))
 
 message("Performing svd \n")
-res<-sparsesvd(A,rank=number_of_HCs)
+res <- NULL
+error_messages <- character()
+
+for (candidate_rank in rank_candidates) {
+  message("Attempting SVD with rank ", candidate_rank)
+
+  result <- tryCatch(
+    sparsesvd(A, rank = candidate_rank),
+    error = function(e) {
+      error_messages <<- c(
+        error_messages,
+        paste0("rank ", candidate_rank, ": ", conditionMessage(e))
+      )
+      message(
+        "SVD failed at rank ",
+        candidate_rank,
+        ": ",
+        conditionMessage(e)
+      )
+      NULL
+    }
+  )
+
+  if (!is.null(result)) {
+    res <- result
+    number_of_HCs <- candidate_rank
+    message("SVD succeeded with rank ", number_of_HCs, "\n")
+    break
+  }
+}
+
+if (is.null(res)) {
+  stop(
+    "SVD failed for all attempted ranks:\n",
+    paste(error_messages, collapse = "\n")
+  )
+}
 
 message("Calculating HCs\n")
 HCs <- res$u %*% diag(sqrt(res$d))
