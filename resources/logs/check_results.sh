@@ -375,28 +375,29 @@ check_results_01d () {
 
 check_results_01e () {
 
-    if [ ! -d "${section_01_dir}/01e" ]; then
-        echo "Problem: directory ${section_01_dir}/01e does not exist"
-        exit 1
-    fi
+    echo "Skip check_results_01e: 01e-genetic_pc_gwas.sh is no longer required."
+    # if [ ! -d "${section_01_dir}/01e" ]; then
+    #     echo "Problem: directory ${section_01_dir}/01e does not exist"
+    #     exit 1
+    # fi
 
-    for i in {1..5}; do
-        pc="PC${i}"
+    # for i in {1..5}; do
+    #     pc="PC${i}"
 
-        if [ -f "${section_01_dir}/01e/gwas_${pc}.fastGWA.gz" ]; then
-            echo "GWAS ${pc} results present"
-        else
-            echo "Problem: GWAS ${pc} results file not present: ${section_01_dir}/01e/gwas_${pc}.fastGWA.gz"
-            exit 1
-        fi
+    #     if [ -f "${section_01_dir}/01e/gwas_${pc}.fastGWA.gz" ]; then
+    #         echo "GWAS ${pc} results present"
+    #     else
+    #         echo "Problem: GWAS ${pc} results file not present: ${section_01_dir}/01e/gwas_${pc}.fastGWA.gz"
+    #         exit 1
+    #     fi
 
-        if [ -f "${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf" ]; then
-            echo "GWAS ${pc} beta Manhattan plot present"
-        else
-            echo "Problem: GWAS ${pc} beta Manhattan plot file not present: ${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf"
-            exit 1
-        fi
-    done
+    #     if [ -f "${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf" ]; then
+    #         echo "GWAS ${pc} beta Manhattan plot present"
+    #     else
+    #         echo "Problem: GWAS ${pc} beta Manhattan plot file not present: ${section_01_dir}/01e/gwas_${pc}_manhattan_beta.pdf"
+    #         exit 1
+    #     fi
+    # done
 }
 
 check_results_01f () {

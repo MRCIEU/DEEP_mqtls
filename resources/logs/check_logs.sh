@@ -182,13 +182,14 @@ check_logs_01 () {
 		exit 1
 	fi
 
-	compare_version "01e"
-	if grep -i -q "success" ${section_01e_logfile}; then
-		echo "01e-genetic_pc_gwas.sh completed successfully."
-	else
-		echo "Problem: 01e-genetic_pc_gwas.sh did not complete successfully"
-		exit 1
-	fi
+	echo "Skip 01e log file check: 01e-genetic_pc_gwas.sh is no longer required."
+	# compare_version "01e"
+	# if grep -i -q "success" ${section_01e_logfile}; then
+	# 	echo "01e-genetic_pc_gwas.sh completed successfully."
+	# else
+	# 	echo "Problem: 01e-genetic_pc_gwas.sh did not complete successfully"
+	# 	exit 1
+	# fi
 
 	if [ -z "${idat_directory}" ]; then
     	echo "You don't have idat dir, skip 01f log file check. Please ensure you don't have access to idat files."
