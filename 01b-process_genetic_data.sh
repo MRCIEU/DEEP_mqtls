@@ -28,7 +28,7 @@ if [ "$inferred_build" -eq 37 ]; then
     if [ -f ${miss_liftover} ]; then
 		echo "SNP missing for liftover found. Excluding them from bfile and liftovering"
         ${plink2} --bfile "${bfile_raw}" \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --exclude ${miss_liftover} \
             --update-map ${liftover_map} \
             --make-bed \
@@ -38,7 +38,7 @@ if [ "$inferred_build" -eq 37 ]; then
     else
 		echo "No SNP missing for liftover found. Liftovering"
         ${plink2} --bfile "${bfile_raw}" \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --update-map ${liftover_map} \
             --make-bed \
 			--output-chr 26 \
@@ -48,7 +48,7 @@ if [ "$inferred_build" -eq 37 ]; then
 elif [ "$inferred_build" -eq 38 ]; then
 	# if build is 38, just copy the raw bfile to the new bfile
     ${plink2} --bfile "${bfile_raw}" \
-        --new-id-max-allele-len 70 \
+        --new-id-max-allele-len 500 \
         --make-bed \
 		--output-chr 26 \
         --out ${bfile} \
@@ -68,7 +68,7 @@ ${plink2} \
     --mind ${snp_imiss} \
     --make-bed \
     --out "${bfile}_format" \
-    --new-id-max-allele-len 70 \
+    --new-id-max-allele-len 500 \
     --allow-extra-chr \
     --human \
     --output-chr 26 \
@@ -82,7 +82,7 @@ n23=`grep ^23 "${bfile}_format.bim" | wc -l`
 if [ "$n23" -gt "0" ]; then
 	${plink} \
 		--bfile ${bfile}_format \
-		--new-id-max-allele-len 70 \
+		--new-id-max-allele-len 500 \
 		--split-x b38 no-fail \
 		--make-bed \
 		--out ${bfile}_xpar_temp \
@@ -90,7 +90,7 @@ if [ "$n23" -gt "0" ]; then
 
 	${plink} \
 		--bfile ${bfile}_xpar_temp \
-		--new-id-max-allele-len 70 \
+		--new-id-max-allele-len 500 \
 		--check-sex \
 		--out ${section_01_dir}/data \
 		--threads ${nthreads}
@@ -115,7 +115,7 @@ if [ "$n23" -gt "0" ]; then
 
 		${plink2} \
 			--bfile ${bfile}_xpar_temp \
-			--new-id-max-allele-len 70 \
+			--new-id-max-allele-len 500 \
 			--remove ${bfile}_xpar_temp.failed_sexcheck \
 			--make-bed \
 			--output-chr 26 \
@@ -133,7 +133,7 @@ cp ${bfile}_format.bim ${bfile}.bim.original
 echo "Formatting SNP IDs to chr:pos_A1_A2"
 ${plink2} \
 	--bfile "${bfile}_format" \
-	--new-id-max-allele-len 70 \
+	--new-id-max-allele-len 500 \
 	--set-all-var-ids @:#_\$1_\$2 \
 	--make-bed \
 	--out ${bfile}1 \
@@ -157,7 +157,7 @@ ${R_directory}Rscript resources/genetics/harmonization.R \
 ${plink2} \
 	--bfile ${bfile} \
 	--rm-dup exclude-mismatch \
-	--new-id-max-allele-len 70 \
+	--new-id-max-allele-len 500 \
 	--make-bed \
 	--output-chr 26 \
 	--out ${bfile}1 \
@@ -181,7 +181,7 @@ echo "Removing ${n_failedSNPs} SNPs from data"
 ${plink2} \
     --bfile ${bfile} \
     --exclude ${bfile}.failed.SNPs.txt \
-    --new-id-max-allele-len 70 \
+    --new-id-max-allele-len 500 \
     --sort-vars \
     --make-pgen \
     --out ${bfile_sort} \
@@ -215,7 +215,7 @@ echo "Creating kinship matrix (GCTA)"
 
 ${plink2} \
     --bfile ${bfile} \
-    --new-id-max-allele-len 70 \
+    --new-id-max-allele-len 500 \
     --extract temp_hm3snps.txt \
     --maf ${grm_maf_cutoff} \
     --make-grm-bin \
@@ -233,7 +233,7 @@ echo "Preparing KING input bfile"
 
 ${plink} \
     --bfile ${bfile} \
-    --new-id-max-allele-len 70 \
+    --new-id-max-allele-len 500 \
     --make-bed \
     --exclude range "${exclude_highld_region}" \
     --out "${bfile}_king_input" \
@@ -307,7 +307,7 @@ if [ "${structured}" = "yes" ]; then
         ${plink2} \
             --bfile ${bfile} \
             --remove ${grmfile_pcrelate}.remove_ids.txt \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --output-chr 26 \
             --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
 
@@ -372,7 +372,7 @@ elif [ "${structured}" = "no" ]; then
         ${plink2} \
             --bfile ${bfile} \
             --keep ${grmfile_king}_filterunrelated.txt \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --output-chr 26 \
             --make-bed --out ${bfile}_unrel_final --threads ${nthreads}
         mv ${bfile}_unrel_final.bed ${bfile}.bed
@@ -390,7 +390,7 @@ elif [ "${structured}" = "no" ]; then
     # PC calculation (structured=no only; structured=yes, then PCs already done by PC-Air)
     ${plink2} \
         --bfile ${bfile} \
-        --new-id-max-allele-len 70 \
+        --new-id-max-allele-len 500 \
         --extract temp_hm3snps.txt \
         --indep-pairwise 10000 5 0.1 \
         --maf 0.2 \
@@ -401,7 +401,7 @@ elif [ "${structured}" = "no" ]; then
     if [ "${related}" = "no" ]; then
         ${plink2} \
             --bfile ${bfile} \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --extract ${pca}.prune.in \
             --pca biallelic-var-wts ${n_pcs} vcols=chrom,pos,ref,alt,maj,nonmaj \
             --out ${pca} \
@@ -421,7 +421,7 @@ elif [ "${structured}" = "no" ]; then
         ${plink2} \
             --bfile ${bfile} \
             --extract ${pca}.prune.in \
-            --new-id-max-allele-len 70 \
+            --new-id-max-allele-len 500 \
             --make-bed \
             --out ${bfile}_ldpruned \
             --threads ${nthreads}
@@ -480,7 +480,7 @@ fi
 echo "Calculating MAF from formatted bfile with chr:pos format"
 ${plink2} \
 	--bfile "${bfile}" \
-	--new-id-max-allele-len 70 \
+	--new-id-max-allele-len 500 \
 	--output-chr 26 \
 	--freq \
 	--out "${bfile}" \
@@ -571,7 +571,7 @@ ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_inf
 # 	then
 # 		${plink2} \
 # 			--bfile ${bfile} \
-# 			--new-id-max-allele-len 70 \
+# 			--new-id-max-allele-len 500 \
 # 			--extract ${pca}.prune.in \
 # 			--pca 20 \
 # 			--out ${pca} \
@@ -581,7 +581,7 @@ ${Python_directory}python "${scripts_directory}/resources/datacheck/ancestry_inf
 
 # 		${plink2} \
 # 			--bfile ${bfile} \
-# 			--new-id-max-allele-len 70 \
+# 			--new-id-max-allele-len 500 \
 # 			--extract ${pca}.prune.in \
 # 			--make-bed \
 # 			--out ${bfile}_ldpruned \
@@ -613,7 +613,7 @@ fi
 
 ${plink2} \
 	--bfile "${bfile}" \
-	--new-id-max-allele-len 70 \
+	--new-id-max-allele-len 500 \
 	--freq \
 	--hardy \
 	--missing \
