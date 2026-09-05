@@ -102,9 +102,9 @@ related="no"
 # Variable names must match column headers in your covariates file exactly,
 # and must end in _factor (categorical) or _numeric (continuous).
 # Separate multiple variables with a single space.
-# Example: study_specific_vars="CaseControl_factor Plate_factor"
-# Note on batch variables: only include if you have evidence of a batch effect
-# Avoid using slide (too many categories); use plate instead.
+# Example: study_specific_vars="CaseControl_factor Sampletype_factor"
+# Include batch variables only if effects remain after SVA; prefer plate over slide
+# because each slide contains relatively few participants.
 # https://github.com/MRCIEU/DEEP_mqtls/wiki/Phenotype-data
 study_specific_vars=""
 
