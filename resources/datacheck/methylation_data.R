@@ -420,6 +420,8 @@ if(cellcounts_file_measured == "NULL")
 }
 
 celltype_aliases <- list(
+  CD4T = c("cd4t", "cd4_t", "cd4_tcells"),
+  CD8T = c("cd8t", "cd8_t", "cd8_tcells"),
   Bcells = c("bcell", "bcells", "b_cell", "b_cells", "b lymphocyte", "b lymphocytes", "b_lymphocyte", "b_lymphocytes", "b-lymphocyte", "b-lymphocytes", "b-lym", "b_lym"),
   Tcells = c("tcell", "tcells", "t_cell", "t_cells", "t lymphocyte", "t lymphocytes", "t_lymphocyte", "t_lymphocytes", "t-lymphocyte", "t-lymphocytes", "t-lym", "t_lym"),
   NK = c("nk","nkcell", "nkcells", "nk_cell", "nk_cells", "natural_killer", "natural_killers", "nklym"),
@@ -520,7 +522,7 @@ if(cellcounts_file_measured != "NULL")
 		errorlist <- c(errorlist, msg)
 		warning("ERROR: ", msg)
 	}
-	message("Number of measured cell types: ", c2)
+	message("Number of measured cell types: ", c2 - 1)
 	message("Cell types:\n", paste(names(ccm)[-1], collapse="\n"))
 
   message("Reformat measured cell counts")
