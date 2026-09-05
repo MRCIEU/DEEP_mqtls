@@ -39,10 +39,11 @@ smoking_prediction_vars <- cbind(IID,p_smoking_mcigarette,p_smoking_elliott)
 message("Saving predicted smoking scores to file: ", smoking_prediction_output_file)
 write.table(smoking_prediction_vars,file=paste0(smoking_prediction_output_file),row.names = F,col.names = T,quote=F)
 
-# match up meth and pheno samples
+# Match samples and align phenotype rows to methylation columns before scoring.
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
-pheno <- pheno[pheno$IID%in%participants,]
-norm.beta <- norm.beta[,participants]
+pheno <- pheno[match(participants, pheno$IID), , drop = FALSE]
+norm.beta <- norm.beta[, participants, drop = FALSE]
+stopifnot(identical(as.character(pheno$IID), colnames(norm.beta)))
 message("Number of samples with covariate and methylation data: ", length(participants))
 
 message("Predicting DNAmAge")#############################################
