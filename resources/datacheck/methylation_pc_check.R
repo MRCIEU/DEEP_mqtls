@@ -34,8 +34,10 @@ colnames(genetic_pcs) <- c("IID", paste("genetic_pc", 1:(ncol(genetic_pcs)-1), s
 rownames(genetic_pcs) <- genetic_pcs$IID
 
 participants <- as.character(intersect(colnames(norm.beta),pheno$IID))
-pheno <- pheno[pheno$IID%in%participants,]
-norm.beta <- norm.beta[,participants]
+pheno <- pheno[match(participants, pheno$IID), , drop = FALSE]
+norm.beta <- norm.beta[, participants, drop = FALSE]
+stopifnot(identical(as.character(pheno$IID), colnames(norm.beta)))
+message("Number of samples with covariate and methylation data: ", length(participants))
 
 # detect cell count panel prefixes
 cell_count_cols <- setdiff(colnames(cell_counts), c("FID","IID"))
