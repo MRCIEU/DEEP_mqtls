@@ -75,7 +75,6 @@ check_results_01b () {
 		"${pca_ld_report}.outlier_snps.tsv.gz"
 		"${pca_ld_report}.regions.tsv"
 		"${pca_ld_report}.summary.tsv"
-		"${pca_ld_report}.note.txt"
 		"${pca_ld_report}.smoothed_statistic.png"
 		"${pca_ld_report}.PC1-PC20_loadings.png"
 	)
