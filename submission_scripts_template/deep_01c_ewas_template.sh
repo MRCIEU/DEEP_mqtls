@@ -2,7 +2,6 @@
 #SBATCH --job-name=deep_01c_ewas
 #SBATCH --output=../job_reports/deep_01c_ewas_%j
 #SBATCH --partition=compute 
-#SBATCH --account=SSCM029144
 #SBATCH --mem=128GB
 #SBATCH --cpus-per-task=16
 #SBATCH --time=36:00:00
