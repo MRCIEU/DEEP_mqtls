@@ -163,7 +163,7 @@ if (nrow(measured) == 0) {
 
   correlation_matrix <- cor(data[,-which(names(data) == "IID")], use = "complete.obs", method="spearman")
 
-  correlation_matrix1 <- cor(data[,-which(names(data) %in% new_cols)], use = "complete.obs", method = "spearman")
+  correlation_matrix1 <- cor(data[, !(names(data) %in% c("IID", new_cols)), drop = FALSE], use = "complete.obs", method = "spearman")
 
   pdf(file = cor_plot_ori, height = 54, width = 87)
   corrplot(correlation_matrix1, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
