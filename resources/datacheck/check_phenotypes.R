@@ -115,21 +115,35 @@ for(i in phenotypes){
   
 }
 
-# now print off all the plots from the list so that all the study variables are on one plot
-# how do we automate the plot size and the ncol and nrow?
-# let's start with 4 columns and we'll see how we go
-# size will be something like 4xn of rows and 4 columns
-# add title that has cohort name and raw distribution
+# Save at most 16 plots per image, with four columns and up to four rows.
+save_distribution_pages <- function(plots, filename_base, title) {
+  if (length(plots) == 0L) return(invisible(NULL))
 
-n_plot_rows <- ceiling(length(phenotypes)/4)
-row_dimensions <- n_plot_rows*4
+  save_page <- function(page_plots, filename) {
+    n_plot_rows <- ceiling(length(page_plots) / 4)
+    jpeg(filename = filename, width = 12, height = n_plot_rows * 4,
+         units = "in", res = 600)
+    on.exit(dev.off(), add = TRUE)
+    makeplots <- ggarrange(plotlist = page_plots, ncol = 4, nrow = n_plot_rows)
+    makeplots <- annotate_figure(makeplots, top = text_grob(
+      title, color = "black", face = "bold", size = 14))
+    print(makeplots)
+  }
 
-jpeg(filename = paste0(raw_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
-makeplots <- ggarrange(plotlist=plot_list, ncol = 4, nrow = n_plot_rows)
-annotate_figure(makeplots, top = text_grob(paste0(study_name,"; raw phenotype distributions"), 
-                                      color = "black", face = "bold", size = 14))
-print(makeplots)
-dev.off()
+  page_starts <- seq.int(1L, length(plots), by = 16L)
+  for (page in seq_along(page_starts)) {
+    first <- page_starts[page]
+    last <- min(first + 15L, length(plots))
+    suffix <- if (page == 1L) "" else as.character(page - 1L)
+    filename <- paste0(filename_base, suffix, ".jpg")
+    message("Saving phenotype distribution page ", page, ": ", filename)
+    save_page(plots[first:last], filename)
+  }
+}
+
+save_distribution_pages(
+  plot_list, paste0(raw_phenotype_distribution_plot, "_", study_name),
+  paste0(study_name, "; raw phenotype distributions"))
 
 # and save out the summary stats
   # QUESTION - do we like this rdata format? It's a list with two elements 
@@ -201,15 +215,9 @@ for(i in numeric_phenos){
 
 ################
 
-n_plot_rows <- ceiling(length(numeric_phenos)/4)
-row_dimensions <- n_plot_rows*4
-
-jpeg(filename = paste0(winzorised_phenotype_distribution_plot,"_",study_name,".jpg"),width = 12, height = row_dimensions, units = "in", res = 600)
-makeplots <- ggarrange(plotlist=plot_list, ncol = 4, nrow = n_plot_rows)
-annotate_figure(makeplots, top = text_grob(paste0(study_name,"; Winsorized phenotype distributions"), 
-                                           color = "black", face = "bold", size = 14))
-print(makeplots)
-dev.off()
+save_distribution_pages(
+  plot_list, paste0(winzorised_phenotype_distribution_plot, "_", study_name),
+  paste0(study_name, "; Winsorized phenotype distributions"))
 
 save(summstats_list,file=paste0(winzorised_phenotype_summary_file,"_",study_name,".Rdata"))
 
@@ -219,4 +227,3 @@ save(summstats_list,file=paste0(winzorised_phenotype_summary_file,"_",study_name
 
 
 save(pheno,file=paste0(winsorized_phenotype_file))
-
