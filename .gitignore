@@ -22,3 +22,10 @@ resources/genetics/topmed.GRCh38.f10wgs.pass.nodup.mac5.maf001.indelrecoded.tab.
 resources/genetics/topmed.GRCh38.f10wgs.pass.nodup.mac5.maf001.indelrecoded.tab.snplist.gz.md5
 resources/genetics/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz
 resources/genetics/HRC.r1-1.GRCh37.wgs.mac5.sites.tab.cptid.maf001_recoded.gz.md5sum
+
+# Only track the four shared submission templates in this directory.
+/submission_scripts_template/*
+!/submission_scripts_template/deep_01c_ewas_template.sh
+!/submission_scripts_template/deep_03e_aggregate_template.sh
+!/submission_scripts_template/deep_07b_template.sh
+!/submission_scripts_template/deep_07c_template.sh
