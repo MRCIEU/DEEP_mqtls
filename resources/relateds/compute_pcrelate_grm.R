@@ -35,10 +35,10 @@ snpgdsBED2GDS(paste0(bfile, ".bed"), paste0(bfile, ".fam"), paste0(bfile, ".bim"
 # --- Step 1: SNP Selection (two tracks) ---
 genofile <- snpgdsOpen(gds.fn)
 
-# Track A: MAF > 0.01 — for KING kinship + PC-Relate (more SNPs = better precision)
+# Track A: MAF > 0.01 — for initial KING kinship estimation
 all_snps <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.01)
 
-# Track B: MAF > 0.2 + LD pruned — for PC-Air PCA (consistent with plink2 PCA in admix=no)
+# Track B: HM3, MAF > 0.2 + LD pruned — for PC-AiR PCA and PC-Relate
 snps_pca <- snpgdsSelectSNP(genofile, autosome.only = TRUE, maf = 0.2)
 
 if (!file.exists(hm3_snp_list) || file.info(hm3_snp_list)$size == 0L) {
@@ -112,10 +112,12 @@ geno_data   <- GenotypeData(geno_reader)
 mypcair <- pcair(geno_data, kinobj = king_mat, divobj = king_mat,
                  snp.include = pruned_snps, eigen.cnt = npc)
 
-geno_iter <- GenotypeBlockIterator(geno_data, snpInclude = all_snps)
+message(">> Calculating PC-Relate kinship with ", length(pruned_snps),
+        " LD-pruned HM3 SNPs (same set as PC-AiR)...")
+geno_iter <- GenotypeBlockIterator(geno_data, snpInclude = pruned_snps)
 mypcrel <- pcrelate(geno_iter, pcs = mypcair$vectors[, 1:npc],
                     training.set = mypcair$unrels,
-                     BPPARAM = BiocParallel::SerialParam())
+                     BPPARAM = BiocParallel::MulticoreParam(workers = nthreads))
 
 # --- Step 4: Export pairwise kinship and GRM ---
 kin_out <- data.frame(ID1 = mypcrel$kinBtwn$ID1, ID2 = mypcrel$kinBtwn$ID2, Kinship = mypcrel$kinBtwn$kin)
