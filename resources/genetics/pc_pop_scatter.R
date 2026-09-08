@@ -14,6 +14,7 @@
 #   2. pheno_rdata           winsorized phenotype RData (loads object `pheno`)
 #   3. study_name            used in output filenames
 #   4. out_dir               output directory
+#   5. study_specific_vars   optional space-separated phenotype column names
 
 suppressPackageStartupMessages({
     library(data.table)
@@ -23,12 +24,18 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 4) {
-    stop("Usage: pc_pop_scatter.R <covariates_file> <winsorized_phenotype_file> <study_name> <out_dir>")
+    stop("Usage: pc_pop_scatter.R <covariates_file> <winsorized_phenotype_file> <study_name> <out_dir> [study_specific_vars]")
 }
 covariates_file <- args[1]
 pheno_rdata     <- args[2]
 study_name      <- args[3]
 out_dir         <- args[4]
+study_specific_arg <- if (length(args) >= 5) args[5] else ""
+study_specific_vars <- unlist(strsplit(trimws(study_specific_arg), "[[:space:]]+"))
+study_specific_vars <- unique(study_specific_vars[
+    nzchar(study_specific_vars) &
+    !toupper(study_specific_vars) %in% c("NA", "NULL")
+])
 
 covs <- as.data.table(
     read.table(covariates_file, header = TRUE, stringsAsFactors = FALSE,
@@ -46,7 +53,8 @@ candidate_factors <- c(
     "Population_group_factor",
     "Location_factor",
     "Urban_rural_factor",
-    "Language_factor"
+    "Language_factor",
+    study_specific_vars
 )
 
 env <- new.env()
@@ -56,6 +64,17 @@ if (!"pheno" %in% ls(env)) {
          paste(ls(env), collapse = ", "), ")")
 }
 pheno <- as.data.table(env$pheno)
+
+missing_study_specific_vars <- setdiff(study_specific_vars, names(pheno))
+if (length(missing_study_specific_vars) > 0) {
+    cat("Skipping study-specific variables (not present in phenotype data):",
+        paste(missing_study_specific_vars, collapse = ", "), "\n")
+}
+present_study_specific_vars <- intersect(study_specific_vars, names(pheno))
+if (length(present_study_specific_vars) > 0) {
+    cat("Adding study-specific variables to PC population scatter:",
+        paste(present_study_specific_vars, collapse = ", "), "\n")
+}
 
 # Take only IID + population factors present in the phenotype data, so the
 # merge does not duplicate columns shared with the covariates file.

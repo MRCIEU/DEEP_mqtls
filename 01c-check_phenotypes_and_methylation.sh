@@ -209,7 +209,8 @@ then
 		"${covariates_combined}.txt" \
 		"${winsorized_phenotype_file}" \
 		"${study_name}" \
-		"${section_01_dir}"
+		"${section_01_dir}" \
+		"${study_specific_vars}"
 
 	echo "Successfully completed script 01c combine_covariates chunk"
 
