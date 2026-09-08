@@ -269,7 +269,8 @@ ${R_directory}Rscript resources/genetics/hc_pop_scatter.R \
     "${covariates_combined}.txt" \
     "${winsorized_phenotype_file}" \
     "${study_name}" \
-    "${section_01_dir}"
+    "${section_01_dir}" \
+    "${study_specific_vars}"
 
 
 echo "Computing correlation and linear model between HCs and PCs"

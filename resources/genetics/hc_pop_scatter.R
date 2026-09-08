@@ -12,6 +12,7 @@
 #   3. pheno_rdata           winsorized phenotype RData (loads object `pheno`)
 #   4. study_name            used in output filenames
 #   5. out_dir               output directory
+#   6. study_specific_vars   optional space-separated phenotype column names
 
 suppressPackageStartupMessages({
     library(data.table)
@@ -21,20 +22,27 @@ suppressPackageStartupMessages({
 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 5) {
-    stop("Usage: hc_pop_scatter.R <hcs_file> <covariates_file> <winsorized_phenotype_file> <study_name> <out_dir>")
+    stop("Usage: hc_pop_scatter.R <hcs_file> <covariates_file> <winsorized_phenotype_file> <study_name> <out_dir> [study_specific_vars]")
 }
 hcs_file        <- args[1]
 covariates_file <- args[2]
 pheno_rdata     <- args[3]
 study_name      <- args[4]
 out_dir         <- args[5]
+study_specific_arg <- if (length(args) >= 6) args[6] else ""
+study_specific_vars <- unlist(strsplit(trimws(study_specific_arg), "[[:space:]]+"))
+study_specific_vars <- unique(study_specific_vars[
+    nzchar(study_specific_vars) &
+    !toupper(study_specific_vars) %in% c("NA", "NULL")
+])
 
 candidate_factors <- c(
     "Birth_place_factor",
     "Population_group_factor",
     "Location_factor",
     "Urban_rural_factor",
-    "Language_factor"
+    "Language_factor",
+    study_specific_vars
 )
 
 hcs <- fread(hcs_file)
@@ -61,6 +69,17 @@ if (!"pheno" %in% ls(env)) {
          paste(ls(env), collapse = ", "), ")")
 }
 pheno <- as.data.table(env$pheno)
+
+missing_study_specific_vars <- setdiff(study_specific_vars, names(pheno))
+if (length(missing_study_specific_vars) > 0) {
+    cat("Skipping study-specific variables (not present in phenotype data):",
+        paste(missing_study_specific_vars, collapse = ", "), "\n")
+}
+present_study_specific_vars <- intersect(study_specific_vars, names(pheno))
+if (length(present_study_specific_vars) > 0) {
+    cat("Adding study-specific variables to HC population scatter:",
+        paste(present_study_specific_vars, collapse = ", "), "\n")
+}
 
 # From the phenotype data take only the population-structure factors, and
 # only those not already supplied by the covariates file (avoids duplicates).
