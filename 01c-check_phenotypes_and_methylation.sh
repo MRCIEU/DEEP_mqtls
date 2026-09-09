@@ -46,19 +46,19 @@ then
 
 	echo "Removing methylation outliers"
 	${R_directory}Rscript resources/methylation/remove_outliers.R \
-		${betas} \
-		${intersect_ids} \
-		${meth_ids} \
-		${covariates} \
-		${bfile}.fam \
-		${bfile}.bim \
-		${methylation_no_outliers_gwas} \
-		${methylation_no_outliers_ewas} \
-		${cohort_descriptives_was} \
-		${methylation_summary_gwas} \
-		${methylation_summary_ewas} \
-		${covariates_intersect_gwas} \
-		${covariates_intersect_ewas} \
+		"${betas}" \
+		"${intersect_ids}" \
+		"${meth_ids}" \
+		"${covariates}" \
+		"${bfile}.fam" \
+		"${bfile}.bim" \
+		"${methylation_no_outliers_gwas}" \
+		"${methylation_no_outliers_ewas}" \
+		"${cohort_descriptives_was}" \
+		"${methylation_summary_gwas}" \
+		"${methylation_summary_ewas}" \
+		"${covariates_intersect_gwas}" \
+		"${covariates_intersect_ewas}" \
 
 	echo "Successfully completed script 01c methy_outlier chunk"
 fi
@@ -70,15 +70,15 @@ then
 	echo "Check phenotypes"
 	# smoking from cohorts
 	${R_directory}Rscript resources/datacheck/check_phenotypes.R \
-		${phenotypes} \
-		${bfile}.fam \
-		${meth_ids} \
-		${raw_phenotype_distribution_plot} \
-		${raw_phenotype_summary_file} \
-		${study_name} \
-		${winzorised_phenotype_distribution_plot} \
-		${winzorised_phenotype_summary_file} \
-		${winsorized_phenotype_file} 
+		"${phenotypes}" \
+		"${bfile}.fam" \
+		"${meth_ids}" \
+		"${raw_phenotype_distribution_plot}" \
+		"${raw_phenotype_summary_file}" \
+		"${study_name}" \
+		"${winzorised_phenotype_distribution_plot}" \
+		"${winzorised_phenotype_summary_file}" \
+		"${winsorized_phenotype_file}"
 
 	echo "Successfully completed script 01c check_phenotype chunk"
 fi
@@ -89,12 +89,12 @@ then
 
 	echo "Predict age and smoking"
 	${R_directory}Rscript resources/datacheck/predict_age_smoking.R \
-		${methylation_no_outliers_ewas} \
-		${winsorized_phenotype_file} \
-		${study_name} \
-		${age_smoking_prediction_plot} \
-		${updated_phenotype_file} \
-		${predicted_smoking}
+		"${methylation_no_outliers_ewas}" \
+		"${winsorized_phenotype_file}" \
+		"${study_name}" \
+		"${age_smoking_prediction_plot}" \
+		"${updated_phenotype_file}" \
+		"${predicted_smoking}"
 
 	echo "Successfully completed script 01c predict_age_smoking chunk"
 fi
@@ -156,15 +156,15 @@ then
 
 	echo "EWAS of age and smoking - cell count adjusted"
 	${R_directory}Rscript resources/datacheck/ewas_age_smoking.R \
-		${methylation_no_outliers_ewas} \
-		${updated_phenotype_file} \
-		${methylation_array} \
-		${cellcounts_cov} \
-		${study_name} \
-		${qc1_ewas_stats} \
-		${qc1_ewas_report} \
-		${scripts_directory} \
-		${study_specific_vars} 
+		"${methylation_no_outliers_ewas}" \
+		"${updated_phenotype_file}" \
+		"${methylation_array}" \
+		"${cellcounts_cov}" \
+		"${study_name}" \
+		"${qc1_ewas_stats}" \
+		"${qc1_ewas_report}" \
+		"${scripts_directory}" \
+		"${study_specific_vars}"
 
 	echo "Successfully completed script 01c ewas chunk"
 fi
@@ -175,17 +175,17 @@ then
 
 	echo "meth PCs"
 	${R_directory}Rscript resources/datacheck/methylation_pc_check.R \
-		${methylation_no_outliers_ewas} \
-		${updated_phenotype_file} \
-		${cellcounts_cov} \
-		${study_name} \
-		${pcs_all} \
-		${meth_pcs_scree_plot} \
-		${meth_pcs_PC1PC2_plot} \
-		${meth_pcs_PC3PC4_plot} \
-		${pc_var_association_plot} \
-		${scripts_directory} \
-		${study_specific_vars}
+		"${methylation_no_outliers_ewas}" \
+		"${updated_phenotype_file}" \
+		"${cellcounts_cov}" \
+		"${study_name}" \
+		"${pcs_all}" \
+		"${meth_pcs_scree_plot}" \
+		"${meth_pcs_PC1PC2_plot}" \
+		"${meth_pcs_PC3PC4_plot}" \
+		"${pc_var_association_plot}" \
+		"${scripts_directory}" \
+		"${study_specific_vars}"
 
 	echo "Successfully completed script 01c meth_pcs chunk"
 
