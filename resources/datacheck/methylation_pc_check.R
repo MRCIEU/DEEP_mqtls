@@ -137,11 +137,24 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # rownames(pcs) <- pcs$Row.names
   # pcs <- pcs[,-1]
 
-  # TO DO: finish adding the vars we want to test the PCs against. Unlikely to be all. 
-  test_pc_vars <- c("Age_numeric", "Sex_factor", "Population_group_factor", study_specific_vars, celltypes, colnames(genetic_pcs)[2:11])
+  # Prefer Plate over Slide, including when both are study-specific variables.
+  batch_var <- if ("Plate_factor" %in% names(pcs)) {
+    "Plate_factor"
+  } else if ("Slide_factor" %in% names(pcs)) {
+    "Slide_factor"
+  } else {
+    character(0)
+  }
+  message("Batch variable for methylation PC checks: ",
+          if (length(batch_var)) batch_var else "none available")
+  test_pc_vars <- unique(c(
+  "Age_numeric", "Sex_factor", "Population_group_factor", batch_var,
+  setdiff(study_specific_vars, c("Plate_factor", "Slide_factor")),
+  celltypes, colnames(genetic_pcs)[2:11]
+  ))
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
-  if ("Slide_factor" %in% names(pcs)) {
-  pcs$Slide_factor <- as.factor(pcs$Slide_factor)
+  if (length(batch_var)) {
+    pcs[[batch_var]] <- as.factor(pcs[[batch_var]])
   }
   message(paste("Test PC vars are:", paste(test_pc_vars, collapse = ", ")))
   plot_pc1pc2_list <- vector("list", length = length(test_pc_vars))
