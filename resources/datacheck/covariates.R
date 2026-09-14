@@ -50,6 +50,38 @@ if(cov2<3)
 	warning("ERROR: ", msg)
 }
 
+# Require a batch covariate; prefer Plate_factor
+batch_cols <- intersect(c("Plate_factor", "Slide_factor"), names(covar))
+
+if (length(batch_cols) == 0L) {
+  msg <- paste0(
+    "Please provide Plate_factor (preferred) or Slide_factor ",
+    "in the covariates file."
+  )
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+} else {
+  if (!"Plate_factor" %in% batch_cols) {
+    msg <- "Plate_factor is preferred. Only Slide_factor was provided."
+    warninglist <- c(warninglist, msg)
+    warning("WARNING: ", msg)
+  }
+
+  # Neither NA nor blank values are allowed in either supplied batch column.
+  for (col in batch_cols) {
+    x <- covar[[col]]
+    missing <- is.na(x) | trimws(as.character(x)) == ""
+    if (any(missing)) {
+      msg <- paste0(
+        col, " has ", sum(missing),
+        " missing or blank values. Please provide a value for every sample."
+      )
+      errorlist <- c(errorlist, msg)
+      warning("ERROR: ", msg)
+    }
+  }
+}
+
 g1<-grep("_factor",names(covar))
 g2<-grep("_numeric",names(covar))
 g<-unique(c(g1,g2))

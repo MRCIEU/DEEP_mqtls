@@ -144,6 +144,16 @@ if(! "Age_numeric" %in% names(pheno)) {
   }
 }
 
+# Require a batch column for methylation PC checks; prefer Plate over Slide.
+if (!any(c("Plate_factor", "Slide_factor") %in% names(pheno))) {
+  msg <- paste0(
+    "Please provide Plate_factor (preferred) or Slide_factor ",
+    "in the phenotype file for methylation PC checks."
+  )
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
+}
+
 # check study specific vars
 
 n_overlap <- study_specific_vars%in%colnames(pheno)
@@ -205,4 +215,3 @@ if(length(errorlist) > 0)
   q(status=1)
 }
 message("\n\n")
-
