@@ -84,7 +84,8 @@ for pc in {1..5}; do
     pc_col="PC${pc}"
     pheno_file="${home_directory}/processed_data/covariate_data/genetic_pc_gwas.PC${pc}.pheno"
 
-    awk -v col="$((pc+2))" 'NR==1{next} {print $1, $2, $col}' ${genetic_pc_gwas} > ${pheno_file}
+    # split_covar.R writes this file without a header; retain every sample.
+    awk -v col="$((pc+2))" '{print $1, $2, $col}' "${genetic_pc_gwas}" > "${pheno_file}"
 
     echo "Running GWAS for ${pc_col}"
     if [ "${use_sparse_grm}" = "yes" ]; then
