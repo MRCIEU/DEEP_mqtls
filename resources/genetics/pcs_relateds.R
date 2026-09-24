@@ -67,11 +67,11 @@ save_pcair_loadings(
 )
 
 pcs <- mypcair$vectors
-ids <- fam[match(fam$V2, rownames(pcs)), 1:2]
+ids <- fam[match(rownames(pcs), fam$V2), 1:2]
 
 
 message("Saving data")
-all(ids$V2 == rownames(pcs))
+stopifnot(all(ids$V2 == rownames(pcs)))
 pcs <- data.frame(ids, pcs)
 write.table(pcs, file=paste0(outfile, ".eigenvec"), row=F, col=F, qu=F)
 write.table(mypcair$values, file=paste0(outfile, ".eigenval"), row=F, col=F, qu=F)
