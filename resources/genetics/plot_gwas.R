@@ -114,19 +114,20 @@ main = function(){
     }
 
     if(control_chr != 0 && plot_pval){
-      index <- GWAS_result[,pos_column] >= (control_pos - control_window) & GWAS_result[,pos_column] <= (control_pos + control_window)
+      index <- GWAS_result[,chr_column] == control_chr &
+         GWAS_result[,pos_column] >= (control_pos - control_window) &
+         GWAS_result[,pos_column] <= (control_pos + control_window)
       
       GWAS_result_filter <- GWAS_result[index, ]
       min_pval <- min(GWAS_result_filter[,pval_column], na.rm=TRUE)
       
-      message("\n\nExpecting a large meQTL near ", control_chr, ":", control_pos)
+      message("\n\nChecking association signals near ", control_chr, ":", control_pos)
       message("Lowest p-value within ", control_window, " base pairs: ", min_pval)
       
 	  if(min_pval > control_threshold) {
-        message("WARNING!")
-        message("There doesn't appear to be a QTL for this positive control")
-        message("This may due to this mQTL varying between pops.")
-        message("Please upload this section and contact DEEP team before continuing.\n\n")
+        message("No association below the specified threshold in this window.")
+        message("This is expected for a negative control; ",
+                "for a positive control, please review the result.")
       	}
     
     chisq = qchisq(a_minuschr[,pval_column],1,lower.tail=FALSE)
