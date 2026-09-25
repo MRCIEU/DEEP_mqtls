@@ -145,7 +145,8 @@ mv ${bfile}1.bed ${bfile}.bed
 mv ${bfile}1.bim ${bfile}.bim
 mv ${bfile}1.fam ${bfile}.fam
 
-touch ${SNPfail1}
+rm -f "${SNPfail1}"
+touch "${SNPfail1}"
 
 ${R_directory}Rscript resources/genetics/harmonization.R \
 	${bfile}.bim \
