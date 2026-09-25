@@ -7,7 +7,7 @@ out_file <- arguments[3];
 
 a <- fread(in_file, header=T)
 cpg_id = colnames(a)[2]
-ids <- fread(ids_file, stringsAsFactors=FALSE)
+ids <- fread(ids_file, header = FALSE, stringsAsFactors=FALSE)
 colnames(ids) <- c("FID", "IID")
 ids <- ids[match(a$IID, ids$IID), ]
 merge <- merge(ids, a, by.x="IID", by.y="IID", sort=F)
