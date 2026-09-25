@@ -198,14 +198,14 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # QUESTION - check that numerical smoking vars will indeed be called Smoking_numeric
   # rather than pack-years or something
 
-  if ("maternal_smoking_factor" %in% colnames(pheno_panel)) {
-    message("maternal_smoking_factor variable already exists.")
-  } else if ("maternal_smoking_numeric" %in% colnames(pheno_panel)) {
+  if ("Maternal_smoking_factor" %in% colnames(pheno_panel)) {
+    message("Maternal_smoking_factor variable already exists.")
+  } else if ("Maternal_smoking_numeric" %in% colnames(pheno_panel)) {
     # Create maternal_smoking_factor based on Smoking_numeric
-    pheno_panel$maternal_smoking_factor <- ifelse(pheno_panel$maternal_smoking_numeric == 0, "No", "Yes")
-    message("maternal_smoking_factor variable created based on maternal_smoking_numeric")
+    pheno_panel$Maternal_smoking_factor <- ifelse(pheno_panel$Maternal_smoking_numeric == 0, "No", "Yes")
+    message("Maternal_smoking_factor variable created based on Maternal_smoking_numeric")
   } else {
-    message(paste0("maternal_smoking_numeric column not found. Cannot create maternal_smoking_factor.",
+    message(paste0("Maternal_smoking_numeric column not found. Cannot create maternal_smoking_factor.",
     "This is expected if this is an adult dataset. If this is a child dataset, Please check your phenotype data",
     sep = "\n"))
   }
