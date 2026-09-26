@@ -75,79 +75,96 @@ compare_version () {
     vercomp ${version_used} ${version_required}
 }
 
-check_logs_01c () {
-    local log_dir="${section_01_dir}/logs_c"
-    local log_files=(${log_dir}/log*.txt)
-
-    # define 7 chunks
-    local chunks=("methy_outlier" "check_phenotype" "predict_age_smoking" "cell_counts" "ewas" "meth_pcs" "combine_covariates")
+check_latest_chunk_logs () {
+    local section="$1" script_name="$2"
+    shift 2
+    local chunks=("$@")
+    local log_dir="${section_01_dir}/logs_${section: -1}"
+    local log_files=()
+    local chunk log_file status selected_log legacy
     local success_count=0
 
-    for chunk in "${chunks[@]}"; do
-        local pattern="Successfully completed script 01c $chunk chunk"
-		echo "Checking for pattern: $pattern"
-        if grep -q "$pattern" "${log_files[@]}"; then
-        	success_count=$((success_count + 1))
-        else
-            echo "Missing success for $chunk"
+    for log_file in "${log_dir}"/log*.txt; do
+        if [ -f "$log_file" ]; then
+            log_files+=("$log_file")
         fi
     done
-    
+    if [ ${#log_files[@]} -gt 0 ]; then
+        # Keep the existing convention: most recently modified log first.
+        mapfile -t log_files < <(LC_ALL=C ls -1t -- "${log_files[@]}")
+    fi
+
+    for chunk in "${chunks[@]}"; do
+        selected_log=""
+        status="absent"
+        for log_file in "${log_files[@]}"; do
+            legacy=0
+            if [ "$section" = "01g" ] && [ "${log_file##*/}" = "log.txt" ]; then
+                legacy=1
+            fi
+            if ! status=$(awk -v section="$section" -v chunk="$chunk" \
+                -v legacy="$legacy" '
+                BEGIN {
+                    state = "absent"
+                    start = chunk " section"
+                    success = "Successfully completed script " section " " chunk " chunk"
+                }
+                { sub(/\r$/, "") }
+                $0 == start {
+                    state = "incomplete"
+                    active = 1
+                    next
+                }
+                /^[[:alnum:]_]+ section$/ { active = 0 }
+                active && $0 == success { state = "complete" }
+                legacy && $0 == "Successfully completed script 01g" { whole_success = 1 }
+                END {
+                    if (state == "absent" && whole_success)
+                        print "legacy_complete"
+                    else
+                        print state
+                }
+            ' "$log_file"); then
+                status="unreadable"
+            fi
+            if [ "$status" != "absent" ]; then
+                selected_log="$log_file"
+                break
+            fi
+        done
+
+        if [ "$status" = "complete" ] || [ "$status" = "legacy_complete" ]; then
+            success_count=$((success_count + 1))
+            echo "${section} ${chunk}: completed successfully; logfile: ${selected_log}"
+            if [ "$status" = "legacy_complete" ]; then
+                echo "  Using the explicit whole-module completion marker in the legacy log."
+            fi
+        elif [ "$status" = "incomplete" ]; then
+            echo "${section} ${chunk}: incomplete; logfile: ${selected_log}"
+            echo "  Latest attempt started without its completion marker; older successes are ignored."
+        elif [ "$status" = "unreadable" ]; then
+            echo "${section} ${chunk}: cannot check logfile: ${selected_log}"
+        else
+            echo "${section} ${chunk}: no run record found in ${log_dir}"
+        fi
+    done
+
     echo "Successful chunks: $success_count/${#chunks[@]}"
-    
     if [ $success_count -eq ${#chunks[@]} ]; then
-        echo "01c-check_phenotypes_and_methylation.sh completed successfully."
+        echo "${script_name} completed successfully."
     else
-        echo "Problem: 01c-check_phenotypes_and_methylation.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
+        echo "Problem: ${script_name} did not complete successfully ($success_count/${#chunks[@]} chunks)"
         exit 1
     fi
 }
 
+check_logs_01c () {
+    check_latest_chunk_logs "01c" "01c-check_phenotypes_and_methylation.sh" \
+        methy_outlier check_phenotype predict_age_smoking cell_counts ewas meth_pcs combine_covariates
+}
+
 check_logs_01g () {
-		local log_dir="${section_01_dir}/logs_g"
-		local log_files=(${log_dir}/log*.txt)
-
-		local has_timestamped_log=0
-		for f in "${log_files[@]}"; do
-			if [[ "$f" =~ log[0-9]{4}-[0-9]{2}-[0-9]{2}_ ]]; then
-				has_timestamped_log=1
-				break
-			fi
-		done
-
-		if [ $has_timestamped_log -eq 1 ]; then
-			local chunks=("vcf" "hc" "gwas")
-			local success_count=0
-			for chunk in "${chunks[@]}"; do
-				local pattern="Successfully completed script 01g $chunk chunk"
-				echo "Checking for pattern: $pattern"
-				if grep -q "$pattern" "${log_files[@]}"; then
-					success_count=$((success_count + 1))
-				else
-					echo "Missing success for $chunk"
-				fi
-			done
-			echo "Successful chunks: $success_count/${#chunks[@]}"
-			if [ $success_count -eq ${#chunks[@]} ]; then
-				echo "01g-HCs.sh completed successfully."
-			else
-				echo "Problem: 01g-HCs.sh did not complete successfully ($success_count/${#chunks[@]} chunks)"
-				exit 1
-			fi
-		else
-			local old_log="${log_dir}/log.txt"
-			if [ -f "$old_log" ]; then
-				if grep -iq "success" "$old_log"; then
-					echo "01g-HCs.sh (old version) completed successfully."
-				else
-					echo "Problem: 01g-HCs.sh (old version) did not complete successfully (no 'success' found)"
-					exit 1
-				fi
-			else
-				echo "Problem: No log file found for 01g-HCs.sh (neither timestamped nor log.txt)"
-				exit 1
-			fi
-		fi
+    check_latest_chunk_logs "01g" "01g-HCs.sh" vcf hc gwas
 }
 
 check_logs_01 () {
