@@ -76,7 +76,7 @@ check_results_01b () {
 		"${pca_ld_report}.regions.tsv"
 		"${pca_ld_report}.summary.tsv"
 		"${pca_ld_report}.smoothed_statistic.png"
-		"${pca_ld_report}.PC1-PC20_loadings.png"
+		"${pca_ld_report}.PC1-PC${n_pcs}_loadings.png"
 	)
 	for file in "${pca_ld_required_files[@]}"; do
 		if [ ! -s "${file}" ]; then
@@ -89,7 +89,7 @@ check_results_01b () {
 		echo "Problem: PCA LD-structure gzip output is invalid"
 		exit 1
 	fi
-	echo "PCA SNP-loading LD-structure QC report and PC1-PC20 loading plot present"
+	echo "PCA SNP-loading LD-structure QC report and PC1-PC${n_pcs} loading plot present"
 
 	if [ -f "${section_01_dir}/easyQC_topmed.multi.AFCHECK.png" ] && [ -f "${section_01_dir}/easyQC_topmed.rep" ]; then
     	echo "easyQC plot and results present"

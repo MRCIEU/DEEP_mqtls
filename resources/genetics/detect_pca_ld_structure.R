@@ -116,7 +116,8 @@ metadata_columns <- c(
   "CHR", "POS", "SNP", "LOADING_ALLELE", "OTHER_ALLELE"
 )
 report_pc_columns <- paste0("PC", seq_len(n_report_pcs))
-plot_pc_columns <- paste0("PC", seq_len(20L))
+n_plot_pcs <- n_report_pcs
+plot_pc_columns <- paste0("PC", seq_len(n_plot_pcs))
 required_columns <- unique(c(
   metadata_columns,
   report_pc_columns,
@@ -155,7 +156,7 @@ plot_loading_matrix <- as.matrix(
 )
 storage.mode(plot_loading_matrix) <- "double"
 if (any(!is.finite(plot_loading_matrix))) {
-  stop("PC1-PC20 plot loadings contain non-finite values.")
+  stop("PC1-PC", n_plot_pcs, " plot loadings contain non-finite values.")
 }
 
 # PCA loadings generated in 01b are autosomal. Accept either "1" or "chr1"
@@ -308,7 +309,7 @@ outlier_file <- paste0(output_prefix, ".outlier_snps.tsv.gz")
 regions_file <- paste0(output_prefix, ".regions.tsv")
 summary_file <- paste0(output_prefix, ".summary.tsv")
 statistic_plot_file <- paste0(output_prefix, ".smoothed_statistic.png")
-loadings_plot_file <- paste0(output_prefix, ".PC1-PC20_loadings.png")
+loadings_plot_file <- paste0(output_prefix, ".PC1-PC", n_plot_pcs, "_loadings.png")
 
 write_gzip_table(statistics, statistics_file)
 write_gzip_table(statistics[is_outlier, , drop = FALSE], outlier_file)
@@ -375,7 +376,7 @@ diagnostic_summary_lines <- c(
   paste0("SNP statistics: ", statistics_file),
   paste0("Candidate regions: ", regions_file),
   paste0("Smoothed statistic plot: ", statistic_plot_file),
-  paste0("PC1-PC20 loading plot: ", loadings_plot_file)
+  paste0("PC1-PC", n_plot_pcs, " loading plot: ", loadings_plot_file)
 )
 message(paste(diagnostic_summary_lines, collapse = "\n"))
 
@@ -489,8 +490,7 @@ grDevices::dev.off()
 
 # Reproduce the plotting approach used for Figure 1 in paper4-bedpca:
 # one loading panel per PC, geom_hex() over SNP column index, a viridis count
-# scale, and five columns of panels. The paper plotted PC1-PC40; DEEP plots
-# PC1-PC20, producing four rows of five panels.
+# scale, and five columns of panels. DEEP plots all configured PCs.
 loading_plot_data <- data.frame(
   COLUMN_INDEX = rep(genome_index, times = length(plot_pc_columns)),
   LOADING = as.vector(
@@ -541,7 +541,7 @@ paper_style_loading_plot <- ggplot2::ggplot(
 Cairo::CairoPNG(
   filename = loadings_plot_file,
   width = 5000,
-  height = 3000,
+  height = 750 * ceiling(n_plot_pcs / 5),
   pointsize = 16,
   res = 200
 )
