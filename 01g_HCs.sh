@@ -376,16 +376,11 @@ if [ "${related}" = "yes" ]; then
   fi
 fi
 
-fastgwa_option=()
-grm_sparse_option=()
-if [ "${use_sparse_grm}" = "yes" ]; then
-  fastgwa_option=("--fastGWA-mlm")
-  grm_sparse_option=("--grm-sparse" "${grm_sparse_prefix}")
-elif [ "${fastgwa_mode}" = "lr" ]; then
-  fastgwa_option=("--fastGWA-lr")
-else
-  echo "Error: Unsupported fastGWA mode: ${fastgwa_mode}"
-  exit 1
+gwas_method="lr"
+gwas_grm_args=()
+if [ "${related}" = "yes" ]; then
+  gwas_method="auto"
+  gwas_grm_args=(--grm-sparse "${grm_sparse_prefix}" --grm-dense "${dense_grm_prefix}")
 fi
 
 covar_args=()
@@ -440,63 +435,46 @@ do
           echo "No GRM mode: fastGWA-lr"
         fi
 
-        ${gcta} \
-          --bfile "${bfile}" \
-          "${grm_sparse_option[@]}" \
-          "${fastgwa_option[@]}" \
-          --h2-limit 100 \
-          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-          --qcovar "${qcovar_file}" \
-          "${covar_args[@]}" \
-          --covar-maxlevel 300 \
-          --out "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}" \
-          --thread-num "${nthreads}"
+        result_files=()
+        for model in pc hc no_correction; do
+          case "${model}" in
+            pc) model_qcovar="${qcovar_file}" ;;
+            hc) model_qcovar="${qcovar_hc_file}" ;;
+            no_correction) model_qcovar="${qcovar_noPC_file}" ;;
+          esac
+          out_prefix="${section_01_dir}/01g/${model}_positive_control_untransformed_${positive_control_cpg}"
 
-        ${gcta} \
-          --bfile "${bfile}" \
-          "${grm_sparse_option[@]}" \
-          "${fastgwa_option[@]}" \
-          --h2-limit 100 \
-          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-          --qcovar "${qcovar_hc_file}" \
-          "${covar_args[@]}" \
-          --covar-maxlevel 300 \
-          --out "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}" \
-          --thread-num "${nthreads}"
+          # Each model starts with fastGWA; only this model can fall back to MLMA.
+          bash resources/genetics/run_gwas_with_fallback.sh \
+            --gcta "${gcta}" \
+            --method "${gwas_method}" \
+            --bfile "${bfile}" \
+            "${gwas_grm_args[@]}" \
+            --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
+            --qcovar "${model_qcovar}" \
+            "${covar_args[@]}" \
+            --covar-maxlevel 300 \
+            --out "${out_prefix}" \
+            --thread-num "${nthreads}"
 
-        ${gcta} \
-          --bfile "${bfile}" \
-          "${grm_sparse_option[@]}" \
-          "${fastgwa_option[@]}" \
-          --h2-limit 100 \
-          --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
-          --qcovar "${qcovar_noPC_file}" \
-          "${covar_args[@]}" \
-          --covar-maxlevel 300 \
-          --out "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}" \
-          --thread-num "${nthreads}"
-
-        for prefix in pc_positive_control_untransformed_${positive_control_cpg} \
-                      hc_positive_control_untransformed_${positive_control_cpg} \
-                      no_correction_positive_control_untransformed_${positive_control_cpg}; do
-
-            in_txt="${section_01_dir}/01g/${prefix}.fastGWA"
-            out_gz="${section_01_dir}/01g/${prefix}.fastGWA.gz"
-
-            if [ -f "${in_txt}" ]; then
-                tr -s " " < "${in_txt}" | gzip -c > "${out_gz}"
-                rm "${in_txt}"
-            else
-                echo "Warning: expected fastGWA output not found: ${in_txt}"
-            fi
+          IFS=$'\t' read -r used_method result_file run_dir < <(tail -n 1 "${out_prefix}.gwas_result.tsv")
+          if [ "${used_method}" = "mlma" ]; then
+            extension="mlma"
+          else
+            extension="fastGWA"
+          fi
+          result_gz="${out_prefix}.${extension}.gz"
+          gzip -c "${result_file}" > "${run_dir}/selected.gz"
+          gzip -t "${run_dir}/selected.gz"
+          mv "${run_dir}/selected.gz" "${result_gz}"
+          printf 'method\tresult\trun_dir\n%s\t%s\t%s\n' \
+            "${used_method}" "${result_gz}" "${run_dir}" > "${out_prefix}.gwas_result.tsv"
+          echo "${model}: using ${used_method} results from ${result_gz}"
+          result_files+=("${result_gz}")
         done
 
         echo "make manhattan and qq plots"
-        {
-          echo "${section_01_dir}/01g/pc_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
-          echo "${section_01_dir}/01g/hc_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
-          echo "${section_01_dir}/01g/no_correction_positive_control_untransformed_${positive_control_cpg}.fastGWA.gz"
-        } > "${section_01_dir}/01g/positive.control.untransformed.file.txt"
+        printf '%s\n' "${result_files[@]}" > "${section_01_dir}/01g/positive.control.untransformed.file.txt"
 
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
             "${section_01_dir}/01g/positive.control.untransformed.file.txt" \

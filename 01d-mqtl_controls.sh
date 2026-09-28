@@ -70,17 +70,35 @@ if [ "${related}" = "yes" ]; then
     fi
 fi
 
-fastgwa_option=()
-grm_sparse_option=()
-if [ "${use_sparse_grm}" = "yes" ]; then
-    fastgwa_option=("--fastGWA-mlm")
-    grm_sparse_option=("--grm-sparse" "${grm_sparse_prefix}")
-elif [ "${fastgwa_mode}" = "lr" ]; then
-    fastgwa_option=("--fastGWA-lr")
-else
-    echo "Error: Unsupported fastGWA mode: ${fastgwa_mode}"
-    exit 1
+gwas_method="lr"
+gwas_grm_args=()
+if [ "${related}" = "yes" ]; then
+    gwas_method="auto"
+    gwas_grm_args=(--grm-sparse "${grm_sparse_prefix}" --grm-dense "${dense_grm_prefix}")
 fi
+
+# Publish the selected result under the original control prefix for plotting.
+prepare_control_result() {
+    local prefix=$1
+    local used_method result_file run_dir extension
+    IFS=$'\t' read -r used_method result_file run_dir < <(tail -n 1 "${prefix}.gwas_result.tsv")
+    if [ "${used_method}" = "mlma" ]; then
+        extension="mlma"
+        pval_column=9
+        beta_column=7
+    else
+        extension="fastGWA"
+        pval_column=10
+        beta_column=8
+    fi
+    result_gz="${prefix}.${extension}.gz"
+    gzip -c "${result_file}" > "${run_dir}/selected.gz"
+    gzip -t "${run_dir}/selected.gz"
+    mv "${run_dir}/selected.gz" "${result_gz}"
+    printf 'method\tresult\trun_dir\n%s\t%s\t%s\n' \
+        "${used_method}" "${result_gz}" "${run_dir}" > "${prefix}.gwas_result.tsv"
+    echo "Reading ${used_method} results: ${result_gz} (P=${pval_column}, beta=${beta_column})"
+}
 
 # Step2: make covar files for gcta input
 echo "Splitting covariate files for GCTA"
@@ -154,27 +172,27 @@ do
             echo "No GRM mode: fastGWA-lr"
         fi
 
-        ${gcta} \
+        out_prefix="${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}"
+        bash resources/genetics/run_gwas_with_fallback.sh \
+            --gcta "${gcta}" \
+            --method "${gwas_method}" \
             --bfile "${bfile}" \
-            "${grm_sparse_option[@]}" \
-            "${fastgwa_option[@]}" \
-            --h2-limit 100 \
+            "${gwas_grm_args[@]}" \
             --pheno "${base_methylation_no_outliers}.${positive_control_cpg}.positive_control.gcta" \
             --qcovar "${qcovar_file}" \
             "${covar_args[@]}" \
             --covar-maxlevel 500 \
-            --out "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}" \
+            --out "${out_prefix}" \
             --thread-num "${nthreads}"
-        
-        tr -s " " < ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA | gzip -c > ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA.gz
-        rm ${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA
+
+        prepare_control_result "${out_prefix}"
 
         echo "make manhattan and qq plots (untransformed)"
-        echo "${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}.fastGWA.gz" > "${section_01_dir}/01d/positive.control.untransformed.file.txt"
+        echo "${result_gz}" > "${section_01_dir}/01d/positive.control.untransformed.file.txt"
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
             "${section_01_dir}/01d/positive.control.untransformed.file.txt" \
-            10 \
-            8 \
+            "${pval_column}" \
+            "${beta_column}" \
             1 \
             3 \
             2 \
@@ -227,27 +245,27 @@ do
             echo "No GRM mode: fastGWA-lr"
         fi
 
-        ${gcta} \
+        out_prefix="${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}"
+        bash resources/genetics/run_gwas_with_fallback.sh \
+            --gcta "${gcta}" \
+            --method "${gwas_method}" \
             --bfile "${bfile}" \
-            "${grm_sparse_option[@]}" \
-            "${fastgwa_option[@]}" \
-            --h2-limit 100 \
+            "${gwas_grm_args[@]}" \
             --pheno "${base_methylation_no_outliers}.${negative_control_cpg}.negative_control.gcta" \
             --qcovar "${qcovar_file}" \
             "${covar_args[@]}" \
             --covar-maxlevel 500 \
-            --out "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}" \
+            --out "${out_prefix}" \
             --thread-num "${nthreads}"
 
-        tr -s " " < "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA" | gzip -c > "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA.gz"
-        rm "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA"
+        prepare_control_result "${out_prefix}"
 
         echo "make manhattan and qq plots (untransformed)"
-        echo "${section_01_dir}/01d/negative_control_untransformed_${negative_control_cpg}.fastGWA.gz" > "${section_01_dir}/01d/negative.control.untransformed.file.txt"
+        echo "${result_gz}" > "${section_01_dir}/01d/negative.control.untransformed.file.txt"
         ${R_directory}Rscript resources/genetics/plot_gwas.R \
         "${section_01_dir}/01d/negative.control.untransformed.file.txt" \
-            10 \
-            8 \
+            "${pval_column}" \
+            "${beta_column}" \
             1 \
             3 \
             2 \
