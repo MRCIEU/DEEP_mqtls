@@ -268,6 +268,30 @@ check_results_01c () {
 	fi
 }
 
+# 01d/01g may publish either fastGWA or MLMA results. Older runs have no manifest.
+check_control_gwas_result() {
+    local prefix=$1 method result run_dir expected
+    if [ -f "${prefix}.gwas_result.tsv" ]; then
+        IFS=$'\t' read -r method result run_dir < <(tail -n 1 "${prefix}.gwas_result.tsv")
+        case "${method}" in
+            mlma) expected="${prefix}.mlma.gz" ;;
+            fastGWA-mlm|fastGWA-lr) expected="${prefix}.fastGWA.gz" ;;
+            *) echo "Problem: unknown GWAS method for ${prefix}"; exit 1 ;;
+        esac
+        if [ "${result}" != "${expected}" ]; then
+            echo "Problem: GWAS result has not been published for ${prefix}"
+            exit 1
+        fi
+    else
+        result="${prefix}.fastGWA.gz"
+    fi
+    if [ ! -s "${result}" ] || ! gzip -t "${result}"; then
+        echo "Problem: missing or invalid GWAS result ${result}"
+        exit 1
+    fi
+    echo "GWAS results present: ${result}"
+}
+
 check_results_01d () {
 
     if [ -f "${methylation_processed_dir}/mqtl_pos_ctr_1d_filt.tsv" ]; then
@@ -283,7 +307,6 @@ check_results_01d () {
     fi
 
     local suffixes=(
-        ".fastGWA.gz"
         "_manhattan.pdf"
         "_nocisChr_manhattan.pdf"
         "_qqplot.jpeg"
@@ -297,6 +320,7 @@ check_results_01d () {
 
         ## ---- Positive control ----
         pos_base="${section_01_dir}/01d/positive_control_untransformed_${positive_control_cpg}"
+        check_control_gwas_result "${pos_base}"
 
         for suffix in "${suffixes[@]}"; do
             file="${pos_base}${suffix}"
@@ -307,9 +331,6 @@ check_results_01d () {
             fi
 
             case "$suffix" in
-                ".fastGWA.gz")
-                    echo "positive control ${positive_control_cpg} results present"
-                    ;;
                 "_manhattan.pdf")
                     echo "positive control ${positive_control_cpg} Manhattan plot present"
                     ;;
@@ -330,6 +351,7 @@ check_results_01d () {
         echo "Checking negative control: ${neg}"
 
         neg_base="${section_01_dir}/01d/negative_control_untransformed_${neg}"
+        check_control_gwas_result "${neg_base}"
 
         for suffix in "${suffixes[@]}"; do
             file="${neg_base}${suffix}"
@@ -340,9 +362,6 @@ check_results_01d () {
             fi
 
             case "$suffix" in
-                ".fastGWA.gz")
-                    echo "negative control ${neg} results present"
-                    ;;
                 "_manhattan.pdf")
                     echo "negative control ${neg} Manhattan plot present"
                     ;;
@@ -436,7 +455,6 @@ check_results_01g () {
     )
 
     local suffixes=(
-        ".fastGWA.gz"
         "_manhattan.pdf"
         "_nocisChr_manhattan.pdf"
         "_qqplot.jpeg"
@@ -458,6 +476,7 @@ check_results_01g () {
         ## ---- Main outputs (per prefix) ----
         for prefix in "${prefixes[@]}"; do
             base="${section_01_dir}/01g/${prefix}_${positive_control_cpg}"
+            check_control_gwas_result "${base}"
 
             for suffix in "${suffixes[@]}"; do
                 file="${base}${suffix}"
@@ -468,9 +487,6 @@ check_results_01g () {
                 fi
 
                 case "$suffix" in
-                    ".fastGWA.gz")
-                        echo "${prefix} ${positive_control_cpg} results present"
-                        ;;
                     "_manhattan.pdf")
                         echo "${prefix} ${positive_control_cpg} Manhattan plot present"
                         ;;

@@ -63,6 +63,18 @@ main = function(){
   for (filename in filenames) {
     message("Reading in ", filename ," GWAS results")
     GWAS_result = fread(filename, header = T, data.table=F)
+    # Resolve each file independently: one list may mix fastGWA and MLMA.
+    pval_column <- as.numeric(arguments[2])
+    beta_column <- as.numeric(arguments[3])
+    if (all(c("BETA", "P") %in% names(GWAS_result))) {
+      pval_column <- match("P", names(GWAS_result))
+      beta_column <- match("BETA", names(GWAS_result))
+      message("Detected fastGWA columns: P=", pval_column, ", beta=", beta_column)
+    } else if (all(c("Chr", "SNP", "bp", "b", "se", "p") %in% names(GWAS_result))) {
+      pval_column <- match("p", names(GWAS_result))
+      beta_column <- match("b", names(GWAS_result))
+      message("Detected MLMA columns: P=", pval_column, ", beta=", beta_column)
+    }
     outname = unlist(strsplit(filename, "[.]"))[[1]]
     
     if(length(unique(GWAS_result[,chr_column])) > 30){
@@ -143,6 +155,7 @@ main = function(){
     manhattan(man_data, bp=names(man_data)[pos_column], 
             chr=names(man_data)[chr_column], 
             snp=names(man_data)[snp_column],
+            p=names(man_data)[pval_column],
             ylim=c(2,max(-log10(man_data[,pval_column])+1)))
     dev.off()
       
@@ -165,6 +178,7 @@ main = function(){
       manhattan(man_data, bp=names(man_data)[pos_column], 
                 chr=names(man_data)[chr_column], 
                 snp=names(man_data)[snp_column],
+                p=names(man_data)[pval_column],
                 ylim=c(2,max(-log10(man_data[,pval_column])+1)))
       dev.off()
           message("The following plots have been generated, please check!\n",

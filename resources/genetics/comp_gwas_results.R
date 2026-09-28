@@ -24,6 +24,21 @@ gwas_list = list()
 for (filename in filenames) {
     message("Reading in ", filename ," GWAS results")
     gwas_result = fread(filename, header = T, data.table=F)
+    # Reset for every file so an MLMA result cannot change the next file's columns.
+    pval_column <- as.numeric(args[3])
+    beta_column <- as.numeric(args[4])
+    se_column <- as.numeric(args[5])
+    if (all(c("BETA", "SE", "P") %in% names(gwas_result))) {
+        pval_column <- match("P", names(gwas_result))
+        beta_column <- match("BETA", names(gwas_result))
+        se_column <- match("SE", names(gwas_result))
+        message("Detected fastGWA result")
+    } else if (all(c("Chr", "SNP", "bp", "b", "se", "p") %in% names(gwas_result))) {
+        pval_column <- match("p", names(gwas_result))
+        beta_column <- match("b", names(gwas_result))
+        se_column <- match("se", names(gwas_result))
+        message("Detected MLMA result")
+    }
     gwas_result[,chr_column] = as.numeric(gwas_result[,chr_column])
     gwas_result[,pos_column] = as.numeric(gwas_result[,pos_column])
     gwas_result[,pval_column] = as.numeric(gwas_result[,pval_column])
@@ -39,7 +54,12 @@ for (filename in filenames) {
     outdir <- dirname(filename)
 
     key <- sub("_.*$", "", base)
-    gwas_list[[key]] <- gwas_result_filter
+    # Use common names only in memory for the SNP/beta/SE comparison.
+    gwas_list[[key]] <- data.frame(
+        SNP = gwas_result_filter[, snp_column],
+        BETA = gwas_result_filter[, beta_column],
+        SE = gwas_result_filter[, se_column]
+    )
 }
 
 keys <- names(gwas_list)
@@ -72,23 +92,18 @@ for (pair in pairs) {
   df1 <- as.data.frame(dt1)
   df2 <- as.data.frame(dt2)
 
-  snp_column_name = colnames(df1)[snp_column]
-  print(snp_column_name)
+  merged <- merge(df1, df2, by = "SNP",
+                  suffixes = c(paste0("_", key1), paste0("_", key2)))
 
-  merged <- merge(df1[, c(snp_column, beta_column, se_column)],
-                df2[, c(snp_column, beta_column, se_column)],
-                by = snp_column_name,
-                suffixes = c(paste0("_", key1), paste0("_", key2)))
+  if (nrow(merged) == 0) {
+      message("No overlapping SNPs between ", key1, " and ", key2, "; skip.")
+      next
+  }
 
-    if (nrow(merged) == 0) {
-        message("No overlapping SNPs between ", key1, " and ", key2, "; skip.")
-        next
-    }
-
-    beta1_name <- paste0(colnames(df1)[beta_column], "_", key1)
-    beta2_name <- paste0(colnames(df2)[beta_column], "_", key2)
-    se1_name   <- paste0(colnames(df1)[se_column],   "_", key1)
-    se2_name   <- paste0(colnames(df2)[se_column],   "_", key2)
+  beta1_name <- paste0("BETA_", key1)
+  beta2_name <- paste0("BETA_", key2)
+  se1_name <- paste0("SE_", key1)
+  se2_name <- paste0("SE_", key2)
 
   x_col <- beta1_name 
   y_col <- beta2_name
