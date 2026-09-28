@@ -63,7 +63,7 @@ if genome_build == "37":
     rg38 = hl.get_reference('GRCh38')
     rg37.add_liftover(chain_file, rg38)
     dat = dat.annotate_rows(new_locus = hl.liftover(dat.locus, 'GRCh38'))
-    dat = dat.filter_rows(hl.is_defined(dat.locus))
+    dat = dat.filter_rows(hl.is_defined(dat.new_locus))
     dat = dat.key_rows_by(
         locus = dat.new_locus,
         alleles = dat.alleles)
@@ -110,7 +110,7 @@ dat_filter = dat_filter.transmute_entries(
         dat_filter.need_flip,
         hl.if_else(
             hl.is_defined(dat_filter.GT),
-            hl.call(2 - dat_filter.GT[0], 2 - dat_filter.GT[1]),
+            hl.call(1 - dat_filter.GT[0], 1 - dat_filter.GT[1]),
             hl.missing(hl.tcall)
         ),
         dat_filter.GT
