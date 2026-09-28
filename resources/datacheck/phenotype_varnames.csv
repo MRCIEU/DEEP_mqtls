@@ -18,6 +18,7 @@ Breastfeeding_factor
 Maternal_age_numeric
 Paternal_age_numeric
 Maternal_smoking_factor
+Maternal_smoking_numeric
 Paternal_smoking_factor
 Maternal_alcohol_factor
 T2D_factor
