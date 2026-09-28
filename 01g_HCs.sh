@@ -360,6 +360,22 @@ else
   exit 1
 fi
 
+# Older cohorts may have completed 01b before thresholdeddense output was added.
+if [ "${related}" = "yes" ]; then
+  if [ "${structured}" = "yes" ]; then
+    dense_grm_prefix="${grmfile_pcrelate}_thresholdeddense"
+  else
+    dense_grm_prefix="${grmfile_king}_thresholdeddense"
+  fi
+
+  if [ ! -f "${dense_grm_prefix}.grm.bin" ] || [ ! -f "${dense_grm_prefix}.grm.id" ]; then
+    echo "Generating missing thresholdeddense GRM: ${dense_grm_prefix}"
+    ${R_directory}Rscript resources/relateds/sparse_grm_to_dense.R \
+      "${grm_sparse_prefix}" \
+      "${dense_grm_prefix}"
+  fi
+fi
+
 fastgwa_option=()
 grm_sparse_option=()
 if [ "${use_sparse_grm}" = "yes" ]; then

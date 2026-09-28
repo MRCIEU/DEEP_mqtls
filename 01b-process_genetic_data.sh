@@ -440,6 +440,22 @@ else
     exit 1
 fi
 
+if [ "${related}" = "yes" ]; then
+    if [ "${structured}" = "yes" ]; then
+
+        ${R_directory}Rscript resources/relateds/sparse_grm_to_dense.R \
+            "${grmfile_pcrelate}" \
+            "${grmfile_pcrelate}_thresholdeddense"
+
+    elif [ "${structured}" = "no" ]; then
+
+        ${R_directory}Rscript resources/relateds/sparse_grm_to_dense.R \
+            "${grmfile_king}_sparse" \
+            "${grmfile_king}_thresholdeddense"
+            
+    fi
+fi
+
 echo "Generating PCA SNP-loading long-range LD structure QC report"
 if ! ${R_directory}Rscript resources/genetics/detect_pca_ld_structure.R \
         "${pca_loadings}" \
