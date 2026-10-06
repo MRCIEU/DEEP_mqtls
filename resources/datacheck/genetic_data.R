@@ -15,6 +15,7 @@ snpsbychr_plot <- as.character(args[6]);
 cohort_descriptives_file <- as.character(args[7]);
 quality_plot <- as.character(args[8]);
 ori_build <- as.numeric(args[9])
+related <- as.character(args[10])
 
 message("Checking bim file: ", bim_file)
 bim <- as.data.frame(fread(bim_file))
@@ -322,6 +323,12 @@ if(any(grepl("_",fam[,1])))
 	msg <- paste0("please remove underscores from family ids")
 	errorlist <- c(errorlist, msg)
 	warning("ERROR: ", msg)
+}
+
+if (any(duplicated(fam[, 1])) && !identical(related, "yes")) {
+  msg <- "Duplicate family IDs found in the FAM file. Please set related=\"yes\" in your config."
+  errorlist <- c(errorlist, msg)
+  warning("ERROR: ", msg)
 }
 
 if (length(unique(fam[, 1])) == 1) {
