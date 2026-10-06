@@ -268,12 +268,51 @@ ${king} \
     --cpus ${nthreads} \
     --prefix ${grmfile_king}_all_pairs
 
+# Standardize KING output, preserving the original .kin and .kin0 files.
+has_duplicate_fid=$(awk 'seen[$1]++ { print "yes"; exit }' "${bfile}_king_input.fam")
+king_pair_files=("${grmfile_king}_all_pairs.kin0")
+if [ "${has_duplicate_fid}" = "yes" ]; then
+    king_pair_files+=("${grmfile_king}_all_pairs.kin")
+fi
+
+for king_pair_file in "${king_pair_files[@]}"; do
+    if [ ! -s "${king_pair_file}" ]; then
+        echo "Error: KING relationship file missing or empty: ${king_pair_file}" >&2
+        exit 1
+    fi
+    awk 'BEGIN { OFS = "\t" }
+        NR == 1 {
+            for (i = 1; i <= NF; i++) {
+                if ($i == "ID1") id1 = i
+                if ($i == "ID2") id2 = i
+                if ($i == "Kinship") kinship = i
+            }
+            if (!id1 || !id2 || !kinship) {
+                print "Error: Missing KING columns in " FILENAME > "/dev/stderr"
+                exit 1
+            }
+            print "ID1", "ID2", "Kinship"
+            next
+        }
+        NF { print $id1, $id2, $kinship }
+    ' "${king_pair_file}" > "${king_pair_file}.pairs"
+done
+
+if [ "${has_duplicate_fid}" = "yes" ]; then
+    awk 'FNR == 1 && NR != 1 { next } { print }' \
+        "${grmfile_king}_all_pairs.kin0.pairs" \
+        "${grmfile_king}_all_pairs.kin.pairs" \
+        > "${grmfile_king}_all_pairs.comb"
+else
+    cp "${grmfile_king}_all_pairs.kin0.pairs" "${grmfile_king}_all_pairs.comb"
+fi
+
 echo "Plotting all-pairs GRM distributions (GCTA + KING) for full sample"
 ${R_directory}Rscript resources/relateds/gcta_king_grm_distri.R \
     "${grmfile_all}" \
     "${rel_cutoff}" \
     "${grm_distribution}_01b" \
-    "${grmfile_king}_all_pairs.kin0" \
+    "${grmfile_king}_all_pairs.comb" \
     "king"
 
 # Derive KING degree from rel_cutoff (GCTA scale: kinship = rel_cutoff / 2)
@@ -358,17 +397,13 @@ elif [ "${structured}" = "no" ]; then
 
     if [ "${related}" = "yes" ]; then
         echo ">> SCENARIO 2: Related + Non-Structured -> reuse KING all-pairs for sparse GRM"
-        echo ">> Reusing ${grmfile_king}_all_pairs.kin0 with kinship cutoff ${kinship_cutoff}"
+        echo ">> Reusing ${grmfile_king}_all_pairs.comb with kinship cutoff ${kinship_cutoff}"
 
-        if [ ! -f "${grmfile_king}_all_pairs.kin0" ]; then
-            echo "Error: ${grmfile_king}_all_pairs.kin0 not found. Cannot build related-pairs file."
-            exit 1
-        fi
+        awk -v kcut="${kinship_cutoff}" 'NR == 1 || ($3 + 0) >= kcut' \
+            "${grmfile_king}_all_pairs.comb" > "${grmfile_king}_filter.comb"
 
-        awk -v kcut="${kinship_cutoff}" 'NR == 1 || ($8 + 0) >= kcut' \
-            "${grmfile_king}_all_pairs.kin0" > "${grmfile_king}_filter.kin0"
-
-        awk 'NR > 1 { print $2, $4, $8 }' ${grmfile_king}_filter.kin0 > ${grmfile_king}_filter.kin0.values
+        awk 'NR > 1 { print $1, $2, $3 }' \
+            "${grmfile_king}_filter.comb" > "${grmfile_king}_filter.kin0.values"
 
         ${R_directory}Rscript resources/relateds/pedFAM.R \
             ${bfile}_king_input.fam \
