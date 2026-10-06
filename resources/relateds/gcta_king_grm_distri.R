@@ -40,7 +40,8 @@ readGRM <- function(rootname)
 # --- Command Line Arguments ---
 # Usage:
 #   GCTA only:              Rscript gcta_king_grm_distri.R <gcta_in> <cutoff> <out_prefix>
-#   GCTA + KING:            Rscript gcta_king_grm_distri.R <gcta_in> <cutoff> <out_prefix> <kin_in> king
+#   GCTA + KING:            Rscript gcta_king_grm_distri.R <gcta_in> <cutoff> <out_prefix> <comb_in> king
+#                          comb_in has columns ID1, ID2, Kinship and includes all pairs.
 #   GCTA + PC-Relate:       Rscript gcta_king_grm_distri.R <gcta_in> <cutoff> <out_prefix> <kin_in> pcrelate
 args <- commandArgs(trailingOnly = TRUE)
 if(length(args) < 3) stop("Usage: Rscript gcta_king_grm_distri.R <gcta_in> <cutoff> <out_prefix> [<kin_in> <type>]")
@@ -71,8 +72,9 @@ print(summary(gcta_off_diag$grm))
 if (has_kin) {
   if (kin_type == "king") {
     message("\n>>> Processing KING Kinship...")
-    king_mat      <- kingToMatrix(king = kin_infile, estimator = "Kinship")
-    kin_off_diag  <- as.matrix(king_mat)[lower.tri(as.matrix(king_mat), diag = FALSE)]
+    # The combined table contains each within-/between-family pair once.
+    king_pairs    <- read.table(kin_infile, header = TRUE, stringsAsFactors = FALSE)
+    kin_off_diag  <- king_pairs$Kinship
     kin_label     <- "KING"
     kin_title     <- "KING Kinship Distribution (Off-Diagonal)"
     kin_xlab      <- "Kinship Coefficient (Phi)"
