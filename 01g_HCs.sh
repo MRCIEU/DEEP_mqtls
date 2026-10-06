@@ -161,8 +161,17 @@ for i in {1..22}; do
             --set-all-var-ids @:#_\$1_\$2 \
             --keep "${genetic_processed_dir}/sample_list" \
             --extract "${genetic_processed_dir}/snp_list" \
-            --export vcf bgz \
+            --indiv-sort file "${genetic_processed_dir}/sample_list" \
+            --make-pgen \
+            --out "${genetic_processed_dir}/chr${i}_ordered"
+
+        ${plink2} --pfile "${genetic_processed_dir}/chr${i}_ordered" \
+            --export vcf bgz id-paste=iid \
             --out "${genetic_processed_dir}/chr${i}_data"
+
+        rm "${genetic_processed_dir}/chr${i}_ordered.pgen" \
+           "${genetic_processed_dir}/chr${i}_ordered.pvar" \
+           "${genetic_processed_dir}/chr${i}_ordered.psam"
 done
 
 for i in {1..22}; do
@@ -175,6 +184,33 @@ fi
 if [ "$arg" = "hc" ] || [ "$arg" = "all" ]
 then
 section_message "hc"
+
+# Validate every chromosome before painting, including standalone hc runs.
+${Python_directory}python - "${bfile}.fam" "${genetic_processed_dir}" <<'PY'
+import gzip
+import sys
+from pathlib import Path
+
+with open(sys.argv[1]) as handle:
+    expected = [line.split()[1] for line in handle if line.strip()]
+if not expected or len(set(expected)) != len(expected):
+    sys.exit("Error: FAM must contain a non-empty, unique IID list.")
+
+for chrom in range(1, 23):
+    path = Path(sys.argv[2]) / f"chr{chrom}_data.vcf.gz"
+    with gzip.open(path, "rt") as handle:
+        samples = None
+        for line in handle:
+            if line.startswith("#CHROM\t"):
+                samples = line.rstrip("\r\n").split("\t")[9:]
+                break
+    if samples != expected:
+        sys.exit(
+            f"Error: {path} sample IDs/order do not match {sys.argv[1]}. "
+            "Rerun the 01g vcf chunk with the current 01b data."
+        )
+print("All 22 VCF sample lists match the current FAM IID order.")
+PY
 
 for i in {1..22}; do
 
@@ -213,7 +249,7 @@ echo "comma-separated list:"
 echo "$counts_list"
 
 # needs number of individuals
-sample_size=$(wc -l < "${genetic_processed_dir}/sample_list")
+sample_size=$(awk 'NF { n++ } END { print n+0 }' "${bfile}.fam")
 
 echo "Sample size (number of individuals): ${sample_size}"
 
@@ -241,6 +277,14 @@ g++ ${home_directory}/processed_data/genetic_data/combine_chunklength_edit.cpp \
     -L\$CONDA_PREFIX/lib \
     -lz -lpthread -llapack -lblas -std=c++0x -g -O3
 "
+
+for chr in {1..22}; do
+    chunklength_file="${genetic_processed_dir}/chr${chr}_data.chunklengths.s.out.gz"
+    if [ ! -s "${chunklength_file}" ]; then
+        echo "Error: Chunklength file missing or empty: ${chunklength_file}" >&2
+        exit 1
+    fi
+done
 
 echo "Combining chunklength files to generate full chunklength file"
 ${home_directory}/processed_data/genetic_data/combine
