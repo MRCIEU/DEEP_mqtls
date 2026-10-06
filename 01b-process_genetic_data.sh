@@ -6,6 +6,15 @@ set -- $concatenated
 exec &> >(tee ${section_01b_logfile})
 print_version
 
+if [ "${related:-}" != "yes" ] && [ "${related:-}" != "no" ]; then
+    echo "Error: Please set related to 'yes' or 'no' in config: ${config_file}" >&2
+    exit 1
+fi
+if [ "${structured:-}" != "yes" ] && [ "${structured:-}" != "no" ]; then
+    echo "Error: Please set structured to 'yes' or 'no' in config: ${config_file}" >&2
+    exit 1
+fi
+
 # Remove low INFO SNPs using original IDs, before liftover and renaming.
 echo "Removing SNPs with INFO < 0.80 before liftover"
 awk '$3 < 0.80 {print $1}' "${quality_scores}" > "${bfile}.lowinfoSNPs.txt"
