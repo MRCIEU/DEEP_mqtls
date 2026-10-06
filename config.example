@@ -158,7 +158,7 @@ betas="${home_directory}/input_data/data.RData"
 bfile_raw="${home_directory}/input_data/data"
 vcf_dir="${home_directory}/input_data/topmed_vcfs/"
 covariates="${home_directory}/input_data/covariates.txt"
-phenotypes="${home_directory}/input_data/phenotypes.txt"   # Set to NULL if no phenotypes available
+phenotypes="${home_directory}/input_data/phenotypes.txt"   # For phenotype column requirements, see https://github.com/MRCIEU/DEEP_mqtls/wiki/Phenotype-data
 quality_scores="${home_directory}/input_data/data.info"    # File with columns: SNP, MAF, quality score
 
 
