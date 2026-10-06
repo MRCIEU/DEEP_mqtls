@@ -6,6 +6,17 @@ set -- $concatenated
 exec &> >(tee ${section_01b_logfile})
 print_version
 
+# Remove low INFO SNPs using original IDs, before liftover and renaming.
+echo "Removing SNPs with INFO < 0.80 before liftover"
+awk '$3 < 0.80 {print $1}' "${quality_scores}" > "${bfile}.lowinfoSNPs.txt"
+${plink2} --bfile "${bfile_raw}" \
+    --exclude "${bfile}.lowinfoSNPs.txt" \
+    --new-id-max-allele-len 500 \
+    --make-bed \
+    --output-chr 26 \
+    --out "${bfile}_info_filtered" \
+    --threads ${nthreads}
+
 # Infer genome build
 echo "Inferring genome build and running liftover if necessary"
 echo "Genome build in the config file is: ${genome_build}"
@@ -15,7 +26,7 @@ echo "Genome build in the config file is: ${genome_build}"
 echo "Determining build based on reference dataset and running liftover"
 # Rscript will produce a map file for liftover and the SNP list that are missing from the liftover
 ${R_directory}Rscript resources/datacheck/liftover.R \
-    ${bfile_raw} \
+    "${bfile}_info_filtered" \
     ${genome_build} \
     ${miss_liftover} \
 	${liftover_map} \
@@ -27,7 +38,7 @@ inferred_build=$(cat "${section_01_dir}/01b_inferred_build.txt")
 if [ "$inferred_build" -eq 37 ]; then
     if [ -f ${miss_liftover} ]; then
 		echo "SNP missing for liftover found. Excluding them from bfile and liftovering"
-        ${plink2} --bfile "${bfile_raw}" \
+        ${plink2} --bfile "${bfile}_info_filtered" \
             --new-id-max-allele-len 500 \
             --exclude ${miss_liftover} \
             --update-map ${liftover_map} \
@@ -37,7 +48,7 @@ if [ "$inferred_build" -eq 37 ]; then
 			--threads ${nthreads}
     else
 		echo "No SNP missing for liftover found. Liftovering"
-        ${plink2} --bfile "${bfile_raw}" \
+        ${plink2} --bfile "${bfile}_info_filtered" \
             --new-id-max-allele-len 500 \
             --update-map ${liftover_map} \
             --make-bed \
@@ -46,14 +57,16 @@ if [ "$inferred_build" -eq 37 ]; then
 			--threads ${nthreads}
     fi
 elif [ "$inferred_build" -eq 38 ]; then
-	# if build is 38, just copy the raw bfile to the new bfile
-    ${plink2} --bfile "${bfile_raw}" \
+	# if build is 38, copy the INFO-filtered bfile to the new bfile
+    ${plink2} --bfile "${bfile}_info_filtered" \
         --new-id-max-allele-len 500 \
         --make-bed \
 		--output-chr 26 \
         --out ${bfile} \
 		--threads ${nthreads}
 fi
+
+rm "${bfile}_info_filtered.bed" "${bfile}_info_filtered.bim" "${bfile}_info_filtered.fam"
 
 # qc and format input genetic data
 echo "Formatting input genetic data"
@@ -169,10 +182,8 @@ mv ${bfile}1.bed ${bfile}.bed
 mv ${bfile}1.bim ${bfile}.bim
 mv ${bfile}1.fam ${bfile}.fam
 
-# Remove SNPs with low info scores
-awk '$3 < 0.80 {print $1}' <${quality_scores} > ${bfile}.lowinfoSNPs.txt
-
-cat ${SNPfail1} ${bfile}.lowinfoSNPs.txt |sort -u >${bfile}.failed.SNPs.txt
+# Low INFO SNPs were already removed using original IDs before liftover.
+sort -u "${SNPfail1}" > "${bfile}.failed.SNPs.txt"
 
 n_failedSNPs=`wc -l ${bfile}.failed.SNPs.txt | awk '{ print $1 }'`
 
