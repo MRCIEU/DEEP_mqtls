@@ -39,6 +39,31 @@ check_results_01a () {
 
 check_results_01b () {
 
+	local king_input_fam="${bfile}_king_input.fam"
+	local has_duplicate_fid king_file
+	local king_required_files=(
+		"${grmfile_king}_all_pairs.kin0"
+		"${grmfile_king}_all_pairs.comb"
+	)
+	if [ ! -s "${king_input_fam}" ]; then
+		echo "Problem: KING input FAM is absent or empty: ${king_input_fam}"
+		exit 1
+	fi
+	if ! has_duplicate_fid=$(awk 'seen[$1]++ { print "yes"; exit }' "${king_input_fam}"); then
+		echo "Problem: Could not read KING input FAM: ${king_input_fam}"
+		exit 1
+	fi
+	if [ "${has_duplicate_fid}" = "yes" ]; then
+		king_required_files+=("${grmfile_king}_all_pairs.kin")
+	fi
+	for king_file in "${king_required_files[@]}"; do
+		if [ ! -s "${king_file}" ]; then
+			echo "Problem: KING file is absent or empty: ${king_file}"
+			exit 1
+		fi
+	done
+	echo "Required KING relationship files are present"
+
 	if [ -f "${section_01_dir}/01b_inferred_build.txt" ]; then
 		echo "Inferred build file from 01b present"
 	else
