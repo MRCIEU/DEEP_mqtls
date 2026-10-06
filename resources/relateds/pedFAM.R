@@ -49,7 +49,12 @@ fam_file <- fam_file[, 1:2]
 names(fam_file) <- c("FID", "IID")
 fam_file$order <- 1:nrow(fam_file)
 
-rel <- read.table(file=path_to_rel, head=F, stringsAsFactors = F)
+if (file.info(path_to_rel)$size == 0) {
+    message("No pairs above the kinship cutoff; generating a diagonal-only GRM")
+    rel <- data.frame(V1 = character(), V2 = character(), V3 = numeric())
+} else {
+    rel <- read.table(file=path_to_rel, head=F, stringsAsFactors = F)
+}
 # the rel file we only need the 1, 2, and last columns:
 rel <- rel[, c(1, 2, ncol(rel))]
 names(rel) <- c("IID_1", "IID_2", "coef")
