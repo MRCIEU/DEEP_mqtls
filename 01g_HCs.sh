@@ -157,6 +157,8 @@ echo "$(wc -l < "${genetic_processed_dir}/sample_list") samples in sample_list"
 for i in {1..22}; do
     echo "Preparing cleaned chr${i} vcf data"
         ${plink2} --vcf "${genetic_processed_dir}/chr${i}_lifted.vcf.gz" \
+            --new-id-max-allele-len 500 \
+            --set-all-var-ids @:#_\$1_\$2 \
             --keep "${genetic_processed_dir}/sample_list" \
             --extract "${genetic_processed_dir}/snp_list" \
             --export vcf bgz \
