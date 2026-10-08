@@ -109,8 +109,13 @@ combine_cell_types_by_prefix <- function(data, prefixes) {
       b_col <- paste0(pref, ".Bcells")
       nk_col <- if (pref == "unilife") paste0(pref, ".sumNK") else paste0(pref, ".NK")
       available_lymph_cols <- c(t_col, b_col, nk_col)[c(t_col, b_col, nk_col) %in% colnames(combined_data)]
-      if (length(available_lymph_cols) > 0) {
-        combined_data[paste0(pref, ".Lym")] <- rowSums(combined_data[, available_lymph_cols, drop = FALSE], na.rm = TRUE)
+      lymph_data <- combined_data[, available_lymph_cols, drop = FALSE]
+      # Salas/Zheng NK is in the original data; include it only for this sum.
+      if (pref %in% c("salas", "zheng") && nk_col %in% colnames(data)) {
+        lymph_data[[nk_col]] <- data[[nk_col]]
+      }
+      if (ncol(lymph_data) > 0) {
+        combined_data[paste0(pref, ".Lym")] <- rowSums(lymph_data, na.rm = TRUE)
       }
     }
   }
