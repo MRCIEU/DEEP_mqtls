@@ -22,8 +22,8 @@ hcs <- read.table(hcs_file, header = TRUE)
 # FID IID HC1 HC2 ... HC100
 
 comb_cov <- read.table(comb_cov_file, header = TRUE, colClass=c("Sex_factor"="character", "Slide_factor"="character"))
-# FID IID cell_counts... genetic_pc1 ... genetic_pc20, Age_numeric Sex_factor Slide_factor p_smoking_mcigarette
-pcs_exclude <- paste0("genetic_pc", 1:20)
+# FID IID cell_counts... genetic PCs, Age_numeric Sex_factor Slide_factor p_smoking_mcigarette
+pcs_exclude <- grep("^genetic_pc[0-9]+$", names(comb_cov), value = TRUE)
 message("Removing genetic PCs from combined covariates file")
 comb_cov <- comb_cov[, !(names(comb_cov) %in% pcs_exclude)]
 

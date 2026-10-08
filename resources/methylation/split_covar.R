@@ -23,7 +23,7 @@ for (i in seq_along(arguments)) {
 }
 
 # comb_cov file should contain all covariates for mqtl analysis
-# including, IID, cell counts prediction, genetic 20 PCs, Age_numeric Sex_factor Slide_factor predicted_smoking
+# including, IID, cell counts prediction, genetic PCs, Age_numeric Sex_factor Slide_factor predicted_smoking
 message("Reading files:")
 fam <- read.table(fam_file, header = FALSE)
 colnames(fam)[1:2] <- c("FID", "IID")
@@ -48,7 +48,9 @@ merged[numeric_cols] <- lapply(
 category_cols <- grepl("_factor$", names(merged)) & !(names(merged) %in% c("FID", "IID"))
 quant_cols    <- !(names(merged) %in% c("FID", "IID")) & !category_cols
 
-pcs_exclude <- paste0("genetic_pc", 11:20)
+all_pc_cols <- grep("^genetic_pc[0-9]+$", names(merged), value = TRUE)
+pc_cols <- paste0("genetic_pc", 1:10)
+pcs_exclude <- setdiff(all_pc_cols, pc_cols)
 quant_cov <- merged[, c("FID", "IID", names(merged)[quant_cols & !(names(merged) %in% c("FID", "IID", pcs_exclude))])]
 category_cov <- merged[, c("FID", "IID", names(merged)[category_cols & !(names(merged) %in% c("FID", "IID"))])]
 
@@ -114,10 +116,8 @@ print(qc_uniques)
 message("Categorical covariates unique counts:")
 print(cc_uniques)
 
-pc_cols <- paste0("genetic_pc", 1:20)
 pc_cov <- quant_cov[, c("FID", "IID", intersect(pc_cols, colnames(quant_cov)))]
 
-all_pc_cols <- paste0("genetic_pc", 1:20)
 quant_cov_noPC <- quant_cov[, !(colnames(quant_cov) %in% all_pc_cols), drop = FALSE]
 
 message(paste("quant_cov header:", paste(colnames(quant_cov), collapse = "\t")))
