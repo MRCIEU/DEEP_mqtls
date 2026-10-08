@@ -145,11 +145,18 @@ if (nrow(measured) == 0) {
 
   new_cols <- setdiff(names(predicted_total), names(predicted))
   new_cols <- setdiff(new_cols, "IID")
-  correlation_matrix2 <- cor(predicted_total[ , new_cols ], use = "complete.obs", method = "spearman")
+  if (identical(prefix, "middleton") && length(new_cols) == 0) {
+    message("Middleton requires no further merging; reusing the original correlation plot.")
+    if (!file.copy(cor_plot_ori, cor_plot_comb, overwrite = TRUE)) {
+      stop("Failed to copy the original correlation plot.")
+    }
+  } else {
+    correlation_matrix2 <- cor(predicted_total[, new_cols, drop = FALSE], use = "complete.obs", method = "spearman")
 
-  pdf(file = cor_plot_comb, height = 54, width = 87)
-  corrplot(correlation_matrix2, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
-  dev.off()
+    pdf(file = cor_plot_comb, height = 54, width = 87)
+    corrplot(correlation_matrix2, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
+    dev.off()
+  }
 
   correlation_matrix <- cor(predicted_total[,-which(names(predicted_total) == "IID")], use = "complete.obs", method="spearman")
 
@@ -174,11 +181,18 @@ if (nrow(measured) == 0) {
   corrplot(correlation_matrix1, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
   dev.off()
 
-  correlation_matrix2 <- cor(data[ ,-which(names(data) %in% names(predicted))], use = "complete.obs", method = "spearman")
+  if (identical(prefix, "middleton") && length(new_cols) == 0) {
+    message("Middleton requires no further merging; reusing the original correlation plot.")
+    if (!file.copy(cor_plot_ori, cor_plot_comb, overwrite = TRUE)) {
+      stop("Failed to copy the original correlation plot.")
+    }
+  } else {
+    correlation_matrix2 <- cor(data[ ,-which(names(data) %in% names(predicted))], use = "complete.obs", method = "spearman")
 
-  pdf(file = cor_plot_comb, height = 54, width = 87)
-  corrplot(correlation_matrix2, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
-  dev.off()
+    pdf(file = cor_plot_comb, height = 54, width = 87)
+    corrplot(correlation_matrix2, method = "circle", type = "full", tl.col = "black", tl.cex = 5, cl.cex = 5)
+    dev.off()
+  }
 
 }
 
