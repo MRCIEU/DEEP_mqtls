@@ -152,6 +152,9 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   setdiff(study_specific_vars, c("Plate_factor", "Slide_factor")),
   celltypes, colnames(genetic_pcs)[2:11]
   ))
+  if (length(unique(phen$Population_group_factor[!is.na(phen$Population_group_factor)])) == 1) {
+  test_pc_vars <- setdiff(test_pc_vars, "Population_group_factor")
+  }
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
   if (length(batch_var)) {
     pcs[[batch_var]] <- as.factor(pcs[[batch_var]])
