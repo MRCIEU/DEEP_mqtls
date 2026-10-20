@@ -68,6 +68,14 @@ if ("Sex_factor" %in% colnames(pheno)) {
   }
 }
 
+if ("Population_group_factor" %in% colnames(pheno)) {
+  n_pop <- length(unique(na.omit(pheno$Population_group_factor)))
+  if (n_pop < 2) {
+    message("Population_group_factor has no variation (only one value). Removing Population_group_factor from pheno.")
+    pheno$Population_group_factor <- NULL
+  }
+}
+
 if ("Age_numeric" %in% colnames(pheno)) {
   n_age <- length(unique(na.omit(pheno$Age_numeric)))
   if (n_age < 2) {
@@ -152,9 +160,6 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   setdiff(study_specific_vars, c("Plate_factor", "Slide_factor")),
   celltypes, colnames(genetic_pcs)[2:11]
   ))
-  if (length(unique(phen$Population_group_factor[!is.na(phen$Population_group_factor)])) == 1) {
-  test_pc_vars <- setdiff(test_pc_vars, "Population_group_factor")
-  }
   test_pc_vars <- test_pc_vars[test_pc_vars %in% colnames(pcs)]
   if (length(batch_var)) {
     pcs[[batch_var]] <- as.factor(pcs[[batch_var]])
