@@ -229,6 +229,14 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   dev.off()
 
   # now test how much each variable associates with each PC using a linear model
+
+  single_level_factors <- test_pc_vars[
+  sapply(pcs[test_pc_vars], function(col) {
+    is.factor(col) && length(unique(na.omit(col))) == 1
+  })
+]
+print(paste("single level factors identified:",single_level_factors))
+          
   pc_analysis <- list()
   for(i in 1:10){
     model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars, collapse = "+"))
