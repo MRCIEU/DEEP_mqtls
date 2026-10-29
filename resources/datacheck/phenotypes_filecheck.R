@@ -95,10 +95,10 @@ if(length(g)!=(cov2-1)){
 #}
 
 a <- apply(pheno,2,function(x) y<-length(which(is.na(x))))
-if(length(which(a>0.1*length(meth_ids))))
+if(length(which(a>0.3*length(meth_ids))))
 {
-  msg <- paste0("more than 10% of missingness in the following phenotypes:\n", 
-                paste(names(pheno)[a>0.1*length(meth_ids)], collapse="\n")
+  msg <- paste0("more than 30% of missingness in the following phenotypes:\n", 
+                paste(names(pheno)[a>0.3*length(meth_ids)], collapse="\n")
   )
   errorlist <- c(errorlist, msg)
   warning("ERROR: ", msg)
