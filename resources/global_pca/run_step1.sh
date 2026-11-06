@@ -24,7 +24,7 @@ OUT=${OUT:-$ROOT/step1}
 PREFIX=${PREFIX:-deep_pca_v2_$(date +%Y%m%d_%H%M)}   # 1c never overwrites, so each run needs a new prefix
 RAW_SNPLIST=${RAW_SNPLIST:-}          # reuse a previous <prefix>.raw.biallelic_snps.snplist.gz (skips the slow BCF scan)
 STEPS=${STEPS:-1a 1b 1c 1d}
-CONVERT=${CONVERT:-UGR QBB BMC_ACTREC}   # Pelotas excluded until files without --hard-call-threshold 0 arrive
+CONVERT=${CONVERT:-UGR QBB BMC_ACTREC CRELES Pelotas}
 PYTHON=${PYTHON:-python}
 BCFTOOLS=${BCFTOOLS:-bcftools}
 THREADS=${THREADS:-8}
@@ -83,7 +83,10 @@ if has 1b; then
             QBB)        prep QBB        --format qbb     --input "$RAW/QBB_extracted_snp_freq.txt.zip" ;;
             BMC_ACTREC) prep BMC_ACTREC --format actrec  --input "$RAW/BMC_ACTREC.zip" --build 37 --n-obs-max 8682 \
                             --files "freq=FREQ.frq_s.csv,info=InfoScores_NoHLA_WithBasePairs-n-Chrs_s.csv" ;;
-            Pelotas)    prep Pelotas    --format pelotas --input "$RAW/Pelotas_DEEP512" --n-obs-max 1024 ;;
+            CRELES)     prep CRELES     --format afreq   --input "$RAW/CRELES_data.afreq.gz" --n-obs-max 2130 ;;
+            # Pelotas: corrected hct05 files (6 Nov), extracted from the encrypted zip into $RAW/Pelotas_DEEP512
+            Pelotas)    prep Pelotas    --format pelotas --input "$RAW/Pelotas_DEEP512" --n-obs-max 1024 \
+                            --files "freq=_hct05_freq.afreq,bim=_hct05.bim" ;;
             *) echo "No conversion rule for $c; add one here"; exit 1 ;;
         esac
     done

@@ -22,8 +22,9 @@ Formats
   actrec   Michigan FREQ csv (CHR,SNP,A1,A2,MAF,NCHROBS) + INFO csv
            (Rsq,...,CHR,BP), both sorted by CHR,BP (BMC_ACTREC)
 
---input is a .zip archive or a directory. Files are located inside it by
-filename suffix, so the archive does not need unzipping.
+--input is a .zip archive, a directory, or a single file. Files are located
+by filename suffix, so an archive does not need unzipping (password-protected
+zips must be extracted first).
 
 Example
   python resources/global_pca/prepare_cohort_snplist.py --format qbb \
@@ -61,17 +62,24 @@ QBB_RE = re.compile(r"^(?:chr)?([0-9XYMT]+):([0-9]+)\[b38\]:([ACGT]+):([ACGT]+)$
 
 # ----------------------------------------------------------------------------- input
 class Source:
-    """A .zip archive or a directory; members are found by filename suffix."""
+    """A .zip archive, a directory, or a single file; members are found by filename suffix."""
 
     def __init__(self, path):
         self.path = Path(path)
         self.zip = zipfile.ZipFile(self.path) if self.path.suffix == ".zip" else None
-        if self.zip is None and not self.path.is_dir():
-            raise ValueError(f"--input must be a .zip or a directory: {self.path}")
+        if self.zip is None and not (self.path.is_dir() or self.path.is_file()):
+            raise ValueError(f"--input not found: {self.path}")
+        if self.zip:
+            enc = [i.filename for i in self.zip.infolist() if i.flag_bits & 0x1]
+            if enc:
+                raise ValueError(f"{self.path} is password-protected; extract the needed files "
+                                 f"(e.g. with 7z) into a folder and pass that folder as --input")
 
     def names(self):
         if self.zip:
             return [n for n in self.zip.namelist() if not n.endswith("/") and "__MACOSX" not in n]
+        if self.path.is_file():
+            return [str(self.path)]
         return [str(p) for p in self.path.rglob("*") if p.is_file()]
 
     def find(self, suffix, exclude=()):
