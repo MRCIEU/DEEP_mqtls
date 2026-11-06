@@ -202,67 +202,59 @@ def read_qbb(src, files, counts, limit):
                    to_float(r[i_f]), to_int(r[i_n]), None)
 
 
-def chrom_order(c):
-    c = c.removeprefix("chr")
-    return int(c) if c.isdigit() else {"X": 23, "Y": 24, "XY": 25, "MT": 26}.get(c, 99)
-
-
 def read_actrec(src, files, counts, limit):
-    """Merge-join FREQ and INFO on (CHR, BP); both must be sorted by CHR then BP.
-    INFO has no alleles, so a position passes only if every INFO row there passes
-    (the minimum Rsq is used)."""
-    with src.open(files["freq"]) as f, src.open(files["info"]) as g:
-        fh = f.readline().strip().split(",")
+    """Join FREQ to INFO on (CHR, BP). The two files need not share a sort order
+    (BMC_ACTREC: INFO is sorted with chromosomes as text, FREQ numerically, with a few
+    rows out of place). INFO has no alleles, so a position passes only if every INFO
+    row there passes: the minimum Rsq per position is used."""
+    import numpy as np
+    import pandas as pd
+
+    with src.open(files["info"]) as g:
         gh = g.readline().strip().split(",")
-        fi = {h: i for i, h in enumerate(fh)}
-        rsq_col = next(h for h in gh if h.startswith("Rsq"))
-        gi = {h: i for i, h in enumerate(gh)}
-        info_iter = (line.strip().split(",") for line in limited(g, limit))
+    rsq_col = next(h for h in gh if h.startswith("Rsq"))
+    with src.open(files["info"]) as g:
+        info = pd.read_csv(g, usecols=["CHR", "BP", rsq_col], nrows=limit or None,
+                           dtype={"CHR": "category", "BP": np.int64, rsq_col: np.float64})
+    chr_num = pd.to_numeric(pd.Series(info.CHR.cat.categories.astype(str)), errors="coerce").to_numpy()
+    chrom = chr_num[info.CHR.cat.codes.to_numpy()]
+    ok = ~np.isnan(chrom)
+    keys = chrom[ok].astype(np.int64) * 10**10 + info.BP.to_numpy()[ok]
+    rsq = info[rsq_col].fillna(-1.0).to_numpy()[ok]
+    del info
+    order = np.argsort(keys, kind="stable")
+    keys, rsq = keys[order], rsq[order]
+    first = np.r_[True, keys[1:] != keys[:-1]]
+    ikeys = keys[first]
+    ivals = np.minimum.reduceat(rsq, np.flatnonzero(first))
+    del keys, rsq, order, first
+    counts["info_positions"] = int(len(ikeys))
 
-        def info_groups():
-            # yields ((chr_order, bp), min_rsq) per position, checking sort order
-            prev, cur, best = None, None, None
-            for r in info_iter:
-                k = (chrom_order(r[gi["CHR"]]), int(r[gi["BP"]]))
-                v = to_float(r[gi[rsq_col]])
-                v = -1.0 if v is None else v
-                if prev is not None and k < prev:
-                    raise ValueError(f"INFO file is not sorted by CHR,BP at {k}")
-                prev = k
-                if k != cur:
-                    if cur is not None:
-                        yield cur, best
-                    cur, best = k, v
-                else:
-                    best = min(best, v)
-            if cur is not None:
-                yield cur, best
-
-        groups = info_groups()
-        gk, gv = next(groups, (None, None))
-        prev = None
-        for line in limited(f, limit):
-            r = line.strip().split(",")
-            parts = r[fi["SNP"]].split(":")
-            if len(parts) != 4:
-                # rsID rows are genotyped array SNPs; the same SNPs also appear as
-                # imputed chr:pos:ref:alt rows, so nothing is lost by skipping them
-                counts["skipped_rsid_rows" if r[fi["SNP"]].startswith("rs") else "unparsed_id"] += 1
-                continue
-            chrom, pos = r[fi["CHR"]], int(parts[1])
-            k = (chrom_order(chrom), pos)
-            if prev is not None and k < prev:
-                raise ValueError(f"FREQ file is not sorted by CHR,BP at {k}")
-            prev = k
-            while gk is not None and gk < k:
-                gk, gv = next(groups, (None, None))
-            info = gv if gk == k else None
-            if info is None:
-                counts["no_info_row"] += 1
-                continue
-            # MAF is the frequency of A1; report A1 as ALT so ALT_FREQS = MAF
-            yield (chrom, pos, r[fi["A2"]], r[fi["A1"]],
-                   to_float(r[fi["MAF"]]), to_int(r[fi["NCHROBS"]]), info)
+    with src.open(files["freq"]) as f:
+        for chunk in pd.read_csv(f, dtype=str, chunksize=1_000_000, nrows=limit or None):
+            snp = chunk["SNP"]
+            good = snp.str.count(":") == 3
+            rs = (~good) & snp.str.startswith("rs")
+            # rsID rows are genotyped array SNPs; the same SNPs also appear as
+            # imputed chr:pos:ref:alt rows, so nothing is lost by skipping them
+            counts["skipped_rsid_rows"] += int(rs.sum())
+            counts["unparsed_id"] += int(((~good) & ~rs).sum())
+            c = chunk.loc[good]
+            pos = c["SNP"].str.split(":").str[1].astype(np.int64).to_numpy()
+            cnum = pd.to_numeric(c["CHR"], errors="coerce").to_numpy()
+            k = np.where(np.isnan(cnum), -1, cnum).astype(np.int64) * 10**10 + pos
+            idx = np.searchsorted(ikeys, k)
+            idx_c = np.minimum(idx, len(ikeys) - 1)
+            found = (len(ikeys) > 0) & (ikeys[idx_c] == k)
+            infov = np.where(found, ivals[idx_c], np.nan)
+            counts["no_info_row"] += int((~found).sum())
+            for ch, p_, a1, a2, maf, nobs, iv, fd in zip(
+                    c["CHR"].to_numpy(), pos, c["A1"].to_numpy(), c["A2"].to_numpy(),
+                    c["MAF"].to_numpy(), c["NCHROBS"].to_numpy(), infov, found):
+                if not fd:
+                    continue
+                # MAF is the frequency of A1; report A1 as ALT so ALT_FREQS = MAF
+                yield (ch, int(p_), a2, a1, to_float(maf), to_int(nobs), float(iv))
 
 
 # ---------------------------------------------------------------------------- filters
