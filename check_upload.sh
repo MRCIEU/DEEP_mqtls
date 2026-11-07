@@ -100,6 +100,12 @@ fi
 
 	echo ""
 	echo "Tarring results, log and config files"
+	# the 01b_pca (global PCA) upload carries its own config archive, so it never replaces the 01 one
+	if [[ "$1" = "01b_pca" ]]; then
+		config_archive="${study_name}_01b_pca_config"
+	else
+		config_archive="${study_name}_config"
+	fi
 	mkdir -p ${home_directory}/results/config/
 	if [[ "$config_file" = /* ]]; then
     	target="${scripts_directory}/$(basename "$config_file")"
@@ -107,19 +113,19 @@ fi
         cp ${config_file} ${scripts_directory}/
     	fi
     	config_basename=$(basename "$config_file")
-    	tar czf ${home_directory}/results/config/${study_name}_config.tar -C ${scripts_directory}/ ./${config_basename} ./resources/parameters
+    	tar czf ${home_directory}/results/config/${config_archive}.tar -C ${scripts_directory}/ ./${config_basename} ./resources/parameters
     	if [[ "${config_file}" != "$target" ]]; then
         	rm ${scripts_directory}/${config_basename}
     	fi
 	else
-    	tar czf ${home_directory}/results/config/${study_name}_config.tar -C ${scripts_directory}/ ./${config_file} ./resources/parameters 
+    	tar czf ${home_directory}/results/config/${config_archive}.tar -C ${scripts_directory}/ ./${config_file} ./resources/parameters 
 	fi
     echo "Successfully created config archive"	
 
     echo "Generating md5 checksum"
-    md5sum ${home_directory}/results/config/${study_name}_config.tar > ${home_directory}/results/config/${study_name}_config.md5sum
+    md5sum ${home_directory}/results/config/${config_archive}.tar > ${home_directory}/results/config/${config_archive}.md5sum
     echo "Encrypting files"
-    gpg --output ${home_directory}/results/config/${study_name}_config.tar.aes --symmetric --cipher-algo AES256 ${home_directory}/results/config/${study_name}_config.tar
+    gpg --output ${home_directory}/results/config/${config_archive}.tar.aes --symmetric --cipher-algo AES256 ${home_directory}/results/config/${config_archive}.tar
     echo ""
 	
 	suff="tgz"
@@ -138,8 +144,8 @@ fi
         cd ../upload
         put ${home_directory}/results/${study_name}_${1}.md5sum
         put ${home_directory}/results/${study_name}_$1.${suff}.aes
-		put ${home_directory}/results/config/${study_name}_config.tar.aes
-		put ${home_directory}/results/config/${study_name}_config.md5sum 
+		put ${home_directory}/results/config/${config_archive}.tar.aes
+		put ${home_directory}/results/config/${config_archive}.md5sum 
 bye
 EOF
 		fi
@@ -147,7 +153,7 @@ EOF
 		echo "Manual upload mode selected; upload these files manually:"
 		echo "${home_directory}/results/${study_name}_${1}.md5sum"
 		echo "${home_directory}/results/${study_name}_${1}.${suff}.aes"
-		echo "${home_directory}/results/config/${study_name}_config.tar.aes"
-		echo "${home_directory}/results/config/${study_name}_config.md5sum"
+		echo "${home_directory}/results/config/${config_archive}.tar.aes"
+		echo "${home_directory}/results/config/${config_archive}.md5sum"
 	fi
 fi
