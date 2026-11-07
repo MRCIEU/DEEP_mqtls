@@ -187,11 +187,11 @@ def main():
     for key, val in cov.items():
         print(f"{key}: {val}", flush=True)
     if cov["coverage"] < args.min_coverage:
-        sys.exit(f"Coverage {cov['coverage']:.4f} is below {args.min_coverage}: too few reference SNPs found. "
+        sys.exit(f"Coverage {100 * cov['coverage']:.3f}% is below {100 * args.min_coverage:.0f}%: too few reference SNPs found. "
                  "Check the genome build and that SNP IDs are chr:pos_A1_A2. No outputs were written.")
     if cov["coverage"] < 1:
         print(f"WARNING: {cov['reference_snps_absent']} of {cov['reference_snps']} reference SNPs are absent "
-              f"(coverage {cov['coverage']:.4f}); they contribute the reference mean", flush=True)
+              f"(coverage {100 * cov['coverage']:.3f}%); they contribute the reference mean", flush=True)
 
     S = np.vstack(sc.scores.values)
     pcs_all = pd.DataFrame(S, columns=[f"PC{i}" for i in range(1, k + 1)])
