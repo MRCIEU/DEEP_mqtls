@@ -555,3 +555,18 @@ check_results_01 () {
     fi
     
 }
+
+check_results_01b_pca () {
+    source resources/global_pca/parameters_01b_pca
+    local id_files=("${gpca_work_dir}/projected_ids.txt" "${gpca_bfile}.fam")
+    if [ "${pca_mode}" = "genetic_only" ]; then
+        id_files+=("${pca_sample_list}")
+    else
+        id_files+=("${bfile}.fam")
+    fi
+    ${Python_directory}python "${scripts_directory}/resources/global_pca/check_01b_pca_outputs.py" \
+        --out-dir "${section_01b_pca_dir}" \
+        --study "${study_name}" \
+        --share-level "${pca_share_level}" \
+        --id-files "${id_files[@]}"
+}

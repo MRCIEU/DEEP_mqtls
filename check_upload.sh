@@ -11,7 +11,7 @@ checkFirstArg () {
 	local e
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
 	echo $"Error: $1 is not a valid section identifier"
-	echo $"Need to specify a value from 01"
+	echo $"Need to specify a value from: 01, 01b_pca"
 	usage
 	exit 1
 }
@@ -37,7 +37,7 @@ checkUploadMode () {
 source resources/logs/check_logs.sh
 source resources/logs/check_results.sh
 
-sections=("01")
+sections=("01" "01b_pca")
 checkFirstArg "$1" "${sections[@]}"
 
 actions=("check" "upload")
@@ -72,7 +72,7 @@ echo "Section $1 has been successfully completed!"
 
 port="-P 2222"
 
-if [[ "$2" = "upload" && ( $1 = "01" ) ]]; then
+if [[ "$2" = "upload" && ( $1 = "01" || $1 = "01b_pca" ) ]]; then
 
 	echo ""
 	if [[ "$upload_mode" = "sftp" ]]; then

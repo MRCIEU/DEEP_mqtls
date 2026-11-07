@@ -211,4 +211,9 @@ soft_threshold="1e-5"
 # =============================================================================
 # DO NOT MODIFY BELOW THIS LINE
 # =============================================================================
+# DEEP global PCA v2 (01b_PCAplot.sh, branch global_pca_v2). Optional; defaults shown.
+pca_mode="post01b"              # "genetic_only" if 01b has not been run (no methylation data yet)
+pca_sample_list="${home_directory}/input_data/pca_samples.txt"   # genetic_only: FID IID of samples selected for methylation profiling
+pca_share_level="individual"    # "aggregate" uploads bin counts only, no per-sample PC scores
+
 source ${scripts_directory}/resources/parameters

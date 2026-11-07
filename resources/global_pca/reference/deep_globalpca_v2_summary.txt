@@ -1,0 +1,31 @@
+Reference samples requested: 3398
+Common SNPs in input list: 638016
+Reference samples found: 3398
+Common SNPs found in reference: 638016
+SNPs after dropping strand-ambiguous A/T and C/G: 548970
+SNPs after removing 18 long-range LD regions: 529899
+SNPs after call rate >= 0.99 and MAF >= 0.001: 529899
+SNPs after LD pruning (r2 < 0.1, window 10000000 bp): 41279
+Orientation PC1: EUR mean 0.1024 -> flipped
+Orientation PC2: EUR mean 0.2204 -> flipped
+Orientation PC3: largest |mean| AMR 0.2331 -> kept
+Orientation PC4: largest |mean| OCE 0.1692 -> kept
+Orientation PC5: largest |mean| OCE 0.6701 -> kept
+Orientation PC6: largest |mean| MID 0.0346 -> kept
+Orientation PC7: largest |mean| MID -0.1243 -> flipped
+Orientation PC8: largest |mean| MID 0.0547 -> kept
+Orientation PC9: largest |mean| OCE -0.0149 -> flipped
+Orientation PC10: largest |mean| MID 0.0032 -> kept
+Orientation PC11: largest |mean| MID -0.0260 -> flipped
+Orientation PC12: largest |mean| MID 0.0282 -> kept
+Orientation PC13: largest |mean| OCE -0.0245 -> flipped
+Orientation PC14: largest |mean| OCE -0.0282 -> flipped
+Orientation PC15: largest |mean| MID -0.0279 -> flipped
+Orientation PC16: largest |mean| MID -0.0318 -> flipped
+Orientation PC17: largest |mean| MID -0.0200 -> flipped
+Orientation PC18: largest |mean| MID -0.0053 -> flipped
+Orientation PC19: largest |mean| MID -0.0063 -> flipped
+Orientation PC20: largest |mean| CSA -0.0014 -> flipped
+Hold-out (339 samples) SD ratio projected/in-sample, PC1-PC5: 0.980, 1.020, 0.894, 0.950, 0.481
+Wrote /home/prachand/projects/DEEP/global_pca_v2/step2/deep_globalpca_v2_loadings.tsv.bgz, /home/prachand/projects/DEEP/global_pca_v2/step2/deep_globalpca_v2_scores.tsv.bgz, /home/prachand/projects/DEEP/global_pca_v2/step2/deep_globalpca_v2_scores_flat.tsv.gz, /home/prachand/projects/DEEP/global_pca_v2/step2/deep_globalpca_v2.snplist
+Command: resources/global_pca/make_reference_pca.py --bfile /home/prachand/projects/DEEP/global_pca_v2/step2/ref_subset --snplist /home/prachand/projects/DEEP/global_pca_v2/step1/deep_pca_v2_20261106_2302.all_cohorts_common.snplist.gz --samples /home/prachand/projects/DEEP/global_pca_v2/step2/ref_samples.txt --exclude-regions resources/genetics/exclude_b38.txt --out-prefix /home/prachand/projects/DEEP/global_pca_v2/step2/deep_globalpca_v2 --threads 32 --mem-gb 200 --tmp-dir /home/prachand/projects/DEEP/global_pca_v2/step2/hail_tmp --holdout-frac 0.1

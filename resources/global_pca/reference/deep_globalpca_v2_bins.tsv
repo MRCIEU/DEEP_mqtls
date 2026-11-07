@@ -1,0 +1,7 @@
+# DEEP global PCA v2 fixed bin grid (aggregate fallback). Range = reference range +/- 0.1, multiples of 0.02.
+# pairs binned: PC1/PC2, PC1/PC3, PC2/PC4. Values outside [min, max) go to the edge bin and are counted as clipped.
+PC	min	max	width
+PC1	-0.36	0.48	0.02
+PC2	-0.34	0.40	0.02
+PC3	-0.22	0.66	0.02
+PC4	-0.24	0.34	0.02

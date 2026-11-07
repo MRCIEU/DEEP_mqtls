@@ -1,0 +1,26 @@
+# DEEP global PCA v2 (01b_PCAplot) settings.
+# Sourced after the config and resources/parameters by 01b_PCAplot.sh and by the 01b_pca upload checks.
+
+# Optional config entries (defaults used when they are not set in the config):
+#   pca_mode="post01b"         cohort has run 01b: uses processed_data/genetic_data/data
+#   pca_mode="genetic_only"    no methylation data yet: prepares genotypes from bfile_raw for pca_sample_list
+#   pca_sample_list="${home_directory}/input_data/pca_samples.txt"   FID IID, genetic_only mode only
+#   pca_share_level="individual"  upload ID-free PC1-PC10 scores (rows shuffled) plus bin counts
+#   pca_share_level="aggregate"   upload bin counts only
+pca_mode="${pca_mode:-post01b}"
+pca_share_level="${pca_share_level:-individual}"
+pca_sample_list="${pca_sample_list:-${home_directory}/input_data/pca_samples.txt}"
+
+section_01b_pca_dir="${home_directory}/results/01b_pca"
+section_01b_pca_logfile="${section_01b_pca_dir}/logs/log${timetemp}.txt"
+
+gpca_ref_dir="${scripts_directory}/resources/global_pca/reference"
+gpca_ref_prefix="deep_globalpca_v2"
+
+# local working files; kept by the cohort, never uploaded
+gpca_work_dir="${home_directory}/processed_data/genetic_data/global_pca_v2"
+gpca_bfile="${gpca_work_dir}/data_gpca"
+gpca_ref_ranges="${gpca_work_dir}/reference_snp_ranges.txt"
+gpca_snpfail="${gpca_work_dir}/SNPfail.txt"
+gpca_miss_liftover="${gpca_work_dir}/miss_liftover.txt"
+gpca_liftover_map="${gpca_work_dir}/liftover_map.txt"

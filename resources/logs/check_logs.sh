@@ -230,3 +230,20 @@ check_logs_01 () {
 		check_logs_01g
 	fi
 }
+
+check_logs_01b_pca () {
+    source resources/global_pca/parameters_01b_pca
+    local log_file
+    log_file=$(ls -1t "${section_01b_pca_dir}/logs/log"*.txt 2>/dev/null | head -n 1)
+    if [ -z "$log_file" ]; then
+        echo "Problem: no 01b_PCAplot log found in ${section_01b_pca_dir}/logs. Run ./01b_PCAplot.sh first."
+        exit 1
+    fi
+    grep "DEEP version" "$log_file" | head -n 1 || true
+    if grep -q "Successfully completed script 01b_PCAplot" "$log_file"; then
+        echo "01b_PCAplot.sh completed successfully (logfile: ${log_file})"
+    else
+        echo "Problem: 01b_PCAplot.sh did not complete successfully (latest logfile: ${log_file})"
+        exit 1
+    fi
+}
