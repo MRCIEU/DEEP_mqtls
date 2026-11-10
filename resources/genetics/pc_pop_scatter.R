@@ -78,7 +78,10 @@ if (length(present_study_specific_vars) > 0) {
 
 # Take only IID + population factors present in the phenotype data, so the
 # merge does not duplicate columns shared with the covariates file.
-pheno_factors <- intersect(candidate_factors, names(pheno))
+pheno_factors <- setdiff(
+    intersect(candidate_factors, names(pheno)),
+    names(covs)
+)
 pheno <- pheno[, c("IID", pheno_factors), with = FALSE]
 for (fc in pheno_factors) pheno[[fc]] <- as.factor(pheno[[fc]])
 
