@@ -98,7 +98,7 @@ for pc in {1..5}; do
       --bfile "${bfile}" \
       "${grm_sparse_option[@]}" \
       "${fastgwa_option[@]}" \
-      --h2-limit 100 \
+      --h2-limit 10 \
       --pheno "${pheno_file}" \
       --qcovar "${qcovar_noPC_file}" \
       "${covar_args[@]}" \
