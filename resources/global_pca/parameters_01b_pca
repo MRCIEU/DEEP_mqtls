@@ -7,8 +7,10 @@
 #   pca_sample_list="${home_directory}/input_data/pca_samples.txt"   FID IID, genetic_only mode only
 #   pca_share_level="individual"  upload ID-free PC1-PC10 scores (rows shuffled) plus bin counts
 #   pca_share_level="aggregate"   upload bin counts only
+#   pca_min_coverage="0.85"       stop if fewer than this fraction of the reference SNPs are found
 pca_mode="${pca_mode:-post01b}"
 pca_share_level="${pca_share_level:-individual}"
+pca_min_coverage="${pca_min_coverage:-0.85}"
 pca_sample_list="${pca_sample_list:-${home_directory}/input_data/pca_samples.txt}"
 
 section_01b_pca_dir="${home_directory}/results/01b_pca"

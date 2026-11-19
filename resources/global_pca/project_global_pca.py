@@ -20,7 +20,13 @@ resources/global_pca/reference/deep_globalpca_v2_loadings.tsv.bgz and writes
 Alleles are matched to the reference by position; SNPs whose alleles are swapped are
 recoded, SNPs whose alleles differ are dropped. Missing SNPs and missing calls contribute
 zero (the reference mean), and genotypes are scaled by the full reference SNP count, as in
-hail.experimental.pc_project, so scores are on the reference scale whatever the coverage.
+hail.experimental.pc_project. Reference SNPs absent from the cohort would otherwise pull the
+scores towards the reference mean (by about the fraction absent), so the scores are corrected
+by least squares on the SNPs present (as in EIGENSOFT lsqproject): with V the reference
+loadings and V_S their rows for the SNPs used, scores are multiplied by
+(V_S'V_S)^-1 (V'V). With full coverage this leaves the scores unchanged. The correction uses
+the SNPs present in the cohort; it does not adjust for the few calls missing in individual
+samples (SNP missingness is at most 5% after QC).
 """
 
 import argparse
@@ -48,8 +54,10 @@ def parse_args():
     p.add_argument("--build", default="38")
     p.add_argument("--out-dir", required=True)
     p.add_argument("--work-dir", required=True)
-    p.add_argument("--min-coverage", type=float, default=0.95,
+    p.add_argument("--min-coverage", type=float, default=0.85,
                    help="Stop if fewer than this fraction of reference SNPs are found (warn below 1.0)")
+    p.add_argument("--missing-snp-correction", default="lsq", choices=["lsq", "none"],
+                   help="lsq: least-squares correction for absent reference SNPs (default); none: as before")
     p.add_argument("--pipeline-version", default="unknown")
     p.add_argument("--threads", type=int, default=4)
     p.add_argument("--mem-gb", type=int, default=16)
@@ -98,7 +106,12 @@ def project(args, ref):
     ht = hl.experimental.pc_project(mt._GT, lo.loadings, lo.pca_af)
     ht = ht.annotate(fid=mt.cols()[ht.s].fam_id)
     sc = ht.to_pandas()
+    # loadings of all reference SNPs and of the SNPs used, for the least-squares correction
+    v_all = np.array(lo.loadings.collect(), dtype=float)
+    used = mt.rows().select()
+    v_used = np.array(lo.semi_join(used).loadings.collect(), dtype=float)
     hl.stop()
+    gram = (v_all.T @ v_all, v_used.T @ v_used)
 
     cov = {
         "reference_snps": n_ref,
@@ -113,7 +126,7 @@ def project(args, ref):
         "min_call_rate_used_snps": cr.min,
         "used_snps_call_rate_below_0.95": cr.lt95,
     }
-    return sc, cov, n_samples, k
+    return sc, cov, n_samples, k, gram
 
 
 def bins_table(pcs, grid):
@@ -183,17 +196,26 @@ def main():
     ref = os.path.join(args.ref_dir, args.ref_prefix)
     stem = os.path.join(args.out_dir, f"{args.study}_globalPCA_v2")
 
-    sc, cov, n_samples, k = project(args, ref)
+    sc, cov, n_samples, k, (g_all, g_used) = project(args, ref)
     for key, val in cov.items():
         print(f"{key}: {val}", flush=True)
     if cov["coverage"] < args.min_coverage:
         sys.exit(f"Coverage {100 * cov['coverage']:.3f}% is below {100 * args.min_coverage:.0f}%: too few reference SNPs found. "
                  "Check the genome build and that SNP IDs are chr:pos_A1_A2. No outputs were written.")
-    if cov["coverage"] < 1:
-        print(f"WARNING: {cov['reference_snps_absent']} of {cov['reference_snps']} reference SNPs are absent "
-              f"(coverage {100 * cov['coverage']:.3f}%); they contribute the reference mean", flush=True)
 
     S = np.vstack(sc.scores.values)
+    if args.missing_snp_correction == "lsq":
+        correction = np.linalg.solve(g_used, g_all)
+        S = S @ correction
+    else:
+        correction = np.eye(k)
+    factors = np.diag(correction)
+    if cov["coverage"] < 1:
+        how = ("scores corrected by least squares on the SNPs present (PC1-PC4 factors "
+               + ", ".join(f"{f:.3f}" for f in factors[:4]) + ")"
+               if args.missing_snp_correction == "lsq" else "they contribute the reference mean (no correction)")
+        print(f"WARNING: {cov['reference_snps_absent']} of {cov['reference_snps']} reference SNPs are absent "
+              f"(coverage {100 * cov['coverage']:.3f}%); {how}", flush=True)
     pcs_all = pd.DataFrame(S, columns=[f"PC{i}" for i in range(1, k + 1)])
     local = pd.concat([sc[["fid", "s"]].rename(columns={"fid": "FID", "s": "IID"}).reset_index(drop=True),
                        pcs_all], axis=1)
@@ -218,9 +240,12 @@ def main():
     summary = [("study", args.study), ("mode", args.mode), ("share_level", args.share_level),
                ("input_build", args.build), ("n_samples", n_samples), ("reference", args.ref_prefix),
                ("reference_snps", cov["reference_snps"]), ("coverage", round(cov["coverage"], 6)),
+               ("missing_snp_correction", args.missing_snp_correction),
+               ("lsq_condition_number", round(float(np.linalg.cond(g_used)), 4)),
                ("pipeline_version", args.pipeline_version),
                ("completed_utc", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M"))]
     summary += [(f"bins_clipped_{p}", n) for p, n in clipped.items()]
+    summary += [(f"lsq_factor_PC{i + 1}", round(float(f), 6)) for i, f in enumerate(factors[:N_UPLOAD_PCS])]
     for c in pcs.columns:
         summary += [(f"{c}_mean", round(pcs[c].mean(), 6)), (f"{c}_sd", round(pcs[c].std(), 6))]
     pd.DataFrame(summary, columns=["metric", "value"]).to_csv(f"{stem}_summary.tsv", sep="\t", index=False)

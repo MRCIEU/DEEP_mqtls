@@ -26,7 +26,7 @@ mkdir -p "${section_01b_pca_dir}/logs" "${gpca_work_dir}"
 exec &> >(tee "${section_01b_pca_logfile}")
 print_version
 echo "01b_PCAplot: DEEP global PCA v2"
-echo "pca_mode=${pca_mode}  pca_share_level=${pca_share_level}"
+echo "pca_mode=${pca_mode}  pca_share_level=${pca_share_level}  pca_min_coverage=${pca_min_coverage}"
 
 if [ "${pca_mode}" != "post01b" ] && [ "${pca_mode}" != "genetic_only" ]; then
     echo "Error: pca_mode must be 'post01b' or 'genetic_only' (config: ${config_file})" >&2
@@ -209,6 +209,7 @@ ${Python_directory}python "${scripts_directory}/resources/global_pca/project_glo
     --study "${study_name}" \
     --mode "${pca_mode}" \
     --share-level "${pca_share_level}" \
+    --min-coverage "${pca_min_coverage}" \
     --build "${build}" \
     --out-dir "${section_01b_pca_dir}" \
     --work-dir "${gpca_work_dir}" \
