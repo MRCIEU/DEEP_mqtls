@@ -63,7 +63,7 @@ main = function(){
   for (filename in filenames) {
     message("Reading in ", filename ," GWAS results")
     GWAS_result = fread(filename, header = T, data.table=F)
-    outname = unlist(strsplit(filename, "[.]"))[[1]]
+    outname <- sub("\\.fastGWA(\\.gz)?$", "", filename)
     
     if(length(unique(GWAS_result[,chr_column])) > 30){
       stop("Wrong chromosome column specified")
