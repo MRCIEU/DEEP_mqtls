@@ -9,6 +9,7 @@ dependencies:
   - r-devtools
   - r-biocmanager
   - r-mass
+  - r-lmertest
   - r-lattice
   - r-ggplot2
   - r-data.table

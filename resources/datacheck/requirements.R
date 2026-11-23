@@ -67,7 +67,7 @@ if (any(!index)) {
     message("All required packages installed")
 }
 
-pkglist_related <- c("SNPRelate", "GENESIS", "GWASTools")
+pkglist_related <- c("SNPRelate", "GENESIS", "GWASTools", "lmerTest")
 
 if (related == "yes") {
     message("Checking that all required packages are present for related samples")
