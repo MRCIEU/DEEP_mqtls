@@ -28,8 +28,10 @@ load(beta_file)
 cell_counts <- read.table(cellcounts_cov, header=T)
 rownames(cell_counts) <- cell_counts$IID
 
-# TO DO: what kind of file is genetic_pc_file?
-genetic_pcs <- read.table(genetic_pc_file)[,-1]
+# Keep FID separately so genetic_pc1:10 retain their original column positions.
+genetic_input <- read.table(genetic_pc_file, colClasses = c(V1 = "character", V2 = "character"))
+family_ids <- genetic_input[, 1:2]
+genetic_pcs <- genetic_input[, -1]
 colnames(genetic_pcs) <- c("IID", paste("genetic_pc", 1:(ncol(genetic_pcs)-1), sep=""))
 rownames(genetic_pcs) <- genetic_pcs$IID
 
@@ -96,7 +98,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # need to know format of genetic PC file
   pheno_panel <- merge(pheno_panel, genetic_pcs, by="IID")
 
-  message("Generating PCs")#######################################
+  message("Generating methylation PCs")#######################################
 
   # Create PC matrix to test PC associations (probe.range means take that number of 
   # the most variable probes)
@@ -142,8 +144,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   pcs <- pcs[,1:10]
   identical(rownames(pcs),rownames(pheno_panel))
   pcs <- merge(x=pcs,y=pheno_panel, by.x="row.names", by.y="IID")
-  # rownames(pcs) <- pcs$Row.names
-  # pcs <- pcs[,-1]
+  pcs$family_id <- family_ids[match(pcs$Row.names, family_ids[, 2]), 1]
 
   # Prefer Plate over Slide, including when both are study-specific variables.
   batch_var <- if ("Plate_factor" %in% names(pcs)) {
@@ -228,7 +229,7 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   print(makeplots)
   dev.off()
 
-  # now test how much each variable associates with each PC using a linear model
+  # Test PC associations, adding a family random intercept when FIDs repeat.
 
   single_level_factors <- test_pc_vars[
   sapply(pcs[test_pc_vars], function(col) {
@@ -238,34 +239,69 @@ for (cellcount_panel in cellcount_panel_prefixes) {
 print(paste("single level factors identified:",single_level_factors))
           
   pc_analysis <- list()
+  pc_singular <- rep(FALSE, 10)
+
+  message(if (length(unique(pcs$family_id)) < nrow(pcs)) {
+    "Repeated FIDs detected; using lmerTest where families repeat after missing-value exclusion."
+  } else {
+    "All FIDs are unique; using standard lm models."
+  })
+
   for(i in 1:10){
     model_formula <- paste0("PC",i," ~ ",paste(test_pc_vars, collapse = "+"))
-    print(paste0("Linear model formula: ", model_formula))
-    fit <- lm(formula = model_formula, data = pcs)
-    pc_analysis[[i]] <- summary(fit)
+    # Count families among the samples retained by the original model's NA handling.
+    model_data <- model.frame(as.formula(model_formula), data = pcs, drop.unused.levels = TRUE)
+    model_data$family_id <- factor(pcs$family_id[match(rownames(model_data), rownames(pcs))])
+    n_fid <- length(unique(model_data$family_id))
+    n_iid <- nrow(model_data) # IID uniqueness is checked in 01a.
+    message("PC", i, ": ", n_iid, " samples, ", n_fid, " families")
 
-    cat("Adjusted R-squared: ", round(summary(fit)$adj.r.squared, 4), "\n")
-    print(round(summary(fit)$coefficients, 4))
+    if (n_fid < n_iid) {
+      model_formula <- paste0(model_formula, " + (1 | family_id)")
+      print(paste0("Family mixed model formula: ", model_formula))
+      fit <- lmerTest::lmer(as.formula(model_formula), data = model_data, REML = TRUE,
+                           na.action = na.fail,
+                           control = lme4::lmerControl(check.conv.singular = "ignore"))
+      if (any(fit@optinfo$conv$opt != 0) || length(fit@optinfo$conv$lme4$messages) ||
+          length(fit@optinfo$warnings)) {
+        stop("PC", i, " mixed model did not converge (", n_iid, " samples, ", n_fid, " families).")
+      }
+      pc_singular[i] <- lme4::isSingular(fit)
+      if (pc_singular[i]) {
+        warning("PC", i, ": family variance is near zero; retaining the mixed model.")
+      }
+      cat("Family variance: ", as.numeric(lme4::VarCorr(fit)$family_id[1, 1]), "\n")
+      pc_analysis[[i]] <- summary(fit, ddf = "Satterthwaite")
+    } else if (n_fid == n_iid) {
+      print(paste0("Linear model formula: ", model_formula))
+      fit <- lm(formula = model_formula, data = pcs)
+      pc_analysis[[i]] <- summary(fit)
+      cat("Adjusted R-squared: ", round(summary(fit)$adj.r.squared, 4), "\n")
+    }
+    print(round(pc_analysis[[i]]$coefficients, 4))
   }
   #save(pc_analysis, file=paste0(""))
   
   pc_plotlist <- list()
   for(i in 1:10){
-    temp <- as.data.frame(pc_analysis[[i]]$coefficients)
+    # lmerTest adds df; select the same four columns for both model branches.
+    temp <- as.data.frame(pc_analysis[[i]]$coefficients[
+      , c("Estimate", "Std. Error", "t value", "Pr(>|t|)"), drop = FALSE])
     names(temp) <- c("estimate", "se", "t", "p")
+    pc_subtitle <- if (pc_singular[i]) "Family random-effect variance near zero" else NULL
     temp <- temp[temp$p < 0.05,]
+    row.names.remove <- c("(Intercept)")
+    temp <- temp[!(row.names(temp) %in% row.names.remove), ]
     
-    #fix edge case where there is no p<0.05
+    # Handle no significant associations after excluding the intercept.
     if (nrow(temp) == 0) {
     pc_plotlist[[i]] <- ggplot() +
-    labs(title = paste0("PC", i, " (no significant associations)")) +
+    labs(title = paste0("PC", i, " (no significant associations)"), subtitle = pc_subtitle) +
     theme_void()
     next
     }
     
     temp <- temp[order(temp$p),]
-    row.names.remove <- c("(Intercept)")
-    temp <- temp[!(row.names(temp) %in% row.names.remove), ]
     temp$PC <- paste0("PC",i)
     # make barplot of p values
     temp$var <- as.character(rownames(temp))
@@ -324,7 +360,7 @@ pc_plot <- ggplot(temp, aes(x = estimate, y = var)) +
     height = 0.2
   ) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
-  labs(title = paste0("PC", i), x = "Estimate (95% CI)", y = "Variable") +
+  labs(title = paste0("PC", i), subtitle = pc_subtitle, x = "Estimate (95% CI)", y = "Variable") +
   theme_minimal() +
   theme(axis.text.y = element_text(size = 10),
         plot.title = element_text(hjust = 0.5))
