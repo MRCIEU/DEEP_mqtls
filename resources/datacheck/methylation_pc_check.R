@@ -16,6 +16,10 @@ PC3PC4_plot <- arguments[8]
 pc_var_association_plot <- arguments[9]
 scripts_directory <- arguments[10]
 study_specific_vars <- strsplit(arguments[11], " ")[[1]] # these will be added in the config file - batch vars and study specific factors
+methylation_array <- arguments[12]
+if (is.na(methylation_array) || !methylation_array %in% c("450k", "epic", "epic2")) {
+  stop("Supply methylation_array (450k, epic, or epic2) as argument 12.")
+}
 
 suppressPackageStartupMessages(library(meffil))
 suppressPackageStartupMessages(library(viridis))
@@ -103,6 +107,61 @@ for (cellcount_panel in cellcount_panel_prefixes) {
   # Create PC matrix to test PC associations (probe.range means take that number of 
   # the most variable probes)
   pcs <- meffil.methylation.pcs(norm.beta,probe.range=10000,full.obj=T)
+
+  # The PCA input is the same for every cell-count panel: plot loadings once.
+  if (cellcount_panel == cellcount_panel_prefixes[1]) {
+    loading_features <- meffil.get.features(methylation_array)[, c("name", "chromosome", "position")]
+    loading_ids <- rownames(pcs$rotation)
+    stopifnot(!is.null(loading_ids), !anyDuplicated(loading_ids),
+              !anyDuplicated(loading_features$name))
+    loading_annotation <- loading_features[match(loading_ids, loading_features$name), ]
+    loading_chr <- match(loading_annotation$chromosome, paste0("chr", 1:22))
+    loading_valid <- !is.na(loading_chr) & is.finite(loading_annotation$position) &
+      loading_annotation$position > 0
+    message("Methylation PC loadings (", methylation_array, "; hg19/GRCh37): plotting ",
+            sum(loading_valid), "/", length(loading_ids), " CpGs; ",
+            sum(is.na(loading_annotation$name)), " unmatched; ",
+            sum(!loading_valid & !is.na(loading_annotation$name)),
+            " with missing/invalid autosomal coordinates (excluded from the plot only).")
+    if (!any(loading_valid)) stop("No valid CpG coordinates for the methylation loading plot.")
+
+    # Reorder copies of the annotation and loadings together; retain the original PCA.
+    loading_order <- which(loading_valid)[order(loading_chr[loading_valid],
+                                               loading_annotation$position[loading_valid])]
+    n_plot_pcs <- min(20L, ncol(pcs$rotation))
+    loading_matrix <- pcs$rotation[loading_order, seq_len(n_plot_pcs), drop = FALSE]
+    stopifnot(identical(rownames(loading_matrix), loading_annotation$name[loading_order]))
+    chromosome_runs <- rle(loading_chr[loading_order])
+    chromosome_ends <- cumsum(chromosome_runs$lengths)
+    chromosome_centres <- chromosome_ends - (chromosome_runs$lengths - 1) / 2
+    loading_plot_data <- data.frame(
+      CPG_INDEX = rep(seq_len(nrow(loading_matrix)), times = n_plot_pcs),
+      LOADING = as.vector(loading_matrix),
+      PC = factor(rep(colnames(loading_matrix), each = nrow(loading_matrix)),
+                  levels = colnames(loading_matrix),
+                  labels = paste("Loadings of Meth", colnames(loading_matrix)))
+    )
+    loading_plot <- ggplot(loading_plot_data, aes(x = CPG_INDEX, y = LOADING)) +
+      geom_hex() +
+      geom_vline(xintercept = chromosome_ends[-length(chromosome_ends)],
+                 colour = "grey70", linewidth = 0.3) +
+      facet_wrap(vars(PC), ncol = 5, scales = "free_y") +
+      scale_fill_viridis_c(name = "CpG count") +
+      scale_x_continuous(breaks = chromosome_centres, labels = chromosome_runs$values) +
+      labs(title = paste(study_name, "methylation PC loadings"),
+           x = "Chromosome (CpG index order; hg19/GRCh37)", y = "Loading") +
+      theme_minimal(base_size = 13) +
+      theme(panel.grid.minor = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1, vjust = 0.5, size = 8),
+            strip.text = element_text(face = "bold"), legend.position = "right")
+    loading_plot_file <- file.path(dirname(scree_plot),
+      paste0("meth_pcs.PC1-PC", n_plot_pcs, "_loadings_", study_name, ".png"))
+    Cairo::CairoPNG(filename = loading_plot_file, width = 5000,
+                    height = 750 * ceiling(n_plot_pcs / 5), pointsize = 16, res = 200)
+    print(loading_plot)
+    dev.off()
+    message("Methylation PC loading plot saved to: ", loading_plot_file)
+  }
   # message("there are ",ncol(pcs)," PCs generated")
 
   # make scree plot
@@ -212,7 +271,25 @@ for (cellcount_panel in cellcount_panel_prefixes) {
       plot_pc3pc4_list[[i]] <- pc3pc4_plot
   }
 
-  n_plot_rows <- ceiling(length(test_pc_vars)/4)
+  # Add family-coloured plots without adding FID to the regression covariates.
+  if (length(unique(pcs$family_id)) < nrow(pcs)) {
+    pc1pc2_plot <- ggplot(pcs, aes(PC1, PC2, color = factor(family_id))) +
+      geom_point(size = 1) +
+      scale_colour_viridis(discrete = TRUE) +
+      labs(title = "PC1 vs PC2, Family ID", color = "Family ID") +
+      theme_bw() +
+      theme(legend.position = "none")
+    pc3pc4_plot <- ggplot(pcs, aes(PC3, PC4, color = factor(family_id))) +
+      geom_point(size = 1) +
+      scale_colour_viridis(discrete = TRUE) +
+      labs(title = "PC3 vs PC4, Family ID", color = "Family ID") +
+      theme_bw() +
+      theme(legend.position = "none")
+    plot_pc1pc2_list[["family_id"]] <- pc1pc2_plot
+    plot_pc3pc4_list[["family_id"]] <- pc3pc4_plot
+  }
+
+  n_plot_rows <- ceiling(length(plot_pc1pc2_list)/4)
   row_dimensions <- n_plot_rows*3
 
   pdf(file = paste0(PC1PC2_plot,"_",study_name,"_",cellcount_panel,".pdf"),width = 12, height = row_dimensions)

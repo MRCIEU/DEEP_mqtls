@@ -185,7 +185,8 @@ then
 		"${meth_pcs_PC3PC4_plot}" \
 		"${pc_var_association_plot}" \
 		"${scripts_directory}" \
-		"${study_specific_vars}"
+		"${study_specific_vars}" \
+		"${methylation_array}"
 
 	echo "Successfully completed script 01c meth_pcs chunk"
 
