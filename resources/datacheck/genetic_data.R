@@ -379,4 +379,12 @@ if(length(errorlist) > 0)
 	})
 	q(status=1)
 }
+
+message(
+  "FAM ID counts: unique FID = ", length(unique(fam[, 1])),
+  "; unique IID = ", length(unique(fam[, 2])),
+  "; duplicated FID = ", if (any(duplicated(fam[, 1]))) "yes" else "no",
+  "; related in config = ", related
+)
+
 message("\n\n")
